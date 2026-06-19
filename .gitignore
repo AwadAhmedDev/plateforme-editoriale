@@ -1,0 +1,42 @@
+# dependencies
+
+node_modules
+
+# build
+
+dist
+.next
+build
+
+# env
+
+.env
+.env.local
+.env.production
+
+# uploads
+
+uploads/images/*
+uploads/documents/*
+uploads/avatars/*
+
+!.gitkeep
+
+# logs
+
+logs
+*.log
+
+# IDE
+
+.vscode
+.idea
+
+# OS
+
+.DS_Store
+Thumbs.db
+
+# coverage
+
+coverage
