@@ -6,7 +6,7 @@ Il ne contient ni choix technique, ni wireframe, ni maquette : il pose le cadre 
 
 ---
 
-# Présentation du projet
+## Présentation du projet
 
 Le projet consiste à créer une plateforme éditoriale en ligne dédiée à l'actualité, à l'analyse et à la documentation de la Corne de l'Afrique (Somalie, Djibouti, Somaliland, Éthiopie, Érythrée, Kenya, Soudan).
 
@@ -16,7 +16,7 @@ Le projet est porté par un **éditeur unique**, qui assure à la fois la rédac
 
 ---
 
-# Vision du produit
+## Vision du produit
 
 - Devenir **la principale plateforme francophone de référence** consacrée à la Corne de l'Afrique.
 - Être reconnu comme **ressource documentaire fiable** par les organisations internationales, les administrations, les juridictions, les chercheurs, les journalistes et les acteurs de la société civile travaillant sur la région.
@@ -27,7 +27,7 @@ La V1 a pour rôle de valider cette vision par la qualité et la spécialisation
 
 ---
 
-# Objectifs UX
+## Objectifs UX
 
 - **Installer la confiance dès la première visite** : le public visé (institutions, juristes, chercheurs) doit percevoir immédiatement le sérieux et la rigueur du média.
 - **Rendre la navigation par thématique et zone géographique évidente**, ces deux axes structurant l'ensemble de la base documentaire.
@@ -40,7 +40,7 @@ La V1 a pour rôle de valider cette vision par la qualité et la spécialisation
 
 ---
 
-# Utilisateurs cibles
+## Utilisateurs cibles
 
 | Catégorie | Type d'usage attendu |
 | --- | --- |
@@ -57,21 +57,24 @@ Deux populations aux attentes distinctes cohabitent : un **public professionnel 
 
 ---
 
-# Besoins utilisateurs
+## Besoins utilisateurs
 
-**Public professionnel (institutions, chercheurs, juristes, journalistes)**
+### Public professionnel (institutions, chercheurs, juristes, journalistes)
+
 - Retrouver rapidement une information précise (recherche par mots-clés, filtrage par catégorie, zone géographique, type de contenu et date — US-022, US-023).
 - Identifier clairement les métadonnées d'un contenu pour le citer ou le sourcer (auteur, date, sources — US-003).
 - Distinguer sans ambiguïté ce qui relève de l'actualité, de l'analyse ou du document structurant (rapport, dossier).
 - Accéder à l'historique des publications dans le temps (contenus archivés — US-004).
 
-**Public grand public / diaspora**
+### Public grand public / diaspora
+
 - Accéder librement à l'information sans aucune friction d'inscription (US-008).
 - Comprendre facilement des sujets complexes, sans connaissance préalable poussée.
 - Partager un contenu vers ses propres réseaux (US-006).
 - Rester informé dans la durée via une inscription simple à la newsletter (US-019, US-020).
 
-**Administrateur unique**
+### Administrateur unique
+
 - Disposer d'un espace de gestion centralisé, sans complexité de rôles ou de droits (US-026).
 - Classer un contenu efficacement au moment de sa création (catégorie, zone géographique, tags — US-002, US-027).
 - Faire évoluer un contenu entre brouillon, publié et archivé sans ambiguïté (US-004, US-005).
@@ -79,45 +82,53 @@ Deux populations aux attentes distinctes cohabitent : un **public professionnel 
 
 ---
 
-# Parcours utilisateurs principaux
+## Parcours utilisateurs principaux
 
-**1. Découverte via partage — visiteur grand public**
+### 1. Découverte via partage — visiteur grand public
+
 Arrivée sur un article partagé (réseau social ou lien direct) → lecture de l'article → découverte de contenus liés (catégorie ou zone géographique) → inscription à la newsletter.
 
-**2. Recherche documentaire ciblée — public professionnel**
+### 2. Recherche documentaire ciblée — public professionnel
+
 Arrivée sur le site (accueil ou moteur de recherche externe) → recherche par mots-clés → affinage par filtres (catégorie, zone, type, date) → consultation de plusieurs contenus → partage ou citation.
 
-**3. Exploration thématique — visiteur en veille**
+### 3. Exploration thématique — visiteur en veille
+
 Arrivée sur l'accueil → navigation par catégorie ou zone géographique → parcours de la liste des articles associés → lecture d'un contenu en détail.
 
-**4. Prise de connaissance institutionnelle — public exigeant**
+### 4. Prise de connaissance institutionnelle — public exigeant
+
 Arrivée sur le site → consultation de la page « À propos » pour évaluer la fiabilité de la source → retour vers les contenus si la crédibilité perçue est suffisante.
 
-**5. Publication d'un contenu — administrateur**
+### 5. Publication d'un contenu — administrateur
+
 Connexion à l'espace d'administration → rédaction ou modification d'un contenu → classification (catégorie, zone géographique, tags, métadonnées) → publication → vérification ponctuelle des inscrits à la newsletter.
 
 Ces parcours s'appuient directement sur les pages définies dans `sitemap.md` et doivent guider les priorités de conception (accès rapide à la recherche et aux catégories depuis toute page, mise en avant de la newsletter sans être intrusive).
 
 ---
 
-# Pages à concevoir
+## Pages à concevoir
 
 L'arborescence complète, avec l'objectif, l'utilisateur concerné et le contenu principal de chaque page, est détaillée dans `sitemap.md`. Ce brief en rappelle la structure pour cadrer le périmètre de conception.
 
-**Pages publiques**
+### Pages publiques
+
 Accueil · Liste des articles · Détail d'un article · Catégories · Recherche · Résultats de recherche · Newsletter · À propos · Contact · Mentions légales · Politique de confidentialité
 
-**Pages administrateur**
+### Pages administrateur
+
 Connexion administrateur · Dashboard · Gestion des articles · Gestion des catégories · Gestion newsletter
 
-**Éléments transversaux** (présents sur l'ensemble ou une partie des pages, à concevoir comme des composants d'interface à part entière)
-Navigation principale · Navigation secondaire (fil d'Ariane, filtres contextuels, menu de l'espace d'administration) · Footer
+### Éléments transversaux
+
+Composants d'interface présents sur l'ensemble ou une partie des pages, à concevoir comme des éléments à part entière : Navigation principale · Navigation secondaire (fil d'Ariane, filtres contextuels, menu de l'espace d'administration) · Footer.
 
 Aucune page relative aux comptes utilisateurs, aux contenus premium ou aux abonnements ne doit être conçue à ce stade : ces fonctionnalités relèvent de la Version 2 (`scope-v1.md`).
 
 ---
 
-# Priorités UX
+## Priorités UX
 
 Classées selon la valeur métier et la priorité affectée dans `scope-v1.md` (fonctionnalités à priorité Haute du MVP) :
 
@@ -132,7 +143,7 @@ Classées selon la valeur métier et la priorité affectée dans `scope-v1.md` (
 
 ---
 
-# Contraintes métier
+## Contraintes métier
 
 - **Administrateur unique** : aucune fonctionnalité de gestion multi-rédacteurs, de rôles ou de droits différenciés n'est à prévoir (`discovery.md` §5, §7).
 - **Aucun compte utilisateur, contenu premium ou abonnement en V1** : l'intégralité des contenus du MVP est publique et librement accessible (`scope-v1.md`).
@@ -144,7 +155,7 @@ Classées selon la valeur métier et la priorité affectée dans `scope-v1.md` (
 
 ---
 
-# Ton éditorial
+## Ton éditorial
 
 Un ton **sérieux, factuel et rigoureux**, proche de la presse spécialisée et de la documentation institutionnelle, sans dérive vers un traitement sensationnaliste des sujets géopolitiques traités.
 
@@ -154,7 +165,7 @@ La sensibilité des sujets couverts (région en tension, acteurs institutionnels
 
 ---
 
-# Image de marque recherchée
+## Image de marque recherchée
 
 - Une identité de **média francophone de référence** sur une région sous-représentée dans la presse francophone.
 - Un positionnement de **sérieux et de crédibilité**, plus proche d'une publication spécialisée ou d'un centre de documentation que d'un blog personnel ou d'un média grand public généraliste.
@@ -164,7 +175,7 @@ La sensibilité des sujets couverts (région en tension, acteurs institutionnels
 
 ---
 
-# Inspirations et références
+## Inspirations et références
 
 À titre de pistes de positionnement — à discuter et affiner avec le client, aucune validation client n'ayant encore été recueillie sur ce point précis :
 
@@ -176,7 +187,7 @@ Ces références portent sur le **registre éditorial, le sérieux perçu et la 
 
 ---
 
-# Critères de réussite UX
+## Critères de réussite UX
 
 - Un visiteur professionnel retrouve un contenu précis en un minimum d'étapes, grâce à la recherche et au filtrage.
 - Un nouveau visiteur perçoit le sérieux et la fiabilité du média dès la page d'accueil, sans avoir besoin de naviguer davantage pour se forger une première impression positive.
