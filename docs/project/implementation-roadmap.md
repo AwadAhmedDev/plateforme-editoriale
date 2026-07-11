@@ -35,17 +35,17 @@ D'après `deployment.md`, le frontend consomme une API backend (Node.js/Express,
 
 ## Vue d'ensemble des phases
 
-| Phase | Nom | Dépend de | Contenu principal |
-| --- | --- | --- | --- |
-| 0 | Fondations & design system | — | Tokens, primitives shadcn/ui, composants partagés sans logique métier |
-| 1 | Pages publiques de lecture | Phase 0 | Accueil, Liste des articles, Détail d'un article, Catégorie, Zone géographique, À propos |
-| 2 | Recherche et filtrage | Phase 1 | Page Recherche, Résultats de recherche, filtres combinables |
-| 3 | Formulaires publics & validation | Phase 0 (Phase 1 pour les emplacements inline) | Newsletter (3 emplacements), Contact, pattern de validation/action serveur |
-| 4 | Authentification & shell administrateur | Phase 0 | Connexion administrateur, session, layout protégé (sidebar) |
-| 5 | Administration des contenus | Phase 3 (pattern formulaire), Phase 4 (shell) | Gestion des catégories/zones, Éditeur d'article, Gestion des articles |
-| 6 | Dashboard & gestion newsletter admin | Phase 3, Phase 5 | Dashboard, Gestion newsletter admin |
-| 7 | Qualité transverse | Phases 0 à 6 | Accessibilité, performance, SEO, responsive — audit global |
-| 8 | Recette et stabilisation | Toutes | Parcours de bout en bout, non-régression, correction finale |
+| Phase | Nom                                     | Dépend de                                      | Contenu principal                                                                        |
+| ----- | --------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 0     | Fondations & design system              | —                                              | Tokens, primitives shadcn/ui, composants partagés sans logique métier                    |
+| 1     | Pages publiques de lecture              | Phase 0                                        | Accueil, Liste des articles, Détail d'un article, Catégorie, Zone géographique, À propos |
+| 2     | Recherche et filtrage                   | Phase 1                                        | Page Recherche, Résultats de recherche, filtres combinables                              |
+| 3     | Formulaires publics & validation        | Phase 0 (Phase 1 pour les emplacements inline) | Newsletter (3 emplacements), Contact, pattern de validation/action serveur               |
+| 4     | Authentification & shell administrateur | Phase 0                                        | Connexion administrateur, session, layout protégé (sidebar)                              |
+| 5     | Administration des contenus             | Phase 3 (pattern formulaire), Phase 4 (shell)  | Gestion des catégories/zones, Éditeur d'article, Gestion des articles                    |
+| 6     | Dashboard & gestion newsletter admin    | Phase 3, Phase 5                               | Dashboard, Gestion newsletter admin                                                      |
+| 7     | Qualité transverse                      | Phases 0 à 6                                   | Accessibilité, performance, SEO, responsive — audit global                               |
+| 8     | Recette et stabilisation                | Toutes                                         | Parcours de bout en bout, non-régression, correction finale                              |
 
 Les Phases 1 à 4 peuvent être menées par des personnes différentes en parallèle une fois la Phase 0 livrée (aucune dépendance croisée entre elles), à l'exception des emplacements inline de la newsletter (bandeau Accueil, bloc fin d'article) qui nécessitent que les pages correspondantes de la Phase 1 existent déjà. Les Phases 5 et 6, en revanche, sont strictement séquentielles.
 
@@ -328,14 +328,14 @@ Valider le produit dans son ensemble à travers les parcours utilisateurs et adm
 
 La stratégie de tests suit la même logique de dépendance que les phases : elle commence au niveau le plus bas (règles de validation, composants isolés) et remonte vers les parcours complets, sans attendre la fin du projet pour commencer.
 
-| Niveau | Portée | Introduit à partir de | Objectif |
-| --- | --- | --- | --- |
-| Tests de schémas et utilitaires | Règles de validation (schémas des formulaires), fonctions de formatage/slug | Phase 0 / Phase 3 | Garantir que chaque règle de `ui-specification.md` (message spécifique, champ requis conditionnel) est vérifiable indépendamment de l'interface |
-| Tests de composants | Composants partagés (`components/ui`, `components/shared`) et composants métier isolés | Phase 0, puis à chaque nouveau composant | Vérifier les états requis (repos, survol, focus, désactivé, chargement, erreur, vide) et les comportements d'accessibilité (piégeage de focus, live-region) indépendamment d'une page réelle |
-| Tests d'intégration par feature | Une route ou un formulaire complet, données simulées conformes au contrat | À la fin de chaque phase (1 à 6) | Valider les critères de validation de la phase avant de la considérer close |
-| Tests de bout en bout (parcours) | Parcours utilisateurs et administrateur complets, données réelles ou proches du réel | Dès qu'un parcours est entièrement livré (au plus tard Phase 8) | Valider la continuité d'un parcours à travers plusieurs écrans, pas seulement chaque écran pris isolément |
-| Audit d'accessibilité automatisé | Ensemble des écrans livrés | À la fin de chaque phase, consolidé en Phase 7 | Détecter les régressions de contraste, de structure sémantique et d'attributs ARIA au fil de l'avancement, pas uniquement à la fin |
-| Vérification responsive | Trois breakpoints (mobile/tablette/desktop) sur les écrans publics | À la fin de chaque phase publique (1, 2, 3), consolidée en Phase 7 | Confirmer qu'aucune fonction n'est retirée entre breakpoints, conformément au principe général de `ui-specification.md` |
+| Niveau                           | Portée                                                                                 | Introduit à partir de                                              | Objectif                                                                                                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tests de schémas et utilitaires  | Règles de validation (schémas des formulaires), fonctions de formatage/slug            | Phase 0 / Phase 3                                                  | Garantir que chaque règle de `ui-specification.md` (message spécifique, champ requis conditionnel) est vérifiable indépendamment de l'interface                                              |
+| Tests de composants              | Composants partagés (`components/ui`, `components/shared`) et composants métier isolés | Phase 0, puis à chaque nouveau composant                           | Vérifier les états requis (repos, survol, focus, désactivé, chargement, erreur, vide) et les comportements d'accessibilité (piégeage de focus, live-region) indépendamment d'une page réelle |
+| Tests d'intégration par feature  | Une route ou un formulaire complet, données simulées conformes au contrat              | À la fin de chaque phase (1 à 6)                                   | Valider les critères de validation de la phase avant de la considérer close                                                                                                                  |
+| Tests de bout en bout (parcours) | Parcours utilisateurs et administrateur complets, données réelles ou proches du réel   | Dès qu'un parcours est entièrement livré (au plus tard Phase 8)    | Valider la continuité d'un parcours à travers plusieurs écrans, pas seulement chaque écran pris isolément                                                                                    |
+| Audit d'accessibilité automatisé | Ensemble des écrans livrés                                                             | À la fin de chaque phase, consolidé en Phase 7                     | Détecter les régressions de contraste, de structure sémantique et d'attributs ARIA au fil de l'avancement, pas uniquement à la fin                                                           |
+| Vérification responsive          | Trois breakpoints (mobile/tablette/desktop) sur les écrans publics                     | À la fin de chaque phase publique (1, 2, 3), consolidée en Phase 7 | Confirmer qu'aucune fonction n'est retirée entre breakpoints, conformément au principe général de `ui-specification.md`                                                                      |
 
 Principes transverses :
 
