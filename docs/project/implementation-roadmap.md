@@ -39,7 +39,7 @@ D'après `deployment.md`, le frontend consomme une API backend (Node.js/Express,
 | ----- | --------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | 0     | Fondations & design system              | —                                              | Tokens, primitives shadcn/ui, composants partagés sans logique métier                    |
 | 1     | Pages publiques de lecture              | Phase 0                                        | Accueil, Liste des articles, Détail d'un article, Catégorie, Zone géographique, À propos |
-| 2     | Recherche et filtrage                   | Phase 1                                        | Page Recherche, Résultats de recherche, filtres combinables                              |
+| 2     | Recherche et filtrage                   | Phase 1                                        | Route unique `/recherche` (formulaire + résultats pilotés par les paramètres d'URL), filtres combinables |
 | 3     | Formulaires publics & validation        | Phase 0 (Phase 1 pour les emplacements inline) | Newsletter (3 emplacements), Contact, pattern de validation/action serveur               |
 | 4     | Authentification & shell administrateur | Phase 0                                        | Connexion administrateur, session, layout protégé (sidebar)                              |
 | 5     | Administration des contenus             | Phase 3 (pattern formulaire), Phase 4 (shell)  | Gestion des catégories/zones, Éditeur d'article, Gestion des articles                    |
@@ -62,14 +62,14 @@ Mettre en place tout ce dont dépend visuellement et structurellement le reste d
 1. **Tokens de design** (`app/globals.css`) : couleurs, échelle typographique, échelle d'espacement, rayons, durées de transition, breakpoints (600px/1024px) — traduction directe de la table de tokens de `ui-specification.md`.
 2. **Layout racine** (`app/layout.tsx`) : document HTML, chargement des trois polices (`font.editorial`, `font.ui`, `font.mono`), landmarks globaux.
 3. **Primitives shadcn/ui strictement nécessaires** : Button, Input, Textarea, Select, Checkbox, RadioGroup, Dialog, composant de toast, Badge, Card — installées puis alignées sur les tokens (couleur, rayon, typographie).
-4. **Composants partagés sans logique métier** (`components/shared/`) : `Skeleton`, `EmptyState`, `LiveRegion`, `StatusPill`, `Modal` (au-dessus de Dialog), `Toast`/`Alert` (au-dessus du composant de toast).
+4. **Composants partagés sans logique métier** (`components/shared/`) : `Skeleton`, `EmptyState`, `LiveRegion`, `StatusPill`, `Tag`, `Modal` (au-dessus de Dialog), `Toast`/`Alert` (au-dessus du composant de toast).
 5. **Utilitaires de support** (`lib/`) : formatage de dates, génération/lecture de slugs, constantes partagées.
 
 ### Livrables
 
 - Design tokens intégralement déclarés et vérifiables (aucune valeur ad hoc possible en dehors de l'échelle définie).
 - Bibliothèque de primitives shadcn/ui installées, thémées, documentées par l'usage (quel composant pour quel rôle).
-- Composants partagés `Skeleton`, `EmptyState`, `LiveRegion`, `StatusPill`, `Modal`, `Toast`/`Alert` fonctionnels et testés isolément (indépendamment de toute page réelle).
+- Composants partagés `Skeleton`, `EmptyState`, `LiveRegion`, `StatusPill`, `Tag`, `Modal`, `Toast`/`Alert` fonctionnels et testés isolément (indépendamment de toute page réelle).
 
 ### Critères de validation
 
@@ -135,9 +135,8 @@ Ajouter la couche d'interactivité de consultation (recherche par mots-clés, fi
 
 ### Routes à développer en premier
 
-1. **Recherche** (page dédiée, formulaire de saisie).
-2. **Résultats de recherche** — pilotée entièrement par les paramètres d'URL (requête + filtres), condition de la persistance de contexte au retour depuis un article.
-3. Application rétroactive des filtres sur **Liste des articles**, **Catégorie**, **Zone géographique** (déjà livrées en Phase 1, mais sans filtres jusqu'à cette phase).
+1. **Recherche et Résultats de recherche** — une route unique (`/recherche`), jamais scindée en deux fichiers : formulaire de saisie affiché en l'absence de paramètre de requête, résultats pilotés entièrement par les paramètres d'URL (requête + filtres) dès qu'une requête est présente — condition de la persistance de contexte au retour depuis un article.
+2. Application rétroactive des filtres sur **Liste des articles**, **Catégorie**, **Zone géographique** (déjà livrées en Phase 1, mais sans filtres jusqu'à cette phase).
 
 ### Livrables
 
@@ -165,18 +164,21 @@ Ajouter la couche d'interactivité de consultation (recherche par mots-clés, fi
 
 1. **Newsletter** (champ unique) — le formulaire le plus simple du produit, construit en premier pour fixer le pattern minimal (validation à la soumission, message spécifique, focus renvoyé, saisie conservée en cas d'échec, confirmation in situ sans redirection).
 2. **Contact** (multi-champs) — réutilise le pattern déjà validé sur un cas à plusieurs champs requis.
+3. **Désinscription newsletter** (écran de confirmation, sans formulaire) — réutilise l'infrastructure de traitement de jeton, pas le pattern de validation de formulaire.
 
 ### Routes / emplacements à développer en premier
 
 1. Page **Newsletter** dédiée (formulaire pleine page) en premier, car isolée de toute autre page.
 2. Emplacements inline de la Newsletter (bandeau Accueil, bloc fin d'article) ensuite, une fois le composant validé isolément — ils réutilisent le même composant, pas une réimplémentation.
 3. Page **Contact**.
+4. Page **Désinscription newsletter** (`/newsletter/desinscription`) — atteinte uniquement depuis le lien d'un e-mail, jamais depuis la navigation ou le footer.
 
 ### Livrables
 
 - Pattern de validation/action serveur documenté par l'exemple (schéma de validation, gestion d'erreur, conservation de saisie, focus, indicateur de chargement inline sur bouton).
 - Newsletter fonctionnelle sur ses trois emplacements avec traitement neutre du cas "déjà inscrit".
 - Contact fonctionnel avec validation par champ à la soumission.
+- Désinscription newsletter fonctionnelle par lien à jeton, avec confirmation neutre y compris en cas de lien déjà utilisé ou expiré.
 
 ### Critères de validation
 
@@ -187,6 +189,7 @@ Ajouter la couche d'interactivité de consultation (recherche par mots-clés, fi
 - [ ] "Déjà inscrit" traité comme une confirmation neutre, jamais comme une erreur.
 - [ ] Mention de confidentialité toujours visible et lisible sur les trois emplacements Newsletter.
 - [ ] Confirmation Newsletter affichée in situ (remplacement du formulaire), jamais par redirection.
+- [ ] La désinscription ne nécessite aucune connexion ni ressaisie de l'e-mail ; un lien déjà utilisé ou expiré affiche la même confirmation neutre qu'un lien valide, jamais une erreur.
 
 ---
 
@@ -232,20 +235,21 @@ Livrer l'outil de travail quotidien de l'administrateur unique, dans l'ordre qui
 
 ### Composants et routes à développer en premier
 
-1. **Gestion des catégories/zones** — la plus simple des trois (formulaire inline nom + description, table, suppression conditionnée à l'absence d'article associé) ; construite en premier car l'Éditeur d'article en dépend pour peupler ses champs de classification.
-2. **Éditeur d'article** — la pièce la plus complexe du produit (contenu rédactionnel, classification, métadonnées, statut à 3 segments, règles de validation différenciées Enregistrer/Publier) ; construite une fois la classification disponible.
+1. **Gestion des catégories/zones** — la plus simple des trois (formulaire inline nom + description, table, suppression conditionnée à l'absence d'article associé) ; construite en premier car l'Éditeur d'article en dépend pour peupler ses champs de classification. Les tags ne font pas partie de cet écran : ils sont créés et supprimés uniquement depuis l'Éditeur d'article, sans gestion globale en V1.
+2. **Éditeur d'article** — la pièce la plus complexe du produit (contenu rédactionnel, type de contenu, classification à choix unique catégorie/zone toutes deux obligatoires, tags multi-valués optionnels, image principale + texte alternatif, métadonnées, statut à 3 segments, règles de validation différenciées Enregistrer/Publier) ; construite une fois la classification disponible.
 3. **Gestion des articles** (liste back-office) — construite en dernier dans cette phase car elle relie les deux précédentes (navigation vers l'éditeur, filtrage par statut/catégorie/zone) sans rien apporter de nouveau tant qu'aucun article n'existe encore à afficher.
 
 ### Livrables
 
 - Gestion des catégories/zones : création, modification, suppression conditionnée, table avec nombre d'articles associés.
-- Éditeur d'article : création et modification, statut à 3 segments, validation différenciée brouillon/publication, toast de confirmation.
+- Éditeur d'article : création et modification, type de contenu/catégorie/zone (choix unique, obligatoires) et tags (optionnels, multi-valués), image principale avec texte alternatif, statut à 3 segments, validation différenciée brouillon/publication, toast de confirmation.
 - Gestion des articles : table avec tri (date, statut), filtre interne, pagination, navigation vers l'éditeur.
 
 ### Critères de validation
 
 - [ ] "Supprimer" une catégorie/zone est désactivé et n'ouvre aucune Modal si des articles y sont associés ; un message explicite en indique la raison.
-- [ ] Le titre est requis pour "Publier" mais pas pour "Enregistrer le brouillon".
+- [ ] Le titre, le type de contenu, la catégorie, la zone géographique et l'image principale (avec texte alternatif) sont requis pour "Publier" mais pas pour "Enregistrer le brouillon" ; les tags restent optionnels dans tous les cas.
+- [ ] Un contenu n'est jamais associé à plus d'une catégorie ou plus d'une zone géographique.
 - [ ] Chaque action de sauvegarde/publication produit un toast explicite ("✓ Brouillon enregistré" / "✓ Article publié").
 - [ ] La table Articles trie uniquement sur Date et Statut, colonne Actions toujours en dernière position, actions destructives séparées d'au moins 12px des actions non destructives.
 - [ ] Aucune suppression directe depuis une table sans passage par une Modal de confirmation.

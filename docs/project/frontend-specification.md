@@ -67,7 +67,9 @@ frontend/
 │   │   ├── recherche/
 │   │   │   ├── page.tsx            Recherche + Résultats (piloté par les paramètres d'URL)
 │   │   │   └── loading.tsx
-│   │   ├── newsletter/page.tsx     Formulaire Newsletter dédié
+│   │   ├── newsletter/
+│   │   │   ├── page.tsx            Formulaire Newsletter dédié
+│   │   │   └── desinscription/page.tsx  Désinscription par lien e-mail (jeton)
 │   │   ├── a-propos/page.tsx
 │   │   ├── contact/page.tsx
 │   │   ├── mentions-legales/page.tsx
@@ -114,10 +116,10 @@ Les fichiers sous `app/` restent des fichiers de **routage et de composition** (
 
 | Feature           | Fonctionnalité `scope-v1.md` couverte                       | Routes concernées                                                               | Contenu du module                                                                                                                                    |
 | ----------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `articles`        | Rédaction et publication d'articles ; consultation publique | Accueil, Liste des articles, Détail d'un article, Gestion des articles, Éditeur | Carte d'article, page de détail, éditeur (contenu + statut + classification), actions de création/modification/publication/dépublication/suppression |
+| `articles`        | Rédaction et publication d'articles ; consultation publique | Accueil, Liste des articles, Détail d'un article, Gestion des articles, Éditeur | Carte d'article, page de détail, éditeur (contenu + type de contenu + statut + classification catégorie/zone uniques + tags + image principale/texte alternatif), actions de création/modification/publication/dépublication/suppression |
 | `taxonomies`      | Organisation éditoriale (catégories, zones géographiques)   | Catégorie, Zone géographique, Gestion des catégories                            | Pages de listing par taxonomie, formulaire inline de gestion, contrôle de suppression conditionnée (aucun article associé)                           |
 | `search`          | Recherche et filtrage documentaire                          | Recherche, Résultats de recherche                                               | Champ de recherche (3 variantes), panneau/ligne de filtres, compteur de résultats en live-region, état vide qualifié                                 |
-| `newsletter`      | Newsletter (inscription/désinscription)                     | Newsletter, bandeau Accueil, bloc fin d'article, Gestion newsletter             | Formulaire à un champ (3 emplacements), confirmation in situ, table admin des inscrits avec retrait                                                  |
+| `newsletter`      | Newsletter (inscription/désinscription)                     | Newsletter, Désinscription newsletter, bandeau Accueil, bloc fin d'article, Gestion newsletter | Formulaire à un champ (3 emplacements), confirmation in situ, désinscription par jeton (page dédiée sans formulaire), table admin des inscrits avec retrait |
 | `contact`         | Canal de contact institutionnel                             | Contact                                                                         | Formulaire multi-champs avec validation à la soumission                                                                                              |
 | `admin-auth`      | Sécurisation de l'espace d'administration                   | Connexion administrateur                                                        | Formulaire de connexion, gestion de session, garde d'accès aux routes protégées                                                                      |
 | `admin-dashboard` | Espace d'administration des contenus (point d'entrée)       | Dashboard                                                                       | Cartes de comptage statiques, table des derniers articles modifiés                                                                                   |
@@ -135,8 +137,9 @@ Le **partage de contenu** et les **breadcrumbs** ne sont pas des features à par
 | `/articles/[slug]`  | `app/(public)/articles/[slug]/page.tsx`  | Statique, revalidé après publication/modification | Contenu, métadonnées, contenus liés                  |
 | `/categorie/[slug]` | `app/(public)/categorie/[slug]/page.tsx` | Statique, revalidé après publication admin        | Articles de la catégorie, filtres secondaires        |
 | `/zone/[slug]`      | `app/(public)/zone/[slug]/page.tsx`      | Statique, revalidé après publication admin        | Articles de la zone, filtres secondaires             |
-| `/recherche`        | `app/(public)/recherche/page.tsx`        | Dynamique (dépend des paramètres de recherche)    | Résultats filtrés selon les paramètres d'URL         |
+| `/recherche`        | `app/(public)/recherche/page.tsx`        | Dynamique (dépend des paramètres de recherche)    | Route unique, jamais scindée en deux fichiers : formulaire de recherche si aucun paramètre `q`, résultats filtrés selon les paramètres d'URL sinon |
 | `/newsletter`       | `app/(public)/newsletter/page.tsx`       | Statique                                          | Formulaire dédié                                     |
+| `/newsletter/desinscription` | `app/(public)/newsletter/desinscription/page.tsx` | Dynamique (dépend du jeton de désinscription) | Validation du jeton reçu par e-mail, confirmation neutre ; jamais liée depuis la navigation ou le footer |
 | `/a-propos`         | `app/(public)/a-propos/page.tsx`         | Statique                                          | Contenu institutionnel                               |
 | `/contact`          | `app/(public)/contact/page.tsx`          | Statique                                          | Formulaire de contact                                |
 | `/mentions-legales` | `app/(public)/mentions-legales/page.tsx` | Statique                                          | Contenu légal                                        |
@@ -183,6 +186,7 @@ Composants transverses à plusieurs features, sans logique métier propre à un 
 | `Breadcrumb`                                 | Fil d'Ariane desktop / lien "← Retour" mobile                             | — (composite propre)   |
 | `Pagination`                                 | Numérotée (desktop public + admin) et "Charger plus" (mobile public)      | — (composite propre)   |
 | `StatusPill`                                 | Statut Brouillon/Publié/Archivé, toujours libellé + couleur               | Badge                  |
+| `Tag`                                        | Saisie libre de mots-clés (ajout/suppression), utilisée uniquement dans l'Éditeur d'article — aucune gestion globale des tags | — (composite propre)   |
 | `FilterBar` / `FilterPanel`                  | Ligne de pills desktop / panneau bas mobile                               | Sheet + composite Pill |
 | `SearchBar`                                  | 3 variantes (header, overlay mobile, page dédiée)                         | Input                  |
 | `EmptyState`                                 | État vide qualifié avec action de sortie systématique                     | — (composite propre)   |
@@ -191,7 +195,7 @@ Composants transverses à plusieurs features, sans logique métier propre à un 
 | `Skeleton`                                   | Squelette de chargement, forme identique au contenu remplacé              | Skeleton               |
 | `LiveRegion`                                 | Annonce des compteurs/erreurs/confirmations aux technologies d'assistance | — (composite propre)   |
 
-Les composants sans équivalent direct dans shadcn/ui (Pill, Breadcrumb, ArticleCard, EmptyState, LiveRegion) sont construits comme composites au-dessus des primitives et des tokens, jamais en modifiant une primitive `components/ui/`.
+Les composants sans équivalent direct dans shadcn/ui (Pill, Breadcrumb, ArticleCard, EmptyState, LiveRegion, Tag) sont construits comme composites au-dessus des primitives et des tokens, jamais en modifiant une primitive `components/ui/`.
 
 ---
 
@@ -199,10 +203,10 @@ Les composants sans équivalent direct dans shadcn/ui (Pill, Breadcrumb, Article
 
 Composants propres à une seule feature, situés dans `features/<domaine>/` :
 
-- **`articles`** : formulaire d'édition (contenu + statut à 3 segments + classification), bandeau de sauvegarde/publication, liste des contenus liés, barre de partage (desktop flottante / mobile fixe).
+- **`articles`** : formulaire d'édition (contenu + statut à 3 segments + classification à choix unique catégorie/zone + tags multi-valués via `Tag` + image principale/texte alternatif), bandeau de sauvegarde/publication, liste des contenus liés, barre de partage (desktop flottante / mobile fixe).
 - **`taxonomies`** : formulaire inline de création/modification de catégorie ou zone, ligne de table avec contrôle de suppression conditionnée.
 - **`search`** : formulaire de recherche, jeu de filtres combinables, compteur de résultats live.
-- **`newsletter`** : formulaire à un champ (décliné dans ses 3 emplacements), table admin des inscrits avec retrait.
+- **`newsletter`** : formulaire à un champ (décliné dans ses 3 emplacements), écran de désinscription par jeton (`/newsletter/desinscription`, sans formulaire), table admin des inscrits avec retrait.
 - **`contact`** : formulaire multi-champs.
 - **`admin-auth`** : formulaire de connexion, logique de garde d'accès.
 - **`admin-dashboard`** : cartes de comptage, table des derniers articles modifiés.
@@ -250,6 +254,9 @@ Un composant métier peut composer des composants partagés (ex. le formulaire d
 - Chaque règle de validation porte le message spécifique défini par `ui-specification.md` (ex. "Le titre est requis pour publier") — aucun message générique ("Champ invalide") n'est acceptable au niveau schéma.
 - Le statut d'un article (Brouillon/Publié/Archivé) est modélisé comme une union de littéraux fermée, avec une règle conditionnelle : le titre est requis uniquement pour la transition vers "Publié", jamais pour "Enregistrer le brouillon".
 - La distinction Catégorie / Zone géographique est modélisée comme deux types de taxonomie distincts (jamais une simple chaîne libre), pour empêcher structurellement leur confusion en amont de tout composant d'affichage.
+- Chaque contenu est associé à exactement une catégorie et une zone géographique (relation un-à-un, jamais un tableau), toutes deux obligatoires pour "Publier" ; les tags forment une liste libre multi-valuée et toujours optionnelle, créée exclusivement depuis l'Éditeur d'article (aucune gestion globale des tags en V1).
+- Le type de contenu (article/analyse/enquête/interview/dossier thématique) est une union de littéraux fermée, obligatoire pour "Publier" au même titre que le titre.
+- L'image principale et son texte alternatif sont deux champs couplés : requis ensemble pour "Publier", optionnels pour "Enregistrer le brouillon" — jamais une image sans texte alternatif dès lors qu'elle est renseignée.
 
 ---
 
@@ -289,7 +296,7 @@ Un composant métier peut composer des composants partagés (ex. le formulaire d
 - Les composants shadcn/ui sont installés comme code source possédé par le projet (`components/ui/`), pas comme dépendance externe opaque — ils peuvent être lus et ajustés, mais leur comportement d'accessibilité sous-jacent (gestion du focus, rôles ARIA, piégeage de focus des modales/menus) n'est jamais retiré ni contourné.
 - Seuls les primitives réellement nécessaires à `ui-specification.md` sont installées (Button, Input, Textarea, Select, Checkbox, RadioGroup, Dialog, composant de toast, Badge, Card) — pas d'installation anticipée de primitives non utilisées par le périmètre V1.
 - La personnalisation d'une primitive se limite à l'alignement visuel sur les tokens du design system (couleur, rayon, typographie, espacement) — jamais à une modification de son comportement interactif.
-- Tout composant présent dans `ui-specification.md` sans équivalent direct dans shadcn/ui (Pill, StatusPill, ArticleCard, Breadcrumb, EmptyState) est construit comme composite dans `components/shared/` ou `features/*/components/`, au-dessus des primitives existantes, jamais en dérivant une nouvelle primitive dans `components/ui/`.
+- Tout composant présent dans `ui-specification.md` sans équivalent direct dans shadcn/ui (Pill, StatusPill, ArticleCard, Breadcrumb, EmptyState, Tag) est construit comme composite dans `components/shared/` ou `features/*/components/`, au-dessus des primitives existantes, jamais en dérivant une nouvelle primitive dans `components/ui/`.
 
 ---
 

@@ -11,8 +11,8 @@ Aucun code, aucune maquette, aucun choix de technologie ou de bibliothèque : ce
 
 Le produit se compose de deux espaces strictement séparés, ne partageant aucun composant de navigation :
 
-- **Espace public** (10 écrans) : Accueil, Liste des articles, Détail d'un article, Recherche, Résultats de recherche, Catégorie, Zone géographique, Newsletter, À propos, Contact. Navigation principale + Footer identiques sur les 10 écrans.
-- **Espace administrateur** (5 écrans) : Connexion administrateur, Dashboard, Gestion des articles, Gestion des catégories, Gestion newsletter. Sidebar identique sur les 4 écrans post-connexion ; aucune navigation publique visible dans cet espace hormis le lien explicite "Voir le site ↗".
+- **Espace public** (10 écrans de premier niveau) : Accueil, Liste des articles, Détail d'un article, Recherche, Résultats de recherche, Catégorie, Zone géographique, Newsletter, À propos, Contact. Navigation principale + Footer identiques sur les 10 écrans. S'y ajoutent des écrans dérivés, sans navigation propre : Mentions légales, Politique de confidentialité (liens de footer uniquement) et Désinscription newsletter (accessible uniquement depuis le lien d'un e-mail, cf. §Newsletter).
+- **Espace administrateur** (5 écrans de premier niveau) : Connexion administrateur, Dashboard, Gestion des articles, Gestion des catégories, Gestion newsletter. Sidebar identique sur les 4 écrans post-connexion ; aucune navigation publique visible dans cet espace hormis le lien explicite "Voir le site ↗". L'Éditeur d'article est un écran dérivé de Gestion des articles (accessible via "+ Nouvel article" ou "Modifier"), doté de ses propres règles de mise en page (cf. §Grille) et de validation (cf. §Formulaires).
 
 Principes d'architecture :
 
@@ -30,13 +30,14 @@ Principes d'architecture :
 
 - Header 64px de hauteur, sticky au scroll, fond `color.bg.primary`, bordure basse 1px `color.border`.
 - Ordre gauche → droite : Logo (lien Accueil) · Liens Catégories / Zones géographiques / À propos · Champ de recherche compact (200–240px, 36px de hauteur) · Bouton CTA "S'abonner" (primaire, `color.accent.warm`).
+- Catégories et Zones géographiques : menus déroulants au survol/clic, jamais une page d'index intermédiaire — chaque menu expose directement la liste des termes individuels (5 catégories, 7 zones), chacun un lien direct vers son écran Catégorie ou Zone géographique. Mécanisme équivalent à l'accordéon du menu mobile (cf. Navigation mobile) : seule la présentation change entre breakpoints, jamais l'existence d'une page intermédiaire.
 - Item actif : soulignement 2px `color.accent.primary`, poids 500 — jamais de changement de couleur de fond.
 - Ordre de tabulation clavier : Logo → liens → recherche → CTA → contenu de page.
 
 ## Navigation mobile / tablette (< 1024px)
 
 - Header condensé 56px, sticky, composé de : Logo (gauche) · icône Recherche + icône Menu (droite), cibles 44×44px chacune.
-- Menu (tiroir 85% largeur ou plein écran, `elevation.raised`) : Accueil, Catégories (dépliable), Zones géographiques (dépliable), Recherche, À propos, CTA "S'abonner" (plein, en fin de menu), Contact.
+- Menu (tiroir 85% largeur ou plein écran, `elevation.raised`) : Accueil, Catégories (dépliable), Zones géographiques (dépliable), Recherche, À propos, CTA "S'abonner" (plein, en fin de menu), Contact. Catégories/Zones géographiques en accordéon : révèle directement la liste des termes individuels, sans page d'index intermédiaire — même mécanisme d'exposition directe que le menu déroulant desktop (cf. Navigation principale), seule la présentation (accordéon vs déroulant) diffère entre breakpoints.
 - Focus piégé dans le menu ouvert ; fermeture via icône ✕, tap hors panneau, ou touche Échap.
 - Le menu ouvert bloque le défilement du contenu sous-jacent.
 
@@ -48,7 +49,7 @@ Principes d'architecture :
 
 ## Footer (public, toutes pages)
 
-- Deux colonnes desktop : "Navigation" (Accueil, Catégories, Zones géographiques, Recherche) et "Informations" (À propos, Contact, Mentions légales, Politique de confidentialité), plus icônes réseaux sociaux.
+- Deux colonnes desktop : "Navigation" (Accueil, Recherche) et "Informations" (À propos, Contact, Mentions légales, Politique de confidentialité), plus icônes réseaux sociaux.
 - Mobile : colonnes remplacées par des accordéons empilés.
 
 ## Persistance de contexte de navigation
@@ -224,8 +225,9 @@ Colonne de lecture (Détail d'article, À propos) : 680px max desktop, pleine la
 
 ## Select
 
-- Hauteur 44px, chevron aligné à droite. Sélection multiple avec cases internes pour les filtres à choix multiples.
+- Hauteur 44px, chevron aligné à droite. Sélection multiple avec cases internes pour les filtres à choix multiples (recherche, catégorie/zone en navigation) — cette multiplicité ne concerne que le filtrage, jamais la classification d'un contenu.
 - Le statut d'article n'est jamais un select classique : toujours rendu en 3 segments pill visibles (cf. Statuts).
+- Catégorie et Zone géographique dans l'Éditeur d'article : select à choix unique, tous deux obligatoires — un contenu n'a jamais plus d'une catégorie ni plus d'une zone (cf. §Formulaires).
 
 ## Checkbox / Radio
 
@@ -238,6 +240,7 @@ Colonne de lecture (Détail d'article, À propos) : 680px max desktop, pleine la
 ## Tag
 
 - Padding 4px 12px, 13px `font.mono`, `radius.pill`, bordure 1px `color.border`. Mode édition : icône ✕ 14px, cible cliquable ≥ 24×24px.
+- Créé et supprimé exclusivement dans le contexte de l'Éditeur d'article (champ mots-clés) : aucun écran de gestion globale des tags (renommage transverse, suppression en masse) en V1.
 
 ## Pill (filtre / navigation)
 
@@ -246,7 +249,7 @@ Colonne de lecture (Détail d'article, À propos) : 680px max desktop, pleine la
 ## Card / Article Card
 
 - Card générique : bordure 1px, `radius.sm`, padding 16px, `elevation.none`.
-- Article Card grille : image 16:9 en tête, padding interne 12px, titre `font.editorial` 20px, métadonnées 13px `font.mono` en dernière ligne, ordre fixe **Type · Catégorie · Zone · Date** avec omission de la dimension déjà donnée par le contexte de page (Catégorie omise sur écran Catégorie, Zone omise sur écran Zone).
+- Article Card grille : image 16:9 en tête, padding interne 12px, titre `font.editorial` 20px, métadonnées 13px `font.mono` en dernière ligne, ordre fixe **Type · Catégorie · Zone · Date** avec omission de la dimension déjà donnée par le contexte de page (Catégorie omise sur écran Catégorie, Zone omise sur écran Zone). Un contenu n'ayant qu'une seule catégorie et qu'une seule zone (cf. §Formulaires), cet ordre affiche toujours exactement une valeur par dimension, jamais une liste.
 - Article Card liste (Résultats de recherche) : image 120×80px à gauche (desktop) / pleine largeur au-dessus (mobile), extrait 2 lignes max avec ellipse.
 - Survol : titre → `color.accent.primary` uniquement (pas d'élévation, pas de zoom image).
 - Catégorie/Zone/Type affichés sur une carte ou en en-tête d'article sont chacun un lien indépendant vers leur page respective.
@@ -302,7 +305,7 @@ Colonne de lecture (Détail d'article, À propos) : 680px max desktop, pleine la
 - **Newsletter** (public) : un seul champ (e-mail), validation de format côté client, mention de confidentialité toujours visible et lisible (lien vers Politique de confidentialité), "déjà inscrit" traité comme une confirmation neutre et non une erreur.
 - **Contact** (public) : nom, e-mail, sujet, message — tous requis, validation par champ à la soumission.
 - **Connexion administrateur** : après un échec, message générique "Identifiant ou mot de passe incorrect" (ne jamais préciser lequel des deux champs est erroné) ; champ mot de passe vidé, identifiant conservé.
-- **Éditeur d'article** (back-office) : le champ Titre est requis pour "Publier" mais pas pour "Enregistrer le brouillon" (un brouillon peut être incomplet). Aucune sauvegarde automatique silencieuse en V1 — risque résiduel identifié, à traiter explicitement (avec indicateur visible type "Dernière sauvegarde à HH:MM") si implémentée.
+- **Éditeur d'article** (back-office) : le bloc classification-statut comprend Type de contenu (select à choix unique : article/analyse/enquête/interview/dossier thématique), Catégorie (select à choix unique), Zone géographique (select à choix unique), Tags (composant Tag, saisie libre multi-valuée, toujours optionnelle, créés à la volée depuis cet écran uniquement) et Image principale avec son Texte alternatif (import + champ texte). Un contenu n'a jamais plus d'une catégorie ni plus d'une zone. Les champs Titre, Type de contenu, Catégorie, Zone géographique et Image principale (avec son texte alternatif) sont requis pour "Publier" mais pas pour "Enregistrer le brouillon" (un brouillon peut rester incomplet sur l'ensemble de ces champs) ; les Tags restent facultatifs dans tous les cas. Aucune sauvegarde automatique silencieuse en V1 — risque résiduel identifié, à traiter explicitement (avec indicateur visible type "Dernière sauvegarde à HH:MM") si implémentée.
 - **Gestion des catégories/zones** (back-office) : nom + description courte, validation à la soumission du formulaire inline.
 
 ---
@@ -336,7 +339,15 @@ Colonne de lecture (Détail d'article, À propos) : 680px max desktop, pleine la
 - Confirmation : le formulaire est remplacé in situ par un message de succès (jamais de redirection vers une autre page).
 - "Déjà inscrit" : message neutre, non un blocage perçu comme une erreur.
 - Mention de renvoi vers la Politique de confidentialité toujours présente et lisible (13px `color.text.secondary`, lien en `color.accent.primary`).
+- **Désinscription** : jamais un formulaire sur le site public — accessible exclusivement via le lien de désinscription à usage unique inclus dans chaque communication envoyée. Ce lien ouvre l'écran dédié "Désinscription newsletter" (cf. ci-dessous), jamais la page Newsletter d'inscription.
 - Aucune fonctionnalité de segmentation, de campagne ou d'édition de contenu de newsletter en V1 (périmètre strictement limité à la collecte d'inscrits, cf. `scope-v1.md`).
+
+## Désinscription newsletter
+
+- Écran technique, atteint uniquement depuis le lien de désinscription d'un e-mail — aucun lien vers cet écran depuis la navigation principale, le footer ou la page Newsletter.
+- Contenu unique : message de confirmation neutre ("Vous avez été désinscrit de la newsletter."), sans champ de saisie ni bouton d'action autre qu'un retour à l'Accueil.
+- Aucune connexion ni ressaisie de l'e-mail requise : l'identification se fait uniquement via le lien reçu.
+- Lien déjà utilisé ou expiré : même traitement neutre que la confirmation (l'adresse n'est de toute façon plus inscrite), jamais un message d'erreur — cohérent avec le traitement du cas "déjà inscrit" à l'inscription.
 
 ---
 
@@ -579,6 +590,8 @@ Depuis n'importe quel écran admin → "Déconnexion" (sidebar) → **Connexion 
 - [ ] La saisie utilisateur est conservée après toute erreur (jamais de champ réinitialisé silencieusement).
 - [ ] Le filtre "Réinitialiser les filtres" est présent dès qu'un filtre est actif.
 - [ ] Les filtres et la requête de recherche sont conservés lors d'un retour depuis un article.
+- [ ] Un article publié dispose toujours d'un type de contenu, d'une catégorie unique, d'une zone géographique unique et d'une image principale avec texte alternatif — ces champs bloquent "Publier" mais jamais "Enregistrer le brouillon".
+- [ ] La désinscription newsletter n'est accessible que via le lien e-mail vers l'écran dédié, jamais via un formulaire sur le site public.
 
 ### États
 

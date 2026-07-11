@@ -39,16 +39,16 @@ Chaque carte porte un identifiant `P<phase>-T<numéro>` (ex. `P0-T1`) pour perme
 
 | Liste (Phase)                                     | Nombre de cartes | Estimation totale indicative  |
 | ------------------------------------------------- | ---------------- | ----------------------------- |
-| Phase 0 — Fondations & design system              | 8                | ~9 j                          |
+| Phase 0 — Fondations & design system              | 8                | ~10 j                         |
 | Phase 1 — Pages publiques de lecture              | 13               | ~20 j                         |
-| Phase 2 — Recherche et filtrage                   | 5                | ~11 j                         |
-| Phase 3 — Formulaires publics & validation        | 4                | ~6 j                          |
+| Phase 2 — Recherche et filtrage                   | 4                | ~10 j                         |
+| Phase 3 — Formulaires publics & validation        | 5                | ~8 j                          |
 | Phase 4 — Authentification & shell administrateur | 4                | ~6 j                          |
-| Phase 5 — Administration des contenus             | 4                | ~10 j                         |
+| Phase 5 — Administration des contenus             | 4                | ~12 j                         |
 | Phase 6 — Dashboard & gestion newsletter admin    | 3                | ~4 j                          |
 | Phase 7 — Qualité transverse                      | 4                | ~9 j                          |
 | Phase 8 — Recette et stabilisation                | 4                | ~7 j                          |
-| **Total**                                         | **49 cartes**    | **~82 j-personne indicatifs** |
+| **Total**                                         | **49 cartes**    | **~86 j-personne indicatifs** |
 
 Les Listes Phase 1 à Phase 4 peuvent progresser en parallèle sur le board une fois la Liste Phase 0 vidée (aucune dépendance croisée entre elles, hors deux cartes explicitement signalées). Les Listes Phase 5 et Phase 6 restent strictement séquentielles derrière Phase 4.
 
@@ -117,10 +117,10 @@ Checklist — Critères d'acceptation :
 
 ---
 
-### Carte : [P0-T4] Construire Skeleton, EmptyState, LiveRegion
+### Carte : [P0-T4] Construire Skeleton, EmptyState, LiveRegion, Tag
 
-**Étiquettes** : Design system · Estimation S (1-2 j)
-**Description** : Composants partagés transverses utilisés par toutes les pages de listing et tout contenu asynchrone.
+**Étiquettes** : Design system · Estimation M (2 j)
+**Description** : Composants partagés transverses utilisés par toutes les pages de listing, tout contenu asynchrone, et la saisie de mots-clés dans l'Éditeur d'article.
 **Dépend de** : P0-T3
 
 Checklist — Sous-tâches :
@@ -128,12 +128,14 @@ Checklist — Sous-tâches :
 - [ ] `Skeleton` : reprend la forme exacte du composant remplacé, sans transition additionnelle
 - [ ] `EmptyState` : message factuel + action de sortie systématique
 - [ ] `LiveRegion` : composant unique réutilisable pour toute annonce aux technologies d'assistance
+- [ ] `Tag` : saisie libre de mots-clés, ajout/suppression à la volée (icône ✕ 14px, cible ≥ 24×24px), sans aucun écran de gestion globale associé
 
 Checklist — Critères d'acceptation :
 
 - [ ] `Skeleton` ne provoque aucun saut de mise en page à l'arrivée du contenu réel
 - [ ] `EmptyState` n'est jamais affiché sans action de reprise en main associée
 - [ ] `LiveRegion` annonce correctement un changement de contenu à un lecteur d'écran (vérifié manuellement)
+- [ ] `Tag` ne propose aucune action de renommage ou de suppression transverse — création et suppression valables uniquement dans le contexte de l'article en cours d'édition
 
 ---
 
@@ -336,7 +338,7 @@ Checklist — Critères d'acceptation :
 Checklist — Sous-tâches :
 
 - [ ] Colonne de lecture 680px max desktop / pleine largeur mobile (marge 20px)
-- [ ] Affichage des métadonnées (auteur, date, sources, mots-clés, catégorie(s), zone(s))
+- [ ] Affichage des métadonnées (auteur, date, sources, mots-clés, catégorie, zone)
 - [ ] Section contenus liés
 - [ ] `loading.tsx` (squelette) et `not-found.tsx` (article introuvable/dépublié)
 - [ ] Métadonnées SEO et données structurées (Article, BreadcrumbList)
@@ -496,42 +498,28 @@ Checklist — Critères d'acceptation :
 
 ---
 
-### Carte : [P2-T3] Route : Recherche
+### Carte : [P2-T3] Route : Recherche et Résultats de recherche
 
-**Étiquettes** : Frontend public · Estimation S (1 j)
-**Description** : Page dédiée à la saisie de la requête.
-**Dépend de** : P2-T1
-
-Checklist — Sous-tâches :
-
-- [ ] Champ pleine largeur + bouton "Rechercher"
-
-Checklist — Critères d'acceptation :
-
-- [ ] Soumission redirige vers Résultats de recherche avec la requête portée par l'URL
-
----
-
-### Carte : [P2-T4] Route : Résultats de recherche
-
-**Étiquettes** : Frontend public · Estimation L (3 j)
-**Description** : Résultats pilotés entièrement par les paramètres d'URL (requête + filtres), en liste verticale pleine largeur.
+**Étiquettes** : Frontend public · Estimation L (3-4 j)
+**Description** : Route unique (`/recherche`), jamais scindée en deux fichiers : formulaire de saisie affiché en l'absence de paramètre de requête, résultats pilotés entièrement par les paramètres d'URL (requête + filtres) dès qu'une requête est présente, en liste verticale pleine largeur.
 **Dépend de** : P2-T1, P2-T2, P0-T4 (LiveRegion, EmptyState)
 
 Checklist — Sous-tâches :
 
-- [ ] Liste verticale pleine largeur (jamais de grille, quel que soit le breakpoint)
+- [ ] Formulaire de saisie (champ pleine largeur + bouton "Rechercher") affiché en l'absence de requête
+- [ ] Liste verticale pleine largeur (jamais de grille, quel que soit le breakpoint) dès qu'une requête est présente
 - [ ] Compteur de résultats en live-region, mis à jour à chaque changement de filtre
 - [ ] État vide qualifié spécifique (reformulation + réinitialisation des filtres)
 
 Checklist — Critères d'acceptation :
 
+- [ ] Une seule route sert les deux états (formulaire et résultats) — aucune deuxième route créée pour les résultats
 - [ ] Requête et filtres actifs conservés lors d'un retour depuis un article consulté
 - [ ] Aucun résultat traité comme un état vide qualifié, jamais comme une erreur
 
 ---
 
-### Carte : [P2-T5] Appliquer les filtres sur Liste, Catégorie, Zone
+### Carte : [P2-T4] Appliquer les filtres sur Liste, Catégorie, Zone
 
 **Étiquettes** : Frontend public · Estimation M (2 j)
 **Description** : Rétrofit des filtres sur les trois écrans de listing déjà livrés en Phase 1.
@@ -623,6 +611,26 @@ Checklist — Critères d'acceptation :
 
 - [ ] Focus renvoyé au premier champ en erreur après soumission refusée
 - [ ] Saisie conservée après un échec technique
+
+---
+
+### Carte : [P3-T5] Désinscription newsletter (page dédiée, accès par lien e-mail)
+
+**Étiquettes** : Frontend public · Estimation S (1-2 j)
+**Description** : Page technique accessible uniquement via le lien de désinscription à usage unique contenu dans chaque communication envoyée — aucun formulaire, confirmation neutre affichée in situ.
+**Dépend de** : P0-T4 (EmptyState/LiveRegion), P3-T2 (registre de ton neutre déjà établi pour "déjà inscrit")
+
+Checklist — Sous-tâches :
+
+- [ ] Route dédiée (`/newsletter/desinscription`) lisant un jeton de désinscription en paramètre d'URL
+- [ ] Confirmation neutre affichée directement, sans champ à saisir ni connexion requise
+- [ ] Traitement neutre d'un lien déjà utilisé ou expiré (jamais un message d'erreur)
+
+Checklist — Critères d'acceptation :
+
+- [ ] Aucune connexion ni saisie requise pour confirmer la désinscription
+- [ ] Le ton du message reste neutre, cohérent avec le traitement du cas "déjà inscrit" à l'inscription (P3-T2)
+- [ ] La page n'est accessible depuis aucun lien de navigation ou de footer, uniquement via l'e-mail
 
 ---
 
@@ -723,25 +731,31 @@ Checklist — Critères d'acceptation :
 
 - [ ] "Supprimer" désactivé et Modal non ouverte si des articles sont associés à la catégorie/zone
 - [ ] Toast de confirmation après création/modification
+- [ ] Aucune gestion des tags dans cet écran : les tags sont créés et supprimés uniquement depuis l'Éditeur d'article (P5-T2)
 
 ---
 
 ### Carte : [P5-T2] Éditeur d'article — structure et classification
 
-**Étiquettes** : Frontend admin · Estimation L (3-4 j)
+**Étiquettes** : Frontend admin · Estimation L (4-5 j)
 **Description** : Pièce la plus complexe du produit — contenu rédactionnel (~65%) et classification/métadonnées (~35%) en 2 colonnes desktop.
-**Dépend de** : P5-T1 (catégories/zones disponibles)
+**Dépend de** : P5-T1 (catégories/zones disponibles), P0-T4 (composant Tag)
 
 Checklist — Sous-tâches :
 
-- [ ] Champs de contenu (titre, chapô, corps, auteur, sources, mots-clés)
-- [ ] Sélection de classification (catégorie, zone géographique) alimentée par P5-T1
+- [ ] Champs de contenu (titre, chapô, corps, auteur, sources)
+- [ ] Champ Type de contenu (select à choix unique : article/analyse/enquête/interview/dossier thématique)
+- [ ] Sélection de classification : catégorie (select à choix unique) et zone géographique (select à choix unique), toutes deux alimentées par P5-T1 — jamais de sélection multiple
+- [ ] Champ Tags (composant `Tag`, saisie libre multi-valuée, optionnelle, créés à la volée depuis cet écran)
+- [ ] Champ Image principale (import) + Texte alternatif
 - [ ] Layout 2 colonnes desktop, colonne latérale toujours visible
 
 Checklist — Critères d'acceptation :
 
 - [ ] Aucune sauvegarde automatique silencieuse
 - [ ] Colonne de classification/statut accessible sans scroll indépendant excessif
+- [ ] Un contenu n'est jamais associé à plus d'une catégorie ou plus d'une zone géographique ; les tags acceptent zéro, un ou plusieurs éléments
+- [ ] Aucune gestion globale des tags accessible ailleurs que dans cet écran
 
 ---
 
@@ -754,12 +768,12 @@ Checklist — Critères d'acceptation :
 Checklist — Sous-tâches :
 
 - [ ] Statut rendu en 3 segments pill, jamais en select classique
-- [ ] Règle : titre requis pour "Publier", non requis pour "Enregistrer le brouillon"
+- [ ] Règle : titre, type de contenu, catégorie, zone géographique et image principale (+ texte alternatif) requis pour "Publier", non requis pour "Enregistrer le brouillon" ; tags toujours optionnels
 - [ ] Toast "✓ Brouillon enregistré" / "✓ Article publié"
 
 Checklist — Critères d'acceptation :
 
-- [ ] "Publier" sans titre affiche "Le titre est requis pour publier" et n'empêche pas l'enregistrement en brouillon
+- [ ] "Publier" sans titre, type, catégorie, zone ou image principale affiche un message spécifique par champ manquant et n'empêche pas l'enregistrement en brouillon
 - [ ] Un seul bouton primaire visible à la fois sur l'écran de l'éditeur
 
 ---
@@ -791,7 +805,7 @@ Checklist — Critères d'acceptation :
 
 **Étiquettes** : Frontend admin · Estimation M (2 j)
 **Description** : Table des inscrits produits par P3-T2/T3, avec retrait confirmé.
-**Dépend de** : P3-T2, P5-T4 (composants de table stabilisés)
+**Dépend de** : P3-T2, P3-T5 (désinscription par lien e-mail), P5-T4 (composants de table stabilisés)
 
 Checklist — Sous-tâches :
 
@@ -804,6 +818,7 @@ Checklist — Critères d'acceptation :
 - [ ] Compteur d'inscrits mis à jour après retrait
 - [ ] Toast affiché après confirmation du retrait
 - [ ] Aucun ajout manuel ni envoi de campagne (hors périmètre V1)
+- [ ] Une adresse désinscrite via le lien e-mail (P3-T5) disparaît automatiquement de cette table, sans action admin requise
 
 ---
 

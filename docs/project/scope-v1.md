@@ -32,7 +32,7 @@ Chaque fonctionnalité est rattachée aux User Stories correspondantes (`user-st
 
 ### 2. Organisation éditoriale (catégories, zones géographiques, métadonnées)
 
-**Description** : Permettre de classer chaque contenu par catégorie thématique, par zone géographique (Somalie, Djibouti, Somaliland, Éthiopie, Érythrée, Kenya, Soudan) et de l'enrichir de métadonnées (auteur, date, sources, mots-clés).
+**Description** : Permettre de classer chaque contenu par une catégorie thématique et une zone géographique (Somalie, Djibouti, Somaliland, Éthiopie, Érythrée, Kenya, Soudan) — toutes deux obligatoires et uniques par contenu — et de l'enrichir de métadonnées (auteur, date, sources) et d'un nombre libre de mots-clés (tags) optionnels, créés depuis la rédaction du contenu.
 
 **User Stories concernées** : US-002, US-003
 
@@ -88,7 +88,7 @@ Chaque fonctionnalité est rattachée aux User Stories correspondantes (`user-st
 
 ### 6. Newsletter (inscription et désinscription)
 
-**Description** : Permettre à un visiteur de s'inscrire à la newsletter via son adresse e-mail, sans création de compte, et de se désinscrire à tout moment.
+**Description** : Permettre à un visiteur de s'inscrire à la newsletter via son adresse e-mail, sans création de compte, et de se désinscrire à tout moment via un lien de désinscription à usage unique présent dans chaque communication envoyée.
 
 **User Stories concernées** : US-019, US-020
 
@@ -102,7 +102,7 @@ Chaque fonctionnalité est rattachée aux User Stories correspondantes (`user-st
 
 ### 7. Espace d'administration des contenus
 
-**Description** : Fournir à l'administrateur un espace centralisé pour créer, modifier, publier, dépublier et supprimer les contenus, et gérer les catégories, zones géographiques et tags.
+**Description** : Fournir à l'administrateur un espace centralisé pour créer, modifier, publier, dépublier et supprimer les contenus, et gérer les catégories et zones géographiques. Les tags restent hors de cet espace de gestion globale : ils sont créés et supprimés uniquement depuis la rédaction d'un contenu.
 
 **User Stories concernées** : US-026, US-027
 

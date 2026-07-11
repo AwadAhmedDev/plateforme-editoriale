@@ -23,6 +23,7 @@ Afin de produire les publications du média.
 - Je peux choisir le type de contenu (article, analyse, enquête, interview, dossier thématique).
 - Je peux enregistrer le contenu sans le publier immédiatement.
 - Je peux reprendre la rédaction d'un contenu non finalisé.
+- Je peux associer une image principale et son texte alternatif à mon contenu ; ces deux champs sont requis pour publier mais pas pour enregistrer un brouillon.
 
 **Priorité** : Haute
 
@@ -30,18 +31,18 @@ Afin de produire les publications du média.
 
 ### US-002 - Catégorisation des contenus
 
-**Description** : Permettre de classer chaque contenu par catégorie thématique et par zone géographique.
+**Description** : Permettre de classer chaque contenu par une catégorie thématique et une zone géographique, toutes deux obligatoires et uniques par contenu.
 
 **User Story**
 En tant qu'administrateur,
-Je souhaite associer un contenu à une catégorie et à une ou plusieurs zones géographiques,
+Je souhaite associer un contenu à une catégorie et à une zone géographique,
 Afin d'organiser les publications par thématique et par pays.
 
 ## Critères d'acceptation — US-002
 
-- Je peux sélectionner une catégorie (actualité, analyse géopolitique, juridique, social, culturel) pour un contenu.
-- Je peux associer un contenu à un ou plusieurs pays/zones (Somalie, Djibouti, Somaliland, Éthiopie, Érythrée, Kenya, Soudan).
-- Un contenu peut être associé à plusieurs catégories et zones simultanément.
+- Je peux sélectionner une catégorie (actualité, analyse géopolitique, juridique, social, culturel) pour un contenu ; ce choix est obligatoire et limité à une seule catégorie.
+- Je peux associer un contenu à un pays/zone (Somalie, Djibouti, Somaliland, Éthiopie, Érythrée, Kenya, Soudan) ; ce choix est obligatoire et limité à une seule zone.
+- Un contenu n'est jamais associé à plusieurs catégories ou plusieurs zones simultanément — cette contrainte conditionne aussi son affichage (une seule catégorie et une seule zone visibles par contenu).
 - Les visiteurs peuvent retrouver les contenus via leur catégorie ou leur zone géographique.
 
 **Priorité** : Haute
@@ -59,7 +60,8 @@ Afin de faciliter son classement et sa recherche ultérieure.
 
 ## Critères d'acceptation — US-003
 
-- Je peux renseigner l'auteur, la date de publication, les sources et des mots-clés pour un contenu.
+- Je peux renseigner l'auteur, la date de publication et les sources pour un contenu.
+- Je peux renseigner un nombre libre de mots-clés (tags) pour un contenu — zéro, un ou plusieurs, tous facultatifs — directement depuis sa rédaction, sans écran de gestion globale des tags.
 - Les métadonnées sont visibles par les visiteurs sur la page du contenu (à l'exception des champs internes).
 - Les mots-clés renseignés sont utilisés par le moteur de recherche du site.
 
@@ -392,9 +394,11 @@ Afin de ne plus recevoir les communications du média si je le souhaite.
 
 ## Critères d'acceptation — US-020
 
-- Je peux me désinscrire via un lien présent dans chaque communication envoyée.
-- Ma désinscription est prise en compte immédiatement.
-- Je ne reçois plus de communication après ma désinscription.
+- Je peux me désinscrire via un lien à usage unique présent dans chaque communication envoyée, sans avoir à me connecter ni à ressaisir mon e-mail.
+- Ce lien m'amène vers une page dédiée qui confirme ma désinscription in situ, sans formulaire ni champ à saisir.
+- Ma désinscription est prise en compte immédiatement et je ne reçois plus de communication ensuite.
+- Si je clique à nouveau sur un lien déjà utilisé ou expiré, la page m'affiche la même confirmation neutre (je ne suis de toute façon plus inscrit) plutôt qu'un message d'erreur.
+- Cette page n'est accessible depuis aucune navigation ni footer du site public : uniquement depuis le lien reçu par e-mail.
 
 **Priorité** : Moyenne
 
@@ -518,20 +522,21 @@ Afin de créer, modifier, publier, dépublier et supprimer l'ensemble des conten
 
 ---
 
-### US-027 - Gestion des catégories, zones géographiques et tags
+### US-027 - Gestion des catégories et zones géographiques
 
-**Description** : Permettre à l'administrateur de gérer les éléments de classification des contenus.
+**Description** : Permettre à l'administrateur de gérer les catégories et zones géographiques utilisées pour classer les contenus. Les tags sont explicitement hors de ce périmètre : ils sont créés et supprimés uniquement depuis la rédaction d'un contenu (cf. US-003), sans écran de gestion globale dédié en V1.
 
 **User Story**
 En tant qu'administrateur,
-Je souhaite gérer les catégories, les zones géographiques et les tags du site,
+Je souhaite gérer les catégories et les zones géographiques du site,
 Afin de maintenir une classification cohérente des contenus.
 
 ## Critères d'acceptation — US-027
 
-- Je peux créer, modifier et supprimer une catégorie, une zone géographique ou un tag.
-- Je peux consulter la liste des contenus associés à chaque catégorie, zone ou tag.
-- La suppression d'un élément de classification ne supprime pas les contenus qui y sont associés.
+- Je peux créer, modifier et supprimer une catégorie ou une zone géographique.
+- Je peux consulter la liste des contenus associés à chaque catégorie ou zone.
+- La suppression d'une catégorie ou d'une zone associée à au moins un contenu est bloquée, avec un message explicite.
+- Je ne dispose d'aucun écran de gestion globale des tags : ils restent visibles et modifiables uniquement au niveau de chaque contenu.
 
 **Priorité** : Moyenne
 

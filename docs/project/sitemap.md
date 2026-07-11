@@ -26,13 +26,7 @@ Pour chaque page sont précisés : son objectif, l'utilisateur concerné et son 
 
 - **Objectif** : présenter l'intégralité d'un contenu éditorial avec ses métadonnées, et permettre sa lecture ainsi que son partage (US-003, US-005, US-006).
 - **Utilisateur concerné** : tout visiteur.
-- **Contenu principal** : titre, corps du texte, auteur, date de publication, sources, mots-clés, catégorie(s) et zone(s) géographique(s) associées, options de partage (réseaux sociaux, lien direct).
-
-### Catégories
-
-- **Objectif** : permettre l'exploration des contenus organisés par thématique et par zone géographique (US-002).
-- **Utilisateur concerné** : tout visiteur, notamment le public professionnel cherchant une documentation par pays ou par thématique.
-- **Contenu principal** : liste des catégories thématiques (actualité, analyse géopolitique, juridique, social, culturel) et des zones géographiques (Somalie, Djibouti, Somaliland, Éthiopie, Érythrée, Kenya, Soudan), avec accès aux contenus associés à chacune.
+- **Contenu principal** : titre, corps du texte, auteur, date de publication, sources, mots-clés, catégorie et zone géographique associées, options de partage (réseaux sociaux, lien direct).
 
 ### Recherche
 
@@ -48,9 +42,15 @@ Pour chaque page sont précisés : son objectif, l'utilisateur concerné et son 
 
 ### Newsletter
 
-- **Objectif** : permettre l'inscription et la désinscription à la newsletter sans création de compte (US-019, US-020).
+- **Objectif** : permettre l'inscription à la newsletter sans création de compte (US-019).
 - **Utilisateur concerné** : tout visiteur souhaitant suivre l'actualité du média.
-- **Contenu principal** : formulaire d'inscription (adresse e-mail), confirmation d'inscription, information sur la nature des envois, moyen de désinscription.
+- **Contenu principal** : formulaire d'inscription (adresse e-mail), confirmation d'inscription, information sur la nature des envois. La désinscription (US-020) ne se fait pas depuis cette page mais depuis le lien à usage unique présent dans chaque communication envoyée — cf. page « Désinscription newsletter » ci-dessous.
+
+### Désinscription newsletter
+
+- **Objectif** : confirmer la désinscription d'un inscrit ayant cliqué sur le lien de désinscription reçu par e-mail (US-020).
+- **Utilisateur concerné** : tout inscrit à la newsletter souhaitant se désinscrire.
+- **Contenu principal** : message de confirmation neutre, sans formulaire ni champ à saisir ; aucune connexion requise. Page technique non accessible depuis la navigation principale ni le footer — atteinte uniquement via le lien reçu par e-mail. Un lien déjà utilisé ou expiré affiche la même confirmation neutre plutôt qu'une erreur.
 
 ### À propos
 
@@ -102,13 +102,13 @@ Pour chaque page sont précisés : son objectif, l'utilisateur concerné et son 
 
 - **Objectif** : administrer les éléments de classification des contenus (US-002, US-027).
 - **Utilisateur concerné** : administrateur unique.
-- **Contenu principal** : liste des catégories thématiques et des zones géographiques, actions de création, modification et suppression, consultation des contenus associés à chaque élément.
+- **Contenu principal** : liste des catégories thématiques et des zones géographiques, actions de création, modification et suppression, consultation des contenus associés à chaque élément. Les tags ne font pas partie de cet écran : ils sont gérés directement depuis la rédaction de chaque contenu (US-003), sans gestion globale dédiée en V1.
 
 ### Gestion newsletter
 
 - **Objectif** : donner à l'administrateur une visibilité sur les inscrits collectés via le formulaire public de newsletter (US-019, US-020). Le pilotage avancé (envoi de campagnes, suivi détaillé de l'audience — US-021, US-029) relève de la fonctionnalité « Suivi des audiences et de la newsletter » affectée à la Version 2 dans `scope-v1.md`, et n'est pas couvert par cette page en V1.
 - **Utilisateur concerné** : administrateur unique.
-- **Contenu principal** : liste des adresses e-mail inscrites, nombre total d'inscrits, statut d'inscription ou de désinscription.
+- **Contenu principal** : liste des adresses e-mail actuellement inscrites, nombre total d'inscrits, action de retrait manuel d'un inscrit. Un inscrit désinscrit via le lien e-mail (page « Désinscription newsletter ») disparaît automatiquement de cette liste, sans action de l'administrateur.
 
 ---
 
@@ -117,7 +117,7 @@ Pour chaque page sont précisés : son objectif, l'utilisateur concerné et son 
 Présente sur l'ensemble des pages publiques, elle donne accès aux sections structurantes du site :
 
 - Accueil
-- Catégories (accès aux thématiques et zones géographiques)
+- Catégories et Zones géographiques (menu déroulant/accordéon exposant directement chaque catégorie et chaque zone — pas de page d'index intermédiaire ; chaque terme renvoie directement à son gabarit Catégorie ou Zone géographique)
 - Recherche
 - À propos
 - Contact
@@ -130,7 +130,6 @@ Présente sur l'ensemble des pages publiques, elle donne accès aux sections str
 **Côté public**, navigation contextuelle propre à certaines pages :
 
 - fil d'Ariane sur la page Détail d'un article (catégorie / zone géographique / article) ;
-- sous-navigation par zone géographique et par thématique sur la page Catégories ;
 - filtres actifs sur la page Résultats de recherche (catégorie, zone géographique, type de contenu, date) ;
 - liens de contenus associés et options de partage sur la page Détail d'un article.
 

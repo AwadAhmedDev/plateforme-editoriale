@@ -5,8 +5,9 @@
 ### 1.1 Gestion des contenus
 
 - Le site doit permettre la création, la rédaction et la publication d'articles, d'analyses, d'enquêtes, d'interviews et de dossiers thématiques.
-- Les contenus doivent pouvoir être organisés par catégories (ex. actualité, analyse géopolitique, juridique, social, culturel) et par zone géographique (Somalie, Djibouti, Somaliland, Éthiopie, Érythrée, Kenya, Soudan).
-- Chaque contenu doit pouvoir être enrichi de métadonnées (auteur, date de publication, sources, mots-clés) permettant son classement et sa recherche ultérieure.
+- Chaque contenu doit être associé à exactement une catégorie thématique (ex. actualité, analyse géopolitique, juridique, social, culturel) et une zone géographique (Somalie, Djibouti, Somaliland, Éthiopie, Érythrée, Kenya, Soudan), toutes deux obligatoires ; un contenu ne peut jamais être associé à plusieurs catégories ou plusieurs zones simultanément.
+- Chaque contenu doit pouvoir être enrichi de métadonnées (auteur, date de publication, sources) et d'un nombre libre de mots-clés (tags), tous facultatifs, permettant son classement et sa recherche ultérieure. Les tags sont créés et supprimés directement depuis la rédaction du contenu, sans écran de gestion globale dédié.
+- Chaque contenu doit pouvoir être illustré d'une image principale accompagnée d'un texte alternatif ; ces deux champs sont requis pour la publication mais pas pour l'enregistrement en brouillon.
 - Le site doit permettre la gestion du statut de chaque contenu (brouillon, publié, archivé).
 - Le site doit permettre la modification et la mise à jour des contenus après publication.
 - Les contenus doivent pouvoir être partagés par les visiteurs (partage vers réseaux sociaux ou par lien).
@@ -38,7 +39,7 @@
 
 - Le site doit permettre à un visiteur de s'inscrire à une newsletter en renseignant son adresse e-mail, sans obligation de créer un compte.
 - L'inscription à la newsletter doit permettre au visiteur de recevoir les nouvelles publications, analyses, enquêtes et actualités relatives à la Corne de l'Afrique.
-- Le visiteur doit pouvoir se désinscrire de la newsletter à tout moment.
+- Le visiteur doit pouvoir se désinscrire de la newsletter à tout moment, via un lien de désinscription à usage unique présent dans chaque communication envoyée, sans nécessiter de connexion ni de saisie préalable.
 - L'administrateur doit pouvoir consulter la liste des inscrits à la newsletter et déclencher l'envoi des communications.
 
 ### 1.6 Gestion de la recherche documentaire
@@ -51,7 +52,7 @@
 ### 1.7 Administration du site
 
 - L'administrateur doit disposer d'un espace de gestion centralisé lui permettant de créer, modifier, publier, dépublier et supprimer l'ensemble des contenus.
-- L'administrateur doit pouvoir gérer les catégories, les zones géographiques et les tags utilisés pour classer les contenus.
+- L'administrateur doit pouvoir gérer les catégories et les zones géographiques utilisées pour classer les contenus. Les tags restent hors de cet espace de gestion : ils sont créés et supprimés uniquement depuis la rédaction d'un contenu, sans écran de gestion globale des tags en V1.
 - L'administrateur doit pouvoir gérer les offres d'abonnement et les conditions d'accès aux contenus premium.
 - L'administrateur doit pouvoir consulter la liste des utilisateurs inscrits, des abonnés et des inscrits à la newsletter.
 - L'administrateur doit pouvoir suivre l'activité globale du site (publications, abonnements, inscriptions) afin d'évaluer l'atteinte des objectifs business.
