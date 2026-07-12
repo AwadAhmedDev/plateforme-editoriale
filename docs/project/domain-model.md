@@ -17,7 +17,7 @@ Deux publics distincts consomment le domaine sans jamais s'y identifier par un c
 
 Le domaine du MVP est volontairement borné : il ne couvre ni les comptes utilisateurs, ni les contenus réservés, ni les abonnements payants, ni le pilotage multi-rédacteurs — ces notions appartiennent à un domaine futur (Version 2 / Version 3) et ne sont pas modélisées ici.
 
-Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la **Catégorie**, la **Zone géographique**, l'**Inscrit Newsletter**, le **Compte Administrateur** (et sa Session) et le **Message de contact**.
+Cinq entités métier composent le domaine du MVP : le **Contenu éditorial**, la **Catégorie**, la **Zone géographique**, l'**Inscrit Newsletter** et le **Compte Administrateur** (et sa Session).
 
 ---
 
@@ -33,27 +33,33 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 
 - Titre
 - Type de contenu (une valeur parmi : article, analyse, enquête, interview, dossier thématique)
-- Corps de texte
 - Catégorie (une seule)
 - Zone géographique (une seule)
 - Image principale et son texte alternatif (couple indissociable)
 
 **Attributs optionnels** :
 
-- Chapô (résumé d'accroche)
-- Auteur (texte libre)
+- Auteur
 - Sources
 - Mots-clés (nombre libre, y compris zéro)
-- Date de dernière modification (renseignée à chaque mise à jour, distincte de la date de publication)
+- Date de publication
+- Date de dernière modification (renseignée à chaque mise à jour)
 
 **Règles métier** :
 
 - Un contenu est toujours rattaché à exactement une Catégorie et une Zone géographique — jamais plusieurs, jamais aucune une fois publié.
 - Les champs obligatoires listés ci-dessus ne conditionnent que le passage au statut Publié ; un Brouillon peut rester incomplet sur l'ensemble de ces champs.
 - Les mots-clés restent facultatifs dans tous les cas, y compris pour la publication.
-- Une fois publié, un contenu reste modifiable à tout moment ; la date de publication ne change pas, la date de dernière modification est mise à jour à chaque changement.
+- Une fois publié, un contenu reste modifiable à tout moment — cf. Point ouvert ci-dessous sur l'articulation entre date de publication et date de dernière modification.
 - Un contenu peut être partagé librement par tout visiteur, sans restriction d'accès (aucune notion de contenu réservé n'existe dans ce domaine).
 - Les mots-clés n'ont pas d'existence ni de gestion en dehors du Contenu éditorial auquel ils sont rattachés (pas de renommage ou de suppression transverse).
+
+**Point ouvert** :
+
+- Le caractère obligatoire du Corps de texte pour le passage au statut Publié n'est validé par aucun document source ; son existence en tant qu'attribut de création est confirmée (`user-stories.md`, US-001), mais aucune règle des documents source ne conditionne explicitement le passage au statut Publié à sa présence.
+- Le format du champ Auteur (texte libre, ou référence à une entité structurée) n'est précisé par aucun document source ; seule son existence en tant que métadonnée facultative est validée (`requirements.md` §1.1, US-003).
+- L'articulation entre la Date de publication et la Date de dernière modification (l'une figée après publication, l'autre mise à jour à chaque changement) n'est pas explicitement validée ; `requirements.md` §1.1 mentionne une date de publication comme métadonnée facultative et US-005 confirme le suivi d'une date de dernière mise à jour, mais aucun document ne précise si ces deux dates coexistent selon un comportement d'immutabilité de l'une et de mise à jour de l'autre.
+- L'existence même d'un Chapô n'est validée par aucun des documents source relus (`requirements.md`, `user-stories.md`, `scope-v1.md`, `sitemap.md`).
 
 **États possibles** : Brouillon, Publié, Archivé — cf. Cycle de vie des entités.
 
@@ -73,7 +79,7 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 
 **Attributs obligatoires** : Nom.
 
-**Attributs optionnels** : Description courte.
+**Attributs optionnels** : aucun attribut optionnel n'est validé par les documents source relus.
 
 **Règles métier** :
 
@@ -81,7 +87,10 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 - La suppression d'une catégorie associée à au moins un contenu est interdite tant que cette association existe.
 - La consultation des contenus associés à une catégorie donnée doit toujours être possible.
 
-**Point ouvert** : la documentation actuelle ne tranche pas si l'ensemble des catégories constitue un référentiel fermé (limité aux valeurs identifiées à la conception) ou une liste librement extensible par l'administrateur — cf. Invariants métier.
+**Point ouvert** :
+
+- La documentation actuelle ne tranche pas si l'ensemble des catégories constitue un référentiel fermé (limité aux valeurs identifiées à la conception) ou une liste librement extensible par l'administrateur — cf. Invariants métier.
+- L'existence d'une Description courte associée à la Catégorie n'est validée par aucun document source ; elle est évoquée dans la documentation de conception sans confirmation dans `requirements.md` ni `user-stories.md`.
 
 **États possibles** : aucun cycle de vie propre ; une catégorie existe ou n'existe plus, sans statut intermédiaire.
 
@@ -97,11 +106,14 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 
 **Attributs obligatoires** : Nom.
 
-**Attributs optionnels** : Description courte.
+**Attributs optionnels** : aucun attribut optionnel n'est validé par les documents source relus.
 
 **Règles métier** : identiques à celles de la Catégorie (création/modification/suppression par l'administrateur, suppression bloquée si des contenus sont associés).
 
-**Point ouvert** : même ambiguïté que pour la Catégorie sur le caractère fermé ou extensible de la liste — cf. Invariants métier.
+**Point ouvert** :
+
+- Même ambiguïté que pour la Catégorie sur le caractère fermé ou extensible de la liste — cf. Invariants métier.
+- L'existence d'une Description courte associée à la Zone géographique n'est validée par aucun document source, au même titre que pour la Catégorie.
 
 **États possibles** : aucun cycle de vie propre.
 
@@ -126,12 +138,15 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 
 - Une adresse e-mail ne peut être inscrite qu'une seule fois ; une nouvelle tentative d'inscription d'une adresse déjà inscrite est traitée comme une confirmation, jamais comme une erreur.
 - L'inscription ne crée aucun compte utilisateur et n'exige aucune authentification.
-- La désinscription s'effectue exclusivement via un lien à usage unique transmis dans chaque communication envoyée, sans connexion ni ressaisie de l'adresse.
-- Une fois désinscrite, une adresse est retirée de la liste des inscrits.
+- Le retrait d'un inscrit de la liste s'effectue selon deux mécanismes distincts :
+  - **désinscription libre-service** : l'inscrit se désinscrit lui-même via un lien à usage unique transmis dans chaque communication envoyée, sans connexion ni ressaisie de l'adresse ;
+  - **retrait manuel par l'administrateur** : l'administrateur retire un inscrit directement depuis l'espace de gestion newsletter, sans passer par le lien de désinscription ni requérir d'action de l'inscrit (`sitemap.md`, page Gestion newsletter).
+- Dans les deux cas, une fois le retrait effectué, l'adresse est retirée de la liste des inscrits.
+- Un inscrit désinscrit via le lien e-mail disparaît automatiquement de la liste consultée par l'administrateur, sans action de sa part.
 
-**États possibles** : Inscrit → Désinscrit (état terminal, équivalent à une disparition de l'entité) — cf. Cycle de vie des entités.
+**États possibles** : Inscrit → Désinscrit, atteint soit par désinscription libre-service (lien à usage unique), soit par retrait manuel de l'administrateur — état terminal équivalent, dans les deux cas, à une disparition de l'entité de la liste des inscrits — cf. Cycle de vie des entités.
 
-**Relations** : entité indépendante, sans relation avec le Contenu éditorial ni les taxonomies.
+**Relations** : entité indépendante, sans relation avec le Contenu éditorial ni les taxonomies ; le retrait manuel place le Compte Administrateur comme acteur de la transition d'état, au même titre que son rôle d'auteur implicite sur les autres entités gérées.
 
 ---
 
@@ -145,7 +160,10 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 
 **Attributs optionnels** : aucun attribut supplémentaire n'est défini par la documentation actuelle.
 
-**Point ouvert** : le Compte Administrateur lui-même (par opposition à la Session) n'est décrit par aucun document au-delà du couple identifiant/mot de passe — aucune procédure de récupération d'accès n'est définie en cas de perte.
+**Point ouvert** :
+
+- Le Compte Administrateur lui-même (par opposition à la Session) n'est décrit par aucun document au-delà du couple identifiant/mot de passe — aucune procédure de récupération d'accès n'est définie en cas de perte.
+- La durée d'une Session administrateur (temps de validité avant expiration) et l'existence éventuelle d'une expiration automatique (par exemple après inactivité) ne sont précisées par aucun document source ; seule l'existence d'une déconnexion volontaire est documentée.
 
 **Règles métier** :
 
@@ -160,31 +178,11 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 
 ---
 
-### Message de contact
-
-**Responsabilité métier** : porter une demande de mise en relation directe avec l'administrateur du média (sourcing, partenariat, presse, demande institutionnelle).
-
-**Description** : représente une soumission du formulaire de contact public.
-
-**Attributs obligatoires** : Nom, adresse e-mail, sujet, message — tous requis à la soumission.
-
-**Attributs optionnels** : aucun.
-
-**Règles métier** : tous les champs sont requis ; la validation intervient au moment de la soumission.
-
-**Point ouvert** : la documentation actuelle ne précise pas si un Message de contact constitue une donnée persistante consultable ultérieurement par l'administrateur, ou une simple transmission sans conservation — cf. Invariants métier.
-
-**États possibles** : aucun cycle de vie documenté au-delà de la soumission.
-
-**Relations** : entité indépendante, sans relation avec les autres entités du domaine.
-
----
-
 ## Agrégats métier
 
 **Agrégat Contenu éditorial** — racine : Contenu éditorial. Les mots-clés qui lui sont associés n'ont aucune identité ni cycle de vie en dehors de lui : ils appartiennent à sa frontière d'agrégat. La Catégorie et la Zone géographique, en revanche, existent indépendamment du contenu qui les référence (elles préexistent, sont partagées par plusieurs contenus et survivent à la suppression d'un contenu donné) : elles sont référencées par identité, mais **hors** de la frontière de cet agrégat.
 
-**Agrégat Catégorie** — racine autonome : Catégorie, limitée à son nom et sa description. Ne contient pas les contenus qui la référencent.
+**Agrégat Catégorie** — racine autonome : Catégorie, limitée à son nom (et, le cas échéant, à sa description — cf. Point ouvert). Ne contient pas les contenus qui la référencent.
 
 **Agrégat Zone géographique** — racine autonome, symétrique de l'agrégat Catégorie.
 
@@ -192,15 +190,13 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 
 **Agrégat Compte Administrateur** — racine : Compte Administrateur. La Session administrateur est un état interne à cette frontière : elle n'a pas d'existence ni de sens en dehors du compte qu'elle authentifie.
 
-**Agrégat Message de contact** — racine autonome et isolée, sans relation avec les autres agrégats du domaine.
-
 ---
 
 ## Invariants métier
 
 - Un Contenu éditorial publié possède toujours exactement une Catégorie et une Zone géographique — jamais zéro, jamais plusieurs.
 - Un Contenu éditorial en statut Brouillon n'est jamais visible en dehors de l'espace d'administration.
-- Un Contenu éditorial ne peut jamais atteindre le statut Publié sans Titre, Type de contenu, Corps de texte, Catégorie, Zone géographique, Image principale et Texte alternatif.
+- Un Contenu éditorial ne peut jamais atteindre le statut Publié sans Titre, Type de contenu, Catégorie, Zone géographique, Image principale et Texte alternatif. Le statut du Corps de texte au regard de cette règle reste un Point ouvert — cf. entité Contenu éditorial.
 - Les mots-clés d'un Contenu éditorial n'existent jamais indépendamment de ce contenu.
 - Une Catégorie ou une Zone géographique associée à au moins un Contenu éditorial ne peut jamais être supprimée.
 - Une même adresse e-mail n'apparaît jamais deux fois parmi les Inscrits Newsletter.
@@ -215,13 +211,11 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 
 **Contenu éditorial** : Brouillon ⇄ Publié ⇄ Archivé. Les trois états communiquent librement dans les deux sens — aucune progression strictement unidirectionnelle n'est imposée. Seule la transition **vers** Publié est soumise aux règles de champs obligatoires ; les transitions vers Brouillon ou vers Archivé restent toujours libres, quel que soit l'état de complétude du contenu.
 
-**Inscrit Newsletter** : (inexistant) → Inscrit → Désinscrit. La désinscription est un état terminal : elle équivaut à la disparition de l'entité de la liste des inscrits, sans étape intermédiaire ni réinscription automatique.
+**Inscrit Newsletter** : (inexistant) → Inscrit → Désinscrit. La transition vers Désinscrit est déclenchée soit par désinscription libre-service (l'inscrit utilise le lien à usage unique reçu par e-mail), soit par retrait manuel (l'administrateur retire l'inscrit depuis l'espace de gestion newsletter). Désinscrit est un état terminal dans les deux cas : il équivaut à la disparition de l'entité de la liste des inscrits, sans étape intermédiaire ni réinscription automatique.
 
-**Session administrateur** : Non connecté → Connecté → Non connecté (déconnexion volontaire). Cycle répétable indéfiniment, sans limite au nombre de connexions/déconnexions successives.
+**Session administrateur** : Non connecté → Connecté → Non connecté (déconnexion volontaire). Cycle répétable indéfiniment, sans limite au nombre de connexions/déconnexions successives. La possibilité d'une expiration automatique de session, indépendante de la déconnexion volontaire, reste un Point ouvert — cf. entité Compte Administrateur.
 
 **Catégorie / Zone géographique** : (inexistante) → Existante → (Supprimée, uniquement si aucun Contenu éditorial n'y est associé). Aucun état intermédiaire.
-
-**Message de contact** : Soumis (état unique et terminal ; aucune suite d'états n'est documentée après la soumission).
 
 ---
 
@@ -233,6 +227,14 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 - **Validation différenciée par intention** : la distinction entre exigences de « brouillon » et exigences de « publication » n'existe que pour le Contenu éditorial ; aucune autre entité du domaine ne connaît cette distinction.
 - **Acteur unique de gestion** : le domaine ne prévoit qu'un seul acteur de gestion (l'Administrateur) ; aucune notion de rôle, de permission différenciée ou de délégation n'existe.
 - **Accès libre par défaut** : toute consultation de Contenu éditorial publié est libre, sans identification ni condition d'accès, sauf les écrans de gestion réservés à l'Administrateur.
+
+---
+
+## Éléments présents dans certains documents mais non validés comme entités métier
+
+### Message de contact
+
+Une page Contact avec un « formulaire ou coordonnées de contact » est décrite dans `sitemap.md`. Aucune exigence métier fondatrice ne valide cette fonctionnalité dans `requirements.md` ni dans `user-stories.md` : aucune section de `requirements.md` ne mentionne de formulaire de contact, et aucune User Story ne couvre ce parcours. En l'absence de validation dans les documents fondateurs du besoin, cet élément n'est pas retenu comme entité métier du domaine et n'est documenté ici qu'à titre de traçabilité.
 
 ---
 
@@ -248,5 +250,4 @@ Six entités métier composent le domaine du MVP : le **Contenu éditorial**, la
 - **Lien de désinscription** : mécanisme d'identification à usage unique permettant à un Inscrit Newsletter de se désinscrire sans authentification.
 - **Compte Administrateur** : identité unique habilitée à gérer l'ensemble du domaine métier.
 - **Session administrateur** : état d'authentification actif du Compte Administrateur.
-- **Message de contact** : soumission du formulaire de contact public.
 - **MVP (Version 1)** : périmètre fonctionnel couvert par le présent modèle métier — exclut les comptes utilisateurs, les contenus réservés et les abonnements payants (Version 2), ainsi que le tableau de bord d'indicateurs et l'ouverture à de futurs contributeurs (Version 3).
