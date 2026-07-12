@@ -40,6 +40,18 @@ Pour chaque page sont précisés : son objectif, l'utilisateur concerné et son 
 - **Utilisateur concerné** : tout visiteur ayant effectué une recherche.
 - **Contenu principal** : liste des contenus correspondants, filtres actifs et modifiables (catégorie, zone géographique, type de contenu, date), message dédié en l'absence de résultat.
 
+### Catégorie
+
+- **Objectif** : offrir une vue filtrée des contenus publiés relevant d'une catégorie thématique donnée, pour l'exploration thématique et la veille sectorielle (US-002, US-004).
+- **Utilisateur concerné** : tout visiteur, en particulier le public professionnel effectuant une veille sur une thématique précise.
+- **Contenu principal** : liste des contenus publiés associés à la catégorie, avec filtres secondaires combinables (zone géographique, type de contenu, date) — le filtre catégorie est omis, déjà donné par le contexte de la page. Message neutre, sans ton d'excuse, si la catégorie ne compte encore aucun contenu publié. Accessible directement depuis le menu Catégories de la navigation principale (pas de page d'index intermédiaire).
+
+### Zone géographique
+
+- **Objectif** : offrir une vue filtrée des contenus publiés relevant d'une zone géographique donnée, symétrique de la page Catégorie sur l'axe géographique (US-002, US-004).
+- **Utilisateur concerné** : tout visiteur, en particulier le public professionnel et la diaspora suivant l'actualité d'une zone précise.
+- **Contenu principal** : liste des contenus publiés associés à la zone géographique, avec filtres secondaires combinables (catégorie, type de contenu, date) — le filtre zone est omis, déjà donné par le contexte de la page. Message neutre, sans ton d'excuse, si la zone ne compte encore aucun contenu publié. Aucun token de couleur ni pictogramme n'est assigné à une zone géographique spécifique. Accessible directement depuis le menu Zones géographiques de la navigation principale (pas de page d'index intermédiaire).
+
 ### Newsletter
 
 - **Objectif** : permettre l'inscription à la newsletter sans création de compte (US-019).
@@ -130,7 +142,9 @@ Présente sur l'ensemble des pages publiques, elle donne accès aux sections str
 **Côté public**, navigation contextuelle propre à certaines pages :
 
 - fil d'Ariane sur la page Détail d'un article (catégorie / zone géographique / article) ;
+- fil d'Ariane sur les pages Catégorie et Zone géographique (Accueil / page courante) ;
 - filtres actifs sur la page Résultats de recherche (catégorie, zone géographique, type de contenu, date) ;
+- filtres secondaires sur les pages Catégorie et Zone géographique (zone géographique/catégorie, type de contenu, date, à l'exclusion de la dimension déjà donnée par le contexte) ;
 - liens de contenus associés et options de partage sur la page Détail d'un article.
 
 **Côté administration**, menu de navigation interne de l'espace de gestion, accessible après connexion :
