@@ -9,7 +9,7 @@ Ce document ne redéfinit et ne réinterprète aucune règle métier : il tradui
 
 ### 1.1 Nature de l'architecture
 
-Application **monolithique full-stack Next.js** (App Router), conforme à `frontend-specification.md` : pas de backend séparé, pas de couche API publique consommée par un client JS découplé. Les Server Components lisent la base de données directement ; les mutations passent par des Server Actions liées directement aux formulaires (`frontend-specification.md`, §Formulaires : « chaque formulaire est adossé à une action serveur dédiée, appelée directement par l'élément `form` »). Une poignée de Route Handlers subsiste pour les usages qui ne sont pas des soumissions de formulaire (fichiers spéciaux Next.js, lien de désinscription).
+Application **monolithique full-stack Next.js** (App Router), conforme à `frontend-specification.md` : pas de backend séparé, pas de couche API publique consommée par un client JS découplé. Les Server Components lisent la base de données directement ; les mutations passent par des Server Actions liées directement aux formulaires (`frontend-specification.md`, §Formulaires : « chaque formulaire est adossé à une action serveur dédiée, appelée directement par l'élément `form` »). Une poignée de Route Handlers subsiste pour les usages qui ne sont pas des soumissions de formulaire (fichiers spéciaux Next.js : `sitemap.ts`, `robots.ts`). Le lien de désinscription newsletter n'en fait pas partie : il est traité par la page `newsletter/desinscription/page.tsx` elle-même (Server Component), qui lit et valide le jeton au rendu — cf. §4.5.
 
 Stack confirmée par `frontend/package.json` et `frontend-specification.md` : **Next.js 16 (App Router)**, **React 19**, **TypeScript strict**, **Tailwind CSS v4**, **shadcn/ui**.
 
@@ -99,9 +99,9 @@ Repris tels quels de `frontend-specification.md` : `articles`, `taxonomies`, `se
 |---|---|---|
 | `articles` | CRUD Contenu éditorial, transitions de statut, invariants de publication (DR-005, DR-006), génération de slug | `taxonomies` (FK), `db` |
 | `taxonomies` | CRUD Catégorie/Zone géographique, blocage de suppression si référencée | `db` |
-| `search` | Construction de requête full-text + filtres combinables | `db` |
+| `search` | Construction de requête full-text (titre, chapô, corps, mots-clés) + filtres combinables | `db` |
 | `newsletter` | Inscription, génération/validation de jeton de désinscription, retrait manuel | `db` |
-| `contact` | Validation et traitement du formulaire de contact | — (aucune persistance requise par les documents source) |
+| `contact` | Validation du formulaire et envoi d'une notification e-mail à l'administrateur (canal de contact réellement exploité) | Service d'envoi transactionnel (arbitrage §8) |
 | `admin-auth` | Authentification, création/validation de session, expiration par inactivité (DR-002) | `db` |
 | `seo` | Génération des métadonnées par gabarit (dont Description courte → méta-description Catégorie/Zone, DR-007), sitemap, robots | `articles`, `taxonomies` |
 | `media` | Upload et validation de l'image principale + texte alternatif | Stockage objet (arbitrage §8) |
@@ -146,6 +146,8 @@ Désinscription : la page `/newsletter/desinscription?token=...` lit le jeton c�
 ### 4.6 Recherche
 
 `searchParams` (`q`, `categorie`, `zone`, `type`, `date`) → requête combinée : `to_tsquery('french', q)` sur `recherche_vecteur` **et** filtres exacts sur les colonnes indexées — jamais de recherche en mémoire côté client.
+
+`recherche_vecteur` (§6) n'est **pas** une colonne générée : une colonne générée ne peut lire que la ligne courante, or les mots-clés vivent dans `contenu_mot_cle`, une table séparée. Elle est donc maintenue par trigger : recalculée à chaque modification du titre, du chapô ou du corps (trigger sur `contenu_editorial`), et à chaque ajout ou retrait d'un mot-clé (trigger sur `contenu_mot_cle`, qui recalcule le vecteur du contenu concerné). Les mots-clés participent ainsi pleinement à l'index de recherche, conformément à `user-stories.md` US-022 (« titre, résumé ou mots-clés »).
 
 ---
 
@@ -233,37 +235,45 @@ CREATE TABLE contenu_editorial (
   auteur                        TEXT,                  -- texte libre — DR-004, pas d'entité
   sources                       TEXT,
   statut                        statut_contenu NOT NULL DEFAULT 'brouillon',
-  date_publication              TIMESTAMPTZ,            -- figée après premier renseignement — DR-005
+  date_publication              TIMESTAMPTZ,            -- auto-renseignée et figée par trigger — DR-005, garantie aussi par CHECK ci-dessous
   date_derniere_modification    TIMESTAMPTZ NOT NULL DEFAULT now(),
   created_at                    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  recherche_vecteur TSVECTOR GENERATED ALWAYS AS (
-    setweight(to_tsvector('french', coalesce(titre, '')), 'A') ||
-    setweight(to_tsvector('french', coalesce(chapo, '')), 'B') ||
-    setweight(to_tsvector('french', coalesce(corps, '')), 'C')
-  ) STORED,
+  recherche_vecteur             TSVECTOR,               -- maintenue par trigger (titre/chapô/corps + mots-clés) — cf. §4.6, pas une colonne générée
 
-  -- Invariant domain-model.md : jamais Publié sans Titre/Type/Catégorie/Zone/Image+Alt
+  -- Invariant domain-model.md : jamais Publié sans Titre/Type/Catégorie/Zone/Image+Alt ; Date de publication garantie non nulle si Publié (DR-005)
   CONSTRAINT chk_publie_champs_requis CHECK (
     statut <> 'publie' OR (
       titre IS NOT NULL AND type_contenu IS NOT NULL AND categorie_id IS NOT NULL
       AND zone_id IS NOT NULL AND image_principale_url IS NOT NULL AND image_alt_text IS NOT NULL
+      AND date_publication IS NOT NULL
     )
   )
 );
 
--- Verrouillage de la Date de publication (DR-005) + mise à jour systématique de la Date de dernière modification
+-- Verrouillage ET auto-renseignement de la Date de publication (DR-005) + mise à jour systématique de la Date de dernière modification.
+-- La garantie ne repose plus uniquement sur le code applicatif : le trigger renseigne lui-même la date au premier passage à
+-- "publie" si elle est absente, et le CHECK ci-dessus interdit dans tous les cas qu'une ligne "publie" ait une date nulle,
+-- y compris en cas de contournement du trigger (ex. écriture directe, trigger désactivé).
 CREATE OR REPLACE FUNCTION fn_contenu_editorial_dates() RETURNS trigger AS $$
 BEGIN
-  IF OLD.date_publication IS NOT NULL AND NEW.date_publication IS DISTINCT FROM OLD.date_publication THEN
+  IF TG_OP = 'UPDATE' AND OLD.date_publication IS NOT NULL AND NEW.date_publication IS DISTINCT FROM OLD.date_publication THEN
     RAISE EXCEPTION 'La Date de publication ne peut plus être modifiée après son premier renseignement (DR-005)';
   END IF;
-  NEW.date_derniere_modification := now();
+
+  IF NEW.statut = 'publie' AND NEW.date_publication IS NULL THEN
+    NEW.date_publication := now();
+  END IF;
+
+  IF TG_OP = 'UPDATE' THEN
+    NEW.date_derniere_modification := now();
+  END IF;
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_contenu_editorial_dates
-BEFORE UPDATE ON contenu_editorial
+BEFORE INSERT OR UPDATE ON contenu_editorial
 FOR EACH ROW EXECUTE FUNCTION fn_contenu_editorial_dates();
 
 -- Mots-clés : aucune existence ni gestion en dehors du contenu (pas de table "tag" séparée)
@@ -272,6 +282,43 @@ CREATE TABLE contenu_mot_cle (
   mot_cle      TEXT NOT NULL,
   PRIMARY KEY (contenu_id, mot_cle)
 );
+
+-- Entretien du vecteur de recherche : agrège titre/chapô/corps ET les mots-clés (table séparée) — corrige la couverture de US-022.
+-- fn_maj_recherche_vecteur effectue un UPDATE sur contenu_editorial, ce qui refait passer la ligne par trg_contenu_editorial_dates
+-- (date_derniere_modification est alors réécrite à l'identique ou légèrement décalée) : comportement voulu, un ajout/retrait de
+-- mot-clé est une modification du Contenu éditorial au sens de DR-005.
+CREATE OR REPLACE FUNCTION fn_maj_recherche_vecteur(p_contenu_id UUID) RETURNS void AS $$
+BEGIN
+  UPDATE contenu_editorial c SET recherche_vecteur =
+    setweight(to_tsvector('french', coalesce(c.titre, '')), 'A') ||
+    setweight(to_tsvector('french', coalesce((SELECT string_agg(mot_cle, ' ') FROM contenu_mot_cle WHERE contenu_id = c.id), '')), 'A') ||
+    setweight(to_tsvector('french', coalesce(c.chapo, '')), 'B') ||
+    setweight(to_tsvector('french', coalesce(c.corps, '')), 'C')
+  WHERE c.id = p_contenu_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_contenu_editorial_recherche_trg() RETURNS trigger AS $$
+BEGIN
+  PERFORM fn_maj_recherche_vecteur(NEW.id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_contenu_editorial_recherche
+AFTER INSERT OR UPDATE OF titre, chapo, corps ON contenu_editorial
+FOR EACH ROW EXECUTE FUNCTION fn_contenu_editorial_recherche_trg();
+
+CREATE OR REPLACE FUNCTION fn_contenu_mot_cle_recherche_trg() RETURNS trigger AS $$
+BEGIN
+  PERFORM fn_maj_recherche_vecteur(COALESCE(NEW.contenu_id, OLD.contenu_id));
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_contenu_mot_cle_recherche
+AFTER INSERT OR DELETE ON contenu_mot_cle
+FOR EACH ROW EXECUTE FUNCTION fn_contenu_mot_cle_recherche_trg();
 
 -- Inscrit Newsletter
 CREATE TABLE inscrit_newsletter (
@@ -310,7 +357,7 @@ Aucun de ces points n'est tranché par le corpus métier — ce sont des décisi
 
 | # | Point | Recommandation | Alternative |
 |---|---|---|---|
-| 1 | ORM / accès aux données | Prisma (TypeScript strict, migrations versionnées) | Drizzle ORM |
+| 1 | ORM / accès aux données | Prisma (TypeScript strict, migrations versionnées). **Limite à documenter** : les colonnes maintenues par trigger (`recherche_vecteur`) et les fonctions/triggers PL/pgSQL (§6 : `fn_administrateur_unique`, `fn_contenu_editorial_dates`, `fn_maj_recherche_vecteur` et déclencheurs associés) ne sont pas exprimables dans `schema.prisma` — ils doivent être ajoutés via des migrations SQL manuelles (`prisma migrate dev --create-only`, puis édition du fichier de migration généré). Les types énumérés et les tables standard restent, eux, entièrement gérés par le schéma déclaratif Prisma | Drizzle ORM |
 | 2 | Hébergement | Vercel (intégration native Next.js/ISR) | Tout hébergeur compatible Node.js |
 | 3 | Stockage des images | Objet compatible S3 (ex. Cloudflare R2) + composant d'image optimisée Next.js | AWS S3 |
 | 4 | Hachage du mot de passe administrateur | bcrypt | argon2id |
@@ -318,6 +365,7 @@ Aucun de ces points n'est tranché par le corpus métier — ce sont des décisi
 | 6 | Génération des slugs (Catégorie/Zone/Article) | Dérivés du nom/titre à la création, modifiables manuellement, unicité vérifiée en base | — |
 | 7 | Récupération d'accès administrateur (hors produit, `domain-model.md`) | Script de reset exécuté manuellement contre la base (cf. analyse dédiée) — aucun endpoint applicatif | — |
 | 8 | **Mécanisme d'envoi des communications newsletter contenant le lien de désinscription** | Hors périmètre technique V1 (envoi de campagne différé en V2, `scope-v1.md` §12) — l'application expose uniquement la génération et la validation du jeton ; le canal d'envoi réel des communications reste externe/manuel en V1 | À clarifier avec le produit si un envoi transactionnel minimal s'avère nécessaire |
+| 9 | Service d'envoi transactionnel pour la notification de contact (module `contact`, §3.1) | Resend (intégration TypeScript native, adaptée à un envoi ponctuel unique — pas une campagne) | Postmark, AWS SES |
 
 ---
 
