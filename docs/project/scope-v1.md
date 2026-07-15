@@ -200,6 +200,8 @@ Chaque fonctionnalité est rattachée aux User Stories correspondantes (`user-st
 
 **Justification** : Au lancement, la navigation par catégorie/zone (fonctionnalité 2) et la recherche (fonctionnalité 4) couvrent déjà l'essentiel du besoin ; une vue dédiée n'apporte une valeur significative qu'une fois le volume d'archives suffisant pour la justifier.
 
+**Précision (DR-001)** : ce report en V2 concerne exclusivement la vue de navigation dédiée aux archives (liste, filtres par date/catégorie/zone). L'accessibilité de base d'un contenu archivé via son URL directe est effective dès la V1 (cf. `domain-model.md`, Invariants métier).
+
 ---
 
 ## Version 3

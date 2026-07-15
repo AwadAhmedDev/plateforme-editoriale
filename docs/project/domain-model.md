@@ -44,22 +44,21 @@ Cinq entités métier composent le domaine du MVP : le **Contenu éditorial**, l
 - Mots-clés (nombre libre, y compris zéro)
 - Date de publication
 - Date de dernière modification (renseignée à chaque mise à jour)
+- Chapô
 
 **Règles métier** :
 
 - Un contenu est toujours rattaché à exactement une Catégorie et une Zone géographique — jamais plusieurs, jamais aucune une fois publié.
 - Les champs obligatoires listés ci-dessus ne conditionnent que le passage au statut Publié ; un Brouillon peut rester incomplet sur l'ensemble de ces champs.
 - Les mots-clés restent facultatifs dans tous les cas, y compris pour la publication.
-- Une fois publié, un contenu reste modifiable à tout moment — cf. Point ouvert ci-dessous sur l'articulation entre date de publication et date de dernière modification.
+- Une fois publié, un contenu reste modifiable à tout moment.
 - Un contenu peut être partagé librement par tout visiteur, sans restriction d'accès (aucune notion de contenu réservé n'existe dans ce domaine).
 - Les mots-clés n'ont pas d'existence ni de gestion en dehors du Contenu éditorial auquel ils sont rattachés (pas de renommage ou de suppression transverse).
-
-**Point ouvert** :
-
-- Le caractère obligatoire du Corps de texte pour le passage au statut Publié n'est validé par aucun document source ; son existence en tant qu'attribut de création est confirmée (`user-stories.md`, US-001), mais aucune règle des documents source ne conditionne explicitement le passage au statut Publié à sa présence.
-- Le format du champ Auteur (texte libre, ou référence à une entité structurée) n'est précisé par aucun document source ; seule son existence en tant que métadonnée facultative est validée (`requirements.md` §1.1, US-003).
-- L'articulation entre la Date de publication et la Date de dernière modification (l'une figée après publication, l'autre mise à jour à chaque changement) n'est pas explicitement validée ; `requirements.md` §1.1 mentionne une date de publication comme métadonnée facultative et US-005 confirme le suivi d'une date de dernière mise à jour, mais aucun document ne précise si ces deux dates coexistent selon un comportement d'immutabilité de l'une et de mise à jour de l'autre.
-- L'existence même d'un Chapô n'est validée par aucun des documents source relus (`requirements.md`, `user-stories.md`, `scope-v1.md`, `sitemap.md`).
+- Un contenu passé au statut Archivé n'est plus exposé dans les listes, la recherche, ni les pages Catégorie/Zone, mais reste accessible via son URL directe (page de détail), afin de ne jamais rompre un lien déjà partagé ou indexé (DR-001).
+- Le Chapô est un attribut optionnel du Contenu éditorial. Il constitue un texte court de présentation pouvant être utilisé pour l'affichage introductif du contenu, l'indexation de recherche et les aperçus affichés dans les listes de contenus (DR-003).
+- L'Auteur constitue un attribut textuel libre et optionnel du Contenu éditorial. Il ne correspond pas à une entité métier autonome et ne fait l'objet d'aucune gestion dédiée (DR-004).
+- La Date de publication est renseignée lors du premier passage du Contenu éditorial au statut Publié et demeure inchangée par la suite. La Date de dernière modification est mise à jour à chaque modification du contenu, quel que soit son statut (DR-005).
+- Le Corps de texte constitue un attribut facultatif du Contenu éditorial, y compris pour le passage au statut Publié (DR-006).
 
 **États possibles** : Brouillon, Publié, Archivé — cf. Cycle de vie des entités.
 
@@ -79,18 +78,14 @@ Cinq entités métier composent le domaine du MVP : le **Contenu éditorial**, l
 
 **Attributs obligatoires** : Nom.
 
-**Attributs optionnels** : aucun attribut optionnel n'est validé par les documents source relus.
+**Attributs optionnels** : Description courte.
 
 **Règles métier** :
 
 - Une catégorie peut être créée, modifiée ou supprimée par l'administrateur.
 - La suppression d'une catégorie associée à au moins un contenu est interdite tant que cette association existe.
 - La consultation des contenus associés à une catégorie donnée doit toujours être possible.
-
-**Point ouvert** :
-
-- La documentation actuelle ne tranche pas si l'ensemble des catégories constitue un référentiel fermé (limité aux valeurs identifiées à la conception) ou une liste librement extensible par l'administrateur — cf. Invariants métier.
-- L'existence d'une Description courte associée à la Catégorie n'est validée par aucun document source ; elle est évoquée dans la documentation de conception sans confirmation dans `requirements.md` ni `user-stories.md`.
+- La Description courte de la Catégorie est un attribut optionnel, destiné à alimenter la métadonnée de référencement (SEO) de la page publique Catégorie (DR-007).
 
 **États possibles** : aucun cycle de vie propre ; une catégorie existe ou n'existe plus, sans statut intermédiaire.
 
@@ -106,14 +101,9 @@ Cinq entités métier composent le domaine du MVP : le **Contenu éditorial**, l
 
 **Attributs obligatoires** : Nom.
 
-**Attributs optionnels** : aucun attribut optionnel n'est validé par les documents source relus.
+**Attributs optionnels** : Description courte.
 
-**Règles métier** : identiques à celles de la Catégorie (création/modification/suppression par l'administrateur, suppression bloquée si des contenus sont associés).
-
-**Point ouvert** :
-
-- Même ambiguïté que pour la Catégorie sur le caractère fermé ou extensible de la liste — cf. Invariants métier.
-- L'existence d'une Description courte associée à la Zone géographique n'est validée par aucun document source, au même titre que pour la Catégorie.
+**Règles métier** : identiques à celles de la Catégorie (création/modification/suppression par l'administrateur, suppression bloquée si des contenus sont associés). La Description courte de la Zone géographique est un attribut optionnel, destiné à alimenter la métadonnée de référencement (SEO) de la page publique Zone géographique (DR-007).
 
 **États possibles** : aucun cycle de vie propre.
 
@@ -160,19 +150,16 @@ Cinq entités métier composent le domaine du MVP : le **Contenu éditorial**, l
 
 **Attributs optionnels** : aucun attribut supplémentaire n'est défini par la documentation actuelle.
 
-**Point ouvert** :
-
-- Le Compte Administrateur lui-même (par opposition à la Session) n'est décrit par aucun document au-delà du couple identifiant/mot de passe — aucune procédure de récupération d'accès n'est définie en cas de perte.
-- La durée d'une Session administrateur (temps de validité avant expiration) et l'existence éventuelle d'une expiration automatique (par exemple après inactivité) ne sont précisées par aucun document source ; seule l'existence d'une déconnexion volontaire est documentée.
-
 **Règles métier** :
 
 - Un seul Compte Administrateur existe pour l'ensemble du domaine.
 - L'accès à l'espace d'administration est strictement réservé à ce compte.
 - Une tentative de connexion échouée affiche un message générique, sans désigner lequel de l'identifiant ou du mot de passe est en cause.
 - La déconnexion est immédiate et réversible par reconnexion, sans confirmation préalable.
+- La récupération d'accès du Compte Administrateur ne fait pas partie du domaine applicatif. Elle est traitée par une procédure opérationnelle hors produit.
+- Une Session administrateur expire automatiquement après une période d'inactivité (DR-002).
 
-**États possibles** (Session) : Non connecté → Connecté → Non connecté (déconnexion volontaire) — cf. Cycle de vie des entités.
+**États possibles** (Session) : Non connecté → Connecté → Non connecté — cf. Cycle de vie des entités.
 
 **Relations** : le Compte Administrateur est l'auteur implicite de toute action de gestion sur le Contenu éditorial, les Catégories et les Zones géographiques (relation d'autorité ; aucune traçabilité multi-auteurs n'existe dans ce domaine).
 
@@ -182,7 +169,7 @@ Cinq entités métier composent le domaine du MVP : le **Contenu éditorial**, l
 
 **Agrégat Contenu éditorial** — racine : Contenu éditorial. Les mots-clés qui lui sont associés n'ont aucune identité ni cycle de vie en dehors de lui : ils appartiennent à sa frontière d'agrégat. La Catégorie et la Zone géographique, en revanche, existent indépendamment du contenu qui les référence (elles préexistent, sont partagées par plusieurs contenus et survivent à la suppression d'un contenu donné) : elles sont référencées par identité, mais **hors** de la frontière de cet agrégat.
 
-**Agrégat Catégorie** — racine autonome : Catégorie, limitée à son nom (et, le cas échéant, à sa description — cf. Point ouvert). Ne contient pas les contenus qui la référencent.
+**Agrégat Catégorie** — racine autonome : Catégorie, limitée à son nom et, le cas échéant, à sa description. Ne contient pas les contenus qui la référencent.
 
 **Agrégat Zone géographique** — racine autonome, symétrique de l'agrégat Catégorie.
 
@@ -196,24 +183,25 @@ Cinq entités métier composent le domaine du MVP : le **Contenu éditorial**, l
 
 - Un Contenu éditorial publié possède toujours exactement une Catégorie et une Zone géographique — jamais zéro, jamais plusieurs.
 - Un Contenu éditorial en statut Brouillon n'est jamais visible en dehors de l'espace d'administration.
-- Un Contenu éditorial ne peut jamais atteindre le statut Publié sans Titre, Type de contenu, Catégorie, Zone géographique, Image principale et Texte alternatif. Le statut du Corps de texte au regard de cette règle reste un Point ouvert — cf. entité Contenu éditorial.
+- Un Contenu éditorial en statut Archivé n'apparaît plus dans les listes, la recherche ni les pages Catégorie/Zone, mais reste accessible via son URL directe (page de détail) — DR-001.
+- Un Contenu éditorial ne peut jamais atteindre le statut Publié sans Titre, Type de contenu, Catégorie, Zone géographique, Image principale et Texte alternatif.
 - Les mots-clés d'un Contenu éditorial n'existent jamais indépendamment de ce contenu.
 - Une Catégorie ou une Zone géographique associée à au moins un Contenu éditorial ne peut jamais être supprimée.
 - Une même adresse e-mail n'apparaît jamais deux fois parmi les Inscrits Newsletter.
 - Un Inscrit Newsletter désinscrit ne reçoit plus jamais de communication du média.
 - Il n'existe jamais qu'un seul Compte Administrateur pour l'ensemble du domaine.
 - Aucun Contenu éditorial, quel que soit son statut, n'est jamais soumis à un accès payant ou à une exigence de compte utilisateur dans ce domaine.
-- **Invariant à trancher** : la liste des Catégories et des Zones géographiques ne peut pas être simultanément fermée (référentiel figé) et librement extensible (CRUD administrateur sans restriction) — un seul des deux comportements doit être retenu comme règle définitive.
+- Les catégories et zones géographiques constituent des référentiels administrables par l'administrateur (création, modification, suppression).
 
 ---
 
 ## Cycle de vie des entités
 
-**Contenu éditorial** : Brouillon ⇄ Publié ⇄ Archivé. Les trois états communiquent librement dans les deux sens — aucune progression strictement unidirectionnelle n'est imposée. Seule la transition **vers** Publié est soumise aux règles de champs obligatoires ; les transitions vers Brouillon ou vers Archivé restent toujours libres, quel que soit l'état de complétude du contenu.
+**Contenu éditorial** : Brouillon ⇄ Publié ⇄ Archivé. Les trois états communiquent librement dans les deux sens — aucune progression strictement unidirectionnelle n'est imposée. Seule la transition **vers** Publié est soumise aux règles de champs obligatoires ; les transitions vers Brouillon ou vers Archivé restent toujours libres, quel que soit l'état de complétude du contenu. Le passage à Archivé retire immédiatement le contenu des surfaces de découverte publique (listes, recherche, Catégorie/Zone) sans révoquer son URL directe, qui reste fonctionnelle (DR-001).
 
 **Inscrit Newsletter** : (inexistant) → Inscrit → Désinscrit. La transition vers Désinscrit est déclenchée soit par désinscription libre-service (l'inscrit utilise le lien à usage unique reçu par e-mail), soit par retrait manuel (l'administrateur retire l'inscrit depuis l'espace de gestion newsletter). Désinscrit est un état terminal dans les deux cas : il équivaut à la disparition de l'entité de la liste des inscrits, sans étape intermédiaire ni réinscription automatique.
 
-**Session administrateur** : Non connecté → Connecté → Non connecté (déconnexion volontaire). Cycle répétable indéfiniment, sans limite au nombre de connexions/déconnexions successives. La possibilité d'une expiration automatique de session, indépendante de la déconnexion volontaire, reste un Point ouvert — cf. entité Compte Administrateur.
+**Session administrateur** : Non connecté → Connecté → Non connecté (déconnexion volontaire ou expiration automatique après une période d'inactivité — DR-002). Cycle répétable indéfiniment, sans limite au nombre de connexions/déconnexions successives.
 
 **Catégorie / Zone géographique** : (inexistante) → Existante → (Supprimée, uniquement si aucun Contenu éditorial n'y est associé). Aucun état intermédiaire.
 

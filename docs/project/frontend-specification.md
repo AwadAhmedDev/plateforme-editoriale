@@ -59,7 +59,7 @@ frontend/
 │   │   │   └── [slug]/
 │   │   │       ├── page.tsx        Détail d'un article
 │   │   │       ├── loading.tsx     Squelette de détail d'article
-│   │   │       └── not-found.tsx   Article introuvable / dépublié
+│   │   │       └── not-found.tsx   Article introuvable ou revenu au statut Brouillon (jamais pour un Archivé, cf. DR-001)
 │   │   ├── categorie/
 │   │   │   └── [slug]/page.tsx     Page Catégorie
 │   │   ├── zone/
@@ -228,7 +228,7 @@ Un composant métier peut composer des composants partagés (ex. le formulaire d
 
 - **Contenu et listes** : aucun état client. Les Server Components récupèrent les données directement ; il n'y a pas de couche de fetching client (pas de bibliothèque de requêtes type client-cache) à dupliquer côté navigateur pour ce qui est déjà rendu par le serveur.
 - **Recherche, filtres, tri, pagination** : portés exclusivement par les paramètres d'URL (`searchParams`), jamais par un state React isolé — condition nécessaire à la persistance de contexte exigée par `ui-specification.md` (retour navigateur/breadcrumb avec filtres conservés).
-- **Session administrateur** : gérée côté serveur (cookie de session), vérifiée dans le layout protégé et en amont des routes ; jamais reproduite en state client.
+- **Session administrateur** : gérée côté serveur (cookie de session), vérifiée dans le layout protégé et en amont des routes ; expire automatiquement après une période d'inactivité (DR-002) ; jamais reproduite en state client.
 - **État d'interface éphémère** (menu mobile ouvert/fermé, overlay recherche, panneau de filtres mobile, modale ouverte) : state local au composant client concerné (`useState`/`useReducer`), jamais remonté à un niveau plus global que nécessaire.
 - **Formulaires** : état de soumission et de validation porté par les actions serveur (cf. §Formulaires), pas par un state client parallèle.
 - **Aucune bibliothèque de state management globale** (type Redux/Zustand/Jotai) n'est introduite : le périmètre V1 ne présente aucun état partagé complexe qui la justifierait (administrateur unique, aucun compte utilisateur — cf. `scope-v1.md`). Cette décision est à réévaluer uniquement si une version ultérieure introduit des comptes utilisateurs ou des contenus premium nécessitant un état client transverse.

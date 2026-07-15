@@ -435,12 +435,13 @@ Règle transverse : un état vide n'est jamais un message d'erreur ; il est touj
 | Contexte                 | Déclencheur                                        | Message / traitement                                                                                              |
 | ------------------------ | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Connexion administrateur | Identifiants incorrects                            | "Identifiant ou mot de passe incorrect" (générique, aucun champ désigné), mot de passe vidé, identifiant conservé |
+| Connexion administrateur | Session expirée par inactivité (DR-002)            | Redirection vers la Connexion, aucun contenu exposé ; message neutre informant que la session a expiré           |
 | Newsletter               | Format e-mail invalide                             | Message inline sous le champ, champ conservé, focus renvoyé                                                       |
 | Newsletter               | E-mail déjà inscrit                                | Confirmation neutre, pas une erreur                                                                               |
 | Contact                  | Champ requis manquant                              | Message inline par champ, focus au premier champ en erreur                                                        |
 | Éditeur d'article        | "Publier" sans titre                               | "Le titre est requis pour publier" ; le brouillon reste enregistrable sans cette contrainte                       |
 | Recherche / Résultats    | Requête sans résultat                              | Traité comme état vide qualifié (cf. États vides), pas une erreur                                                 |
-| Toute page de contenu    | Contenu introuvable (lien rompu, article dépublié) | Page d'erreur dédiée, message factuel, lien de retour vers Accueil/Recherche — jamais une page blanche            |
+| Toute page de contenu    | Contenu introuvable (lien rompu, contenu revenu au statut Brouillon) | Page d'erreur dédiée, message factuel, lien de retour vers Accueil/Recherche — jamais une page blanche ; ne concerne jamais un contenu Archivé, qui reste accessible via son URL directe (DR-001) |
 | Tout formulaire          | Échec technique (réseau/serveur)                   | "Une erreur est survenue, veuillez réessayer" (message global non spécifique au champ), saisie conservée          |
 
 ---
@@ -541,6 +542,10 @@ URL admin → **Connexion administrateur** → soumission → succès : **Dashbo
 ### Déconnexion
 
 Depuis n'importe quel écran admin → "Déconnexion" (sidebar) → **Connexion administrateur**, sans confirmation (action réversible par reconnexion).
+
+### Expiration de session
+
+Depuis n'importe quel écran admin, après une période d'inactivité → session expirée automatiquement (DR-002) → redirection vers **Connexion administrateur**, aucun contenu exposé, message neutre informant que la session a expiré.
 
 ---
 

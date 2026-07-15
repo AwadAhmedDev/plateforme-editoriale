@@ -340,7 +340,7 @@ Checklist — Sous-tâches :
 - [ ] Colonne de lecture 680px max desktop / pleine largeur mobile (marge 20px)
 - [ ] Affichage des métadonnées (auteur, date, sources, mots-clés, catégorie, zone)
 - [ ] Section contenus liés
-- [ ] `loading.tsx` (squelette) et `not-found.tsx` (article introuvable/dépublié)
+- [ ] `loading.tsx` (squelette) et `not-found.tsx` (article introuvable ou revenu au statut Brouillon — jamais déclenché pour un article Archivé, cf. DR-001)
 - [ ] Métadonnées SEO et données structurées (Article, BreadcrumbList)
 
 Checklist — Critères d'acceptation :
@@ -380,6 +380,7 @@ Checklist — Sous-tâches :
 
 - [ ] Réutilisation de la grille et de la pagination de P1-T8
 - [ ] Message neutre si taxonomie créée sans article publié
+- [ ] Métadonnées SEO (description alimentée par la Description courte de la catégorie)
 
 Checklist — Critères d'acceptation :
 
@@ -667,11 +668,13 @@ Checklist — Sous-tâches :
 - [ ] Vérification de session en amont des routes `/admin/(protected)/*`
 - [ ] Vérification de session redondante dans le layout protégé
 - [ ] Déconnexion effective depuis n'importe quel écran admin
+- [ ] Expiration automatique de la session après une période d'inactivité (durée hors périmètre de cette carte — DR-002)
 
 Checklist — Critères d'acceptation :
 
 - [ ] Accès direct à une URL protégée sans session : redirection vers la Connexion, aucun contenu exposé
 - [ ] Déconnexion sans confirmation (action réversible par reconnexion)
+- [ ] Une session inactive au-delà de la période d'inactivité définie expire automatiquement et redirige vers la Connexion, aucun contenu exposé
 
 ---
 
@@ -961,7 +964,7 @@ Checklist — Critères d'acceptation :
 ### Carte : [P8-T2] Exécution des parcours administrateur
 
 **Étiquettes** : Qualité transverse · Estimation S (1-2 j)
-**Description** : Les 5 parcours de `ui-specification.md` (§Parcours administrateur) exécutés de bout en bout.
+**Description** : Les 6 parcours de `ui-specification.md` (§Parcours administrateur) exécutés de bout en bout.
 **Dépend de** : Phase 7
 
 Checklist — Sous-tâches :
@@ -971,10 +974,11 @@ Checklist — Sous-tâches :
 - [ ] Modification d'un article
 - [ ] Gestion des catégories/zones
 - [ ] Gestion de la newsletter, puis Déconnexion
+- [ ] Expiration de session
 
 Checklist — Critères d'acceptation :
 
-- [ ] Les 5 parcours s'exécutent sans blocage
+- [ ] Les 6 parcours s'exécutent sans blocage
 
 ---
 
