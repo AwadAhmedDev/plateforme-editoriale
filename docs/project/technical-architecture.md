@@ -33,7 +33,7 @@ Stack confirmée par `frontend/package.json` et `frontend-specification.md` : **
 
 ### 2.1 Arborescence (reprise de `frontend-specification.md`, aucune modification)
 
-```
+```text
 frontend/
 ├── app/
 │   ├── layout.tsx
@@ -120,7 +120,7 @@ Couche de repository unique par entité (`lib/db/*.ts`), aucune requête SQL dup
 
 ### 4.2 Branchement par statut à l'accès direct (application stricte de DR-001)
 
-```
+```text
 getArticleBySlug(slug) → article trouvé ?
   non              → notFound() [contenu introuvable]
   oui, Brouillon   → notFound() [jamais visible hors administration]
