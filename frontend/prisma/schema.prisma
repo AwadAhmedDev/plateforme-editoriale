@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TypeContenu {
+  article
+  analyse
+  enquete
+  interview
+  dossier_thematique
+
+  @@map("type_contenu")
+}
+
+enum StatutContenu {
+  brouillon
+  publie
+  archive
+
+  @@map("statut_contenu")
+}
+
+model Categorie {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nom               String   @unique
+  slug              String   @unique
+  descriptionCourte String?  @map("description_courte")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  contenus ContenuEditorial[]
+
+  @@map("categorie")
+}
+
+model ZoneGeographique {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nom               String   @unique
+  slug              String   @unique
+  descriptionCourte String?  @map("description_courte")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  contenus ContenuEditorial[]
+
+  @@map("zone_geographique")
+}
+
+model Administrateur {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  identifiant    String   @unique
+  motDePasseHash String   @map("mot_de_passe_hash")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  sessions SessionAdministrateur[]
+
+  @@map("administrateur")
+}
+
+model SessionAdministrateur {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  administrateurId   String   @map("administrateur_id") @db.Uuid
+  jetonHash          String   @unique @map("jeton_hash")
+  derniereActiviteAt DateTime @default(now()) @map("derniere_activite_at") @db.Timestamptz
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  administrateur Administrateur @relation(fields: [administrateurId], references: [id], onDelete: Cascade)
+
+  @@index([administrateurId])
+  @@map("session_administrateur")
+}
+
+model ContenuEditorial {
+  id                       String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                     String                   @unique
+  titre                    String?
+  chapo                    String?
+  corps                    String?
+  typeContenu              TypeContenu?             @map("type_contenu")
+  categorieId              String?                  @map("categorie_id") @db.Uuid
+  zoneId                   String?                  @map("zone_id") @db.Uuid
+  imagePrincipaleUrl       String?                  @map("image_principale_url")
+  imageAltText             String?                  @map("image_alt_text")
+  imageLargeur             Int?                     @map("image_largeur")
+  imageHauteur             Int?                     @map("image_hauteur")
+  auteur                   String?
+  sources                  String?
+  statut                   StatutContenu            @default(brouillon)
+  datePublication          DateTime?                @map("date_publication") @db.Timestamptz
+  dateDerniereModification DateTime                 @default(now()) @map("date_derniere_modification") @db.Timestamptz
+  createdAt                DateTime                 @default(now()) @map("created_at") @db.Timestamptz
+  // Maintenu exclusivement par trigger PL/pgSQL (cf. rapport) — jamais lu/écrit via Prisma Client.
+  rechercheVecteur         Unsupported("tsvector")? @map("recherche_vecteur")
+
+  categorie Categorie?        @relation(fields: [categorieId], references: [id], onDelete: Restrict)
+  zone      ZoneGeographique? @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  motsCles  ContenuMotCle[]
+
+  @@index([statut, datePublication(sort: Desc)])
+  @@index([categorieId])
+  @@index([zoneId])
+  @@map("contenu_editorial")
+}
+
+model ContenuMotCle {
+  contenuId String @map("contenu_id") @db.Uuid
+  motCle    String @map("mot_cle")
+
+  contenu ContenuEditorial @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+
+  @@id([contenuId, motCle])
+  @@index([motCle])
+  @@map("contenu_mot_cle")
+}
+
+model InscritNewsletter {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email               String    @unique
+  dateInscription     DateTime  @default(now()) @map("date_inscription") @db.Timestamptz
+  // TEXT + CHECK côté SQL, pas un type ENUM Postgres natif : reste un String Prisma (cf. rapport).
+  statut              String    @default("inscrit")
+  jetonDesinscription String?   @unique @map("jeton_desinscription")
+  desinscritAt        DateTime? @map("desinscrit_at") @db.Timestamptz
+
+  @@map("inscrit_newsletter")
+}
