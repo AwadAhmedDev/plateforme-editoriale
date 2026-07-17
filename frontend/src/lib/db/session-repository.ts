@@ -30,4 +30,11 @@ export const SessionRepository = {
   findByAdministrateurId(administrateurId: string): Promise<SessionAdministrateur[]> {
     return prisma.sessionAdministrateur.findMany({ where: { administrateurId } });
   },
+
+  updateDerniereActivite(jetonHash: string, at: Date): Promise<SessionAdministrateur> {
+    return prisma.sessionAdministrateur.update({
+      where: { jetonHash },
+      data: { derniereActiviteAt: at },
+    });
+  },
 };
