@@ -23,4 +23,12 @@ export const ContenuEditorialRepository = {
     });
     return match !== null;
   },
+
+  async existsByZoneId(zoneId: string): Promise<boolean> {
+    const match = await prisma.contenuEditorial.findFirst({
+      where: { zoneId },
+      select: { id: true },
+    });
+    return match !== null;
+  },
 };
