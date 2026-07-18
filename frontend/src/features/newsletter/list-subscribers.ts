@@ -1,5 +1,5 @@
-import { getCurrentSession } from "@/features/admin-auth/session";
 import { InscritNewsletterRepository } from "@/lib/db/inscrit-newsletter-repository";
+import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
 
 export type SubscriberListItem = {
   id: string;
@@ -20,10 +20,7 @@ export type SubscriberListResult = {
 // (proxy.ts + layout.tsx). Pagination 20 lignes obligatoire (api-contracts.md §1.6, §4.4 ;
 // ui-specification.md §Tables Administrateur).
 export async function listSubscribers(params: { page: number; email?: string }): Promise<SubscriberListResult> {
-  const session = await getCurrentSession();
-  if (!session.authenticated) {
-    throw new Error("Accès refusé : aucune Session administrateur valide.");
-  }
+  await ensureAdministrateurAuthentifie();
 
   const { items, total, hasNextPage, page } = await InscritNewsletterRepository.findAllInscritsPagines(params);
 
