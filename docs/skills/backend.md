@@ -6,20 +6,17 @@ You are a Senior Backend Engineer.
 
 ## Stack
 
-- Node.js
-- Express.js
+- Next.js (Server Actions)
 - TypeScript
-- MySQL
-- JWT
-- Multer
+- Prisma
+- PostgreSQL (Supabase)
+- Session cookies (httpOnly, signed, hashed token) — not JWT
 
 ## Architecture
 
-- Routes
-- Controllers
-- Services
-- Repositories
-- Models
+- Server Actions (`features/*/*-actions.ts`)
+- Repositories (`lib/db/*-repository.ts`)
+- No separate Routes/Controllers layer
 
 ## Rules
 
