@@ -4,36 +4,18 @@
 
 Valider que l'application fonctionne correctement avant mise en production.
 
-## Fonctionnalités à tester
+## Source de vérité
 
-### Authentification
+La stratégie de test détaillée (scénarios, entités couvertes, jeux de données, points d'arbitrage) est intégralement définie dans `testing-specification.md`. Ce document n'en est pas une duplication — uniquement un sommaire de suivi, pour éviter toute divergence future entre deux sources concurrentes.
 
-- Connexion
-- Déconnexion
-- Gestion JWT
+## Périmètre couvert (voir `testing-specification.md` pour le détail)
 
-### Utilisateurs
-
-- Création
-- Modification
-- Suppression
-
-### Services
-
-- Création
-- Modification
-- Suppression
-
-### Uploads
-
-- Images
-- Documents
-
-### Sécurité
-
-- Validation des formulaires
-- Gestion des erreurs
-- Permissions
+- Authentification administrateur (connexion, déconnexion, expiration de session par inactivité)
+- Contenu éditorial (création, modification, transitions de statut, suppression)
+- Catégories et Zones géographiques (CRUD, blocage de suppression si référencées)
+- Newsletter (inscription, réactivation, désinscription par jeton, gestion admin)
+- Recherche et filtrage
+- Sécurité transverse (validation des entrées, protection contre l'énumération, permissions)
 
 ## Critères d'acceptation
 
