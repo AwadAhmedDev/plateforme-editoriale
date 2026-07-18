@@ -16,7 +16,7 @@ Review:
 
 ## Checklist
 
-- JWT
+- Session cookies (httpOnly, signed, hashed token)
 - SQL Injection
 - XSS
 - CSRF
