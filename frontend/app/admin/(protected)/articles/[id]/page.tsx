@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listCategories } from "@/features/taxonomies/list-categories";
 import { listZones } from "@/features/taxonomies/list-zones";
@@ -10,6 +11,10 @@ import { ArticleStatusPanel } from "@/features/articles/article-status-panel";
 // image) + un panneau statut indépendant, tous les trois liés au même id déjà existant.
 // findById lit l'article tous statuts confondus (server-actions-specification.md §3.7),
 // via getArticleForEdit qui revérifie elle-même la Session administrateur.
+//
+// Lien « ← Retour à la liste » (Lot 13, ui-specification.md §Parcours administrateur —
+// Modification d'un article) : seul élément de navigation propre à cet écran, la Sidebar
+// (app/admin/(protected)/layout.tsx) couvrant déjà la navigation transverse.
 export default async function ArticleEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
@@ -21,6 +26,12 @@ export default async function ArticleEditPage({ params }: { params: Promise<{ id
 
   return (
     <main className="p-7">
+      <Link
+        href="/admin/articles"
+        className="mb-4 inline-block text-sm text-zinc-600 underline-offset-2 hover:text-zinc-900 hover:underline dark:text-zinc-400 dark:hover:text-zinc-100"
+      >
+        ← Retour à la liste
+      </Link>
       <h1 className="mb-6 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
         {article.titre ?? "Article sans titre"}
       </h1>
