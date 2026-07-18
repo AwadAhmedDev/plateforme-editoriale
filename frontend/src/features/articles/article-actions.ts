@@ -1,7 +1,11 @@
 "use server";
 
 import type { z } from "zod";
-import { ContenuEditorialRepository, type ArticleForEdit } from "@/lib/db/contenu-editorial-repository";
+import {
+  ContenuEditorialRepository,
+  ConcurrentModificationError,
+  type ArticleForEdit,
+} from "@/lib/db/contenu-editorial-repository";
 import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
 import { articleFieldsSchema, type ArticleFieldsInput } from "@/features/articles/article-schema";
 import { generateDraftSlug, isDraftSlug, slugify } from "@/lib/slug";
@@ -192,20 +196,39 @@ export async function updateArticle(
   // cf. extraireChampsFormulaire) ET absents du type `UpdateArticleData` lui-même
   // (contenu-editorial-repository.ts, Lot 2) — double garantie, pas seulement une omission
   // volontaire ici.
+  //
+  // Verrouillage optimiste (audit Lot 16, correctif Lot 16A) : paramètre technique lu
+  // directement depuis `formData`, jamais ajouté à `articleFieldsSchema` — ce n'est pas un
+  // champ métier, seulement la valeur de `dateDerniereModification` que l'Éditeur avait au
+  // chargement. Absent ou invalide, la vérification est simplement ignorée (comportement
+  // identique à avant ce lot) plutôt que de faire échouer une sauvegarde pour une raison
+  // purement technique.
+  const dateDerniereModificationAttendueBrut = formData.get("dateDerniereModificationAttendue");
+  const dateDerniereModificationAttendue =
+    typeof dateDerniereModificationAttendueBrut === "string" &&
+    dateDerniereModificationAttendueBrut.length > 0 &&
+    !Number.isNaN(Date.parse(dateDerniereModificationAttendueBrut))
+      ? new Date(dateDerniereModificationAttendueBrut)
+      : undefined;
+
   try {
-    await ContenuEditorialRepository.update(id, {
-      slug,
-      titre: values.titre ?? null,
-      chapo: values.chapo ?? null,
-      corps: values.corps ?? null,
-      typeContenu: values.typeContenu ?? null,
-      categorieId: values.categorieId ?? null,
-      zoneId: values.zoneId ?? null,
-      imagePrincipaleUrl: values.imagePrincipaleUrl ?? null,
-      imageAltText: values.imageAltText ?? null,
-      auteur: values.auteur ?? null,
-      sources: values.sources ?? null,
-    });
+    await ContenuEditorialRepository.update(
+      id,
+      {
+        slug,
+        titre: values.titre ?? null,
+        chapo: values.chapo ?? null,
+        corps: values.corps ?? null,
+        typeContenu: values.typeContenu ?? null,
+        categorieId: values.categorieId ?? null,
+        zoneId: values.zoneId ?? null,
+        imagePrincipaleUrl: values.imagePrincipaleUrl ?? null,
+        imageAltText: values.imageAltText ?? null,
+        auteur: values.auteur ?? null,
+        sources: values.sources ?? null,
+      },
+      dateDerniereModificationAttendue
+    );
 
     if (values.motsCles) {
       await ContenuEditorialRepository.syncMotsCles(id, values.motsCles);
@@ -217,7 +240,17 @@ export async function updateArticle(
     revalidateArticleSurfaces(toArticleSurfaceState(existante), apres ? toArticleSurfaceState(apres) : null);
 
     return { status: "success", message: "Article mis à jour.", articleId: id };
-  } catch {
+  } catch (error) {
+    // Verrouillage optimiste (Lot 16A) : intercepté explicitement, jamais noyé dans le
+    // message générique ci-dessous — même principe que ImageValidationError dans
+    // uploadMainImage (article-media-actions.ts).
+    if (error instanceof ConcurrentModificationError) {
+      return {
+        status: "error",
+        message: "Cet article a été modifié entretemps. Veuillez recharger la page avant de réessayer.",
+        values,
+      };
+    }
     // Couvre notamment une violation de `chk_publie_champs_requis` (vider un champ requis
     // sur un contenu déjà `publie` sans repasser par unpublishArticle) : jamais une erreur
     // technique brute exposée, toujours ce message générique fixe.
