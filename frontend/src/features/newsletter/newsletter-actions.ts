@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
-import { getCurrentSession } from "@/features/admin-auth/session";
 import { InscritNewsletterRepository } from "@/lib/db/inscrit-newsletter-repository";
 import { generateNewsletterToken } from "@/lib/newsletter/token";
+import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
 
 // Server Actions Newsletter (server-actions-specification.md §6, §8.2).
 export type NewsletterActionState = {
@@ -12,13 +12,6 @@ export type NewsletterActionState = {
   message: string | null;
   values?: { email: string };
 };
-
-async function ensureAdministrateurAuthentifie(): Promise<void> {
-  const session = await getCurrentSession();
-  if (!session.authenticated) {
-    throw new Error("Accès refusé : aucune Session administrateur valide.");
-  }
-}
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
