@@ -9,9 +9,9 @@ You are a Senior Frontend Engineer.
 - Next.js
 - React
 - TypeScript
-- Tailwind CSS
-- shadcn/ui
-- React Hook Form
+- Tailwind CSS (hand-written utility classes, no component library)
+- Native HTML form elements
+- useActionState (React/Next.js) for Server Action forms
 - Zod
 
 ## Objectives
