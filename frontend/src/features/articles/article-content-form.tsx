@@ -50,6 +50,51 @@ export function ArticleContentForm({
   const auteurRef = useRef<HTMLInputElement>(null);
   const sourcesRef = useRef<HTMLInputElement>(null);
 
+  // Clé stable dérivée du CONTENU des mots-clés, pas de la référence du tableau (qui change
+  // à chaque relecture serveur même si le contenu est identique) — condition nécessaire pour
+  // que l'effet ci-dessous ne se déclenche jamais sur un rafraîchissement provoqué par
+  // ArticleImageForm ou ArticleStatusPanel (aucun des deux ne touche jamais les mots-clés).
+  const motsClesKey = article?.motsCles.map((m) => m.motCle).join("") ?? "";
+
+  // Resynchronisation (audit Lot 15, correctif Lot 15A) : contrairement à
+  // ArticleStatusPanel/ArticleImageForm — dont la prop resynchronisée (`statut`,
+  // `imageAltText`) ne peut changer que via leur propre action — cet effet dépend
+  // délibérément de chaque champ de contenu pris individuellement, jamais de l'objet
+  // `article` entier (dont la référence change à chaque rafraîchissement quelle qu'en soit
+  // la cause). Seul un changement réel de VALEUR d'un de ces champs déclenche l'effet ; ni
+  // uploadMainImage ni publishArticle/unpublishArticle/archiveArticle ne modifient jamais
+  // titre/slug/chapo/corps/typeContenu/categorieId/zoneId/auteur/sources/motsCles — un
+  // rafraîchissement déclenché par ArticleImageForm ou ArticleStatusPanel ne fait donc
+  // jamais fire cet effet, et ne peut donc jamais écraser une saisie de contenu en cours,
+  // non enregistrée. Risque résiduel accepté, inchangé par rapport au Lot 10A : si un autre
+  // onglet modifie exactement le même champ pendant que celui-ci y est activement édité ici,
+  // la valeur distante l'emporte — aucune fusion n'est tentée, cohérent avec la stratégie
+  // déjà retenue pour statutConfirme/altText.
+  useEffect(() => {
+    if (slugRef.current) slugRef.current.value = article?.slug ?? "";
+    if (titreRef.current) titreRef.current.value = article?.titre ?? "";
+    if (chapoRef.current) chapoRef.current.value = article?.chapo ?? "";
+    if (corpsRef.current) corpsRef.current.value = article?.corps ?? "";
+    if (typeContenuRef.current) typeContenuRef.current.value = article?.typeContenu ?? "";
+    if (categorieIdRef.current) categorieIdRef.current.value = article?.categorieId ?? "";
+    if (zoneIdRef.current) zoneIdRef.current.value = article?.zoneId ?? "";
+    if (auteurRef.current) auteurRef.current.value = article?.auteur ?? "";
+    if (sourcesRef.current) sourcesRef.current.value = article?.sources ?? "";
+    setMotsCles(article?.motsCles.map((m) => m.motCle) ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    article?.slug,
+    article?.titre,
+    article?.chapo,
+    article?.corps,
+    article?.typeContenu,
+    article?.categorieId,
+    article?.zoneId,
+    article?.auteur,
+    article?.sources,
+    motsClesKey,
+  ]);
+
   useEffect(() => {
     if (state.status === "success") {
       router.refresh();
@@ -235,6 +280,16 @@ export function ArticleContentForm({
       <input type="hidden" name="imagePrincipaleUrl" value={article?.imagePrincipaleUrl ?? ""} />
       <input type="hidden" name="imageAltText" value={article?.imageAltText ?? ""} />
 
+      {/* Verrouillage optimiste (audit Lot 16, correctif Lot 16A) : paramètre technique,
+          jamais un champ métier — lu directement depuis FormData par updateArticle, hors
+          du schéma Zod. Champ contrôlé par la prop comme les deux ci-dessus : toujours à
+          jour dès que ce composant se rend avec un `article` frais. */}
+      <input
+        type="hidden"
+        name="dateDerniereModificationAttendue"
+        value={article?.dateDerniereModification.toISOString() ?? ""}
+      />
+
       <button
         type="submit"
         disabled={pending}
@@ -243,10 +298,22 @@ export function ArticleContentForm({
         {pending ? "Enregistrement…" : "Enregistrer le brouillon"}
       </button>
 
+      <span role="status" aria-live="polite" className="sr-only">
+        {pending ? "Enregistrement en cours…" : ""}
+      </span>
+
       {state.status === "error" && (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-          {state.message}
-        </p>
+        <div role="alert" className="flex flex-col gap-1 text-sm text-red-600 dark:text-red-400">
+          {state.errors && Object.keys(state.errors).length > 0 ? (
+            <ul className="list-disc pl-4">
+              {Object.entries(state.errors).map(([champ, message]) => (
+                <li key={champ}>{message}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>{state.message}</p>
+          )}
+        </div>
       )}
       {state.status === "success" && (
         <p role="status" className="text-sm text-green-700 dark:text-green-400">
