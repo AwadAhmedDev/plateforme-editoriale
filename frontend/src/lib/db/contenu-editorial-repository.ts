@@ -173,6 +173,18 @@ function normaliserMotCle(motCle: string): string {
   return motCle.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+// Signale un verrouillage optimiste échoué (Lot 16A, cf. `update` ci-dessous) : la ligne a
+// changé depuis la valeur de `dateDerniereModification` fournie par l'appelant. Distincte
+// des erreurs Prisma génériques, sur le même principe que `ImageValidationError`
+// (lib/media/upload-image.ts) — un type d'erreur dédié, intercepté explicitement par la
+// Server Action appelante plutôt que noyé dans le `catch` générique.
+export class ConcurrentModificationError extends Error {
+  constructor() {
+    super("La ligne a été modifiée depuis sa dernière lecture.");
+    this.name = "ConcurrentModificationError";
+  }
+}
+
 // Accès aux données de l'entité Contenu éditorial (technical-architecture.md §3.2).
 // Aucune règle métier, aucun contrôle d'autorisation ici — uniquement des opérations
 // Prisma typées.
@@ -268,8 +280,37 @@ export const ContenuEditorialRepository = {
   // jamais `statut` ni `datePublication` (exclus par le type `UpdateArticleData` lui-même,
   // pas seulement par convention) — le verrou DR-005 reste entièrement porté par le
   // trigger `trg_contenu_editorial_dates` déjà en production, jamais court-circuité ici.
-  update(id: string, data: UpdateArticleData): Promise<ContenuEditorial> {
-    return prisma.contenuEditorial.update({ where: { id }, data });
+  //
+  // Verrouillage optimiste (audit Lot 16, correctif Lot 16A) : `dateDerniereModificationAttendue`,
+  // si fourni, conditionne l'écriture à ce que la ligne n'ait pas changé depuis cette
+  // valeur — le trigger `trg_contenu_editorial_dates` avance `date_derniere_modification`
+  // à chaque UPDATE, quelle que soit la colonne réellement modifiée, ce qui en fait un
+  // marqueur de version fiable sans colonne ni migration supplémentaire. Paramètre
+  // optionnel : absent, le comportement reste strictement celui d'avant ce lot (écriture
+  // inconditionnelle sur `id` seul). `updateMany` (plutôt que `update`) est la seule façon
+  // d'exprimer ce prédicat composite avec Prisma sans lever d'exception si la ligne a été
+  // modifiée entretemps par ailleurs — `resultat.count === 0` détecte alors le conflit,
+  // même motif que `InscritNewsletterRepository.reactivate` (lib/db/inscrit-newsletter-
+  // repository.ts) pour une situation de concurrence analogue.
+  async update(
+    id: string,
+    data: UpdateArticleData,
+    dateDerniereModificationAttendue?: Date
+  ): Promise<ContenuEditorial> {
+    if (dateDerniereModificationAttendue === undefined) {
+      return prisma.contenuEditorial.update({ where: { id }, data });
+    }
+
+    const resultat = await prisma.contenuEditorial.updateMany({
+      where: { id, dateDerniereModification: dateDerniereModificationAttendue },
+      data,
+    });
+
+    if (resultat.count === 0) {
+      throw new ConcurrentModificationError();
+    }
+
+    return prisma.contenuEditorial.findUniqueOrThrow({ where: { id } });
   },
 
   // Transition vers Brouillon (dépublication) ou Archivé — écriture simple, toujours
