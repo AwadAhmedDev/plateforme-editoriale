@@ -16,10 +16,6 @@ build
 
 # uploads
 
-uploads/images/*
-uploads/documents/*
-uploads/avatars/*
-
 !.gitkeep
 
 # logs
