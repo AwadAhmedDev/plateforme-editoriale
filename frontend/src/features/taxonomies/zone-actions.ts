@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentSession } from "@/features/admin-auth/session";
 import { ZoneGeographiqueRepository } from "@/lib/db/zone-geographique-repository";
 import { ContenuEditorialRepository } from "@/lib/db/contenu-editorial-repository";
+import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
+import { slugify } from "@/lib/slug";
 
 // Server Actions de Gestion des zones géographiques (server-actions-specification.md §5,
 // symétrique de §4.2-§4.4). Chacune revérifie elle-même la Session administrateur
@@ -20,23 +21,6 @@ export type ZoneActionState = {
   // <form> se résout (constat déjà fait sur le formulaire de connexion).
   values?: { nom: string; slug: string; descriptionCourte: string };
 };
-
-async function ensureAdministrateurAuthentifie(): Promise<void> {
-  const session = await getCurrentSession();
-  if (!session.authenticated) {
-    throw new Error("Accès refusé : aucune Session administrateur valide.");
-  }
-}
-
-function slugify(input: string): string {
-  return input
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 function lireChampsFormulaire(formData: FormData): { nom: string; slug: string; descriptionCourte: string } {
   return {
