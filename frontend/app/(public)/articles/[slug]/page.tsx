@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getArticleDetail } from "@/features/articles/get-article-detail";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
+import { ShareBar } from "@/features/articles/share-bar";
 
 // Route Détail d'un article (Lot L3, contrat révisé) : lecture via
 // getArticleDetail uniquement — aucun accès repository ni Prisma direct ici.
@@ -78,6 +79,8 @@ export default async function ArticleDetailPage({
           ))}
         </p>
       )}
+
+      {article.titre && <ShareBar titre={article.titre} />}
 
       {article.image && (
         <Image
