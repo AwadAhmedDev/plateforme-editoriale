@@ -161,6 +161,7 @@ Ce document ne tranche délibérément aucun de ces mécanismes ni leurs seuils,
 | Hash bcrypt du mot de passe administrateur | Authentification | Généré une seule fois lors de la création manuelle du Compte Administrateur (aucun écran de création applicatif) ; jamais transmis en clair, jamais journalisé | `technical-architecture.md` §8 point 4, `implementation-roadmap.md` Phase 0A |
 | Clé API du service transactionnel (Resend recommandé) | Envoi de la notification de contact | Variable d'environnement, jamais commitée | `technical-architecture.md` §8 point 9 |
 | Identifiants du stockage objet (Cloudflare R2 recommandé) | Upload de l'image principale | Variables d'environnement, jamais commitées | `technical-architecture.md` §8 point 3 |
+| `SITE_URL` | URL absolue du site, utilisée par `metadataBase` de Next.js pour le `canonical`/Open Graph/Twitter des futurs lots SEO (`app/(public)/articles/[slug]`) | Variable d'environnement **serveur uniquement** (jamais `NEXT_PUBLIC_`) ; **obligatoire en production** (échec de build explicite si absente) ; repli sur `http://localhost:3000` **uniquement en développement** | Lot L7a |
 
 **Principes transverses** :
 
