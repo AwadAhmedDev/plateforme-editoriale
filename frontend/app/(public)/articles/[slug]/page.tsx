@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,6 +11,31 @@ import { ShareBar } from "@/features/articles/share-bar";
 // Fournit son propre <main> ; app/(public)/layout.tsx n'en pose pas (cf.
 // audit « Double landmark <main> »). Ni barre de partage, ni contenus liés,
 // ni generateMetadata/SEO/JSON-LD — hors périmètre de ce lot.
+// Métadonnées minimales (Lot L6, contrat validé) : title/description
+// uniquement — aucun canonical, openGraph, twitter, JSON-LD ni metadataBase.
+// Réutilise getArticleDetail (déjà mémoïsé via React.cache() dans ce fichier
+// source) : un seul accès base de données réel par requête, malgré l'appel
+// indépendant depuis ArticleDetailPage. Si article est null, aucun title ni
+// description n'est défini ici — héritage automatique des valeurs par défaut
+// du layout racine, sans valeur inventée.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArticleDetail(slug);
+
+  if (!article) {
+    return {};
+  }
+
+  return {
+    ...(article.titre ? { title: article.titre } : {}),
+    ...(article.chapo ? { description: article.chapo } : {}),
+  };
+}
+
 export default async function ArticleDetailPage({
   params,
 }: {
