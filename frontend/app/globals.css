@@ -29,19 +29,22 @@
 
   /* Breakpoint additionnel — n'écrase aucun breakpoint par défaut */
   --breakpoint-tablet: 600px;
+
+  /* radius.sm et transition.fast (Lot L1, contrat révisé §F) : intentions
+     fonctionnelles déclarées explicitement — consommées par Breadcrumb et
+     ArticleCard. Valeur de --radius-sm strictement identique au défaut
+     Tailwind (0.25rem) : déclaration explicite à but de traçabilité, aucun
+     changement de rendu. Aucune clé --duration-* par défaut ne correspond à
+     120ms, d'où --duration-fast, propre au projet. */
+  --radius-sm: 0.25rem;
+  --duration-fast: 120ms;
 }
 
 /*
- * radius.sm (4px) et radius.pill (rayon complet) : déjà couverts nativement par
- * Tailwind (`rounded-sm` = --radius-sm = 0.25rem = 4px ; `rounded-full` pour un
- * rayon complet) — aucun token supplémentaire déclaré ici.
- * Échelle d'espacement 4/8/12/16/24/32/48/64/96 : déjà strictement identique à
- * l'échelle par défaut de Tailwind (--spacing: 0.25rem = 4px, multiples entiers
- * calculés dynamiquement) — aucun token supplémentaire déclaré ici.
- * transition.fast (120ms) : aucune clé --duration-* par défaut ne correspond à
- * 120ms ; utilisé directement en valeur arbitraire (`duration-[120ms]`) au point
- * d'usage plutôt que déclaré ici, pour éviter un token isolé sans consommateur
- * multiple.
+ * radius.pill (rayon complet) et échelle d'espacement 4/8/12/16/24/32/48/64/96 :
+ * toujours non déclarés — déjà strictement identiques aux valeurs par défaut
+ * de Tailwind (`rounded-full` ; `--spacing: 0.25rem`), et hors périmètre du
+ * Lot L1 (aucun consommateur actuel). Cf. décision de régularisation L0A.
  */
 
 /*
