@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FooterTaxonomies } from "@/components/shared/footer-taxonomies";
 
 // Layout de l'espace public (Lot L0A Étape 1, frontend-specification.md
 // §Layouts) : fournit uniquement le chrome partagé (header + footer) dans un
@@ -61,6 +62,8 @@ export default function PublicLayout({
             Politique de confidentialité
           </Link>
         </nav>
+
+        <FooterTaxonomies />
       </footer>
     </div>
   );
