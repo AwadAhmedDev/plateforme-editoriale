@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { InscritNewsletterRepository } from "@/lib/db/inscrit-newsletter-repository";
 
@@ -9,6 +10,23 @@ import { InscritNewsletterRepository } from "@/lib/db/inscrit-newsletter-reposit
 // §9). Page non liée depuis la navigation ni le footer — accessible uniquement via le
 // lien reçu par e-mail. Seule action autorisée par ui-specification.md:348 : un retour
 // vers l'Accueil, aucun champ de saisie ni autre bouton.
+//
+// Metadata (Lot L10, contrat validé) : title statique + canonical, comme les autres
+// pages statiques. robots: { index: false, follow: false } spécifique à cette page —
+// jamais destinée à la découverte (ni nav, ni footer, atteinte uniquement via lien
+// e-mail à usage unique), cohérent avec la protection anti-énumération déjà en place
+// côté contenu.
+export const metadata: Metadata = {
+  title: "Désinscription confirmée",
+  alternates: {
+    canonical: "/newsletter/desinscription",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
 export default async function DesinscriptionNewsletterPage({
   searchParams,
 }: {

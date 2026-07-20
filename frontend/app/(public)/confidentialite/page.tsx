@@ -1,9 +1,22 @@
+import type { Metadata } from "next";
+
 // Politique de confidentialité (sitemap.md §Politique de confidentialité,
 // frontend-specification.md:76,146 — route statique `app/(public)/confidentialite/page.tsx`).
 // Contenu limité à ce que le site collecte réellement aujourd'hui (adresse e-mail de la
 // Newsletter, seule donnée personnelle traitée par le domaine, cf. domain-model.md) —
 // aucune mention d'un traitement non implémenté. Écran dérivé, lien de footer uniquement
 // (ui-specification.md:14), pas de navigation propre.
+//
+// Metadata (Lot L10, contrat validé) : title statique reprenant le <h1> tel quel,
+// aucune description spécifique — même choix que /, /articles, /recherche (éviter
+// d'inventer un texte non validé, éviter de dupliquer la description globale du layout).
+export const metadata: Metadata = {
+  title: "Politique de confidentialité",
+  alternates: {
+    canonical: "/confidentialite",
+  },
+};
+
 export default function ConfidentialitePage() {
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 p-7">
