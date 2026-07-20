@@ -38,7 +38,6 @@ export default async function Home() {
               zoneNom={article.zoneNom}
               zoneSlug={article.zoneSlug}
               datePublication={article.datePublication}
-              liensTaxonomieActifs={false}
             />
           ))}
         </div>
