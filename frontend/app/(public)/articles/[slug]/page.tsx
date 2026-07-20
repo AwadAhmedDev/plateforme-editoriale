@@ -33,6 +33,33 @@ export async function generateMetadata({
   return {
     ...(article.titre ? { title: article.titre } : {}),
     ...(article.chapo ? { description: article.chapo } : {}),
+    alternates: {
+      canonical: `/articles/${slug}`,
+    },
+    openGraph: {
+      type: "article",
+      url: `/articles/${slug}`,
+      ...(article.titre ? { title: article.titre } : {}),
+      ...(article.chapo ? { description: article.chapo } : {}),
+      ...(article.image
+        ? {
+            images: [
+              {
+                url: article.image.url,
+                width: article.image.largeur,
+                height: article.image.hauteur,
+                alt: article.image.alt,
+              },
+            ],
+          }
+        : {}),
+    },
+    twitter: {
+      card: article.image ? "summary_large_image" : "summary",
+      ...(article.titre ? { title: article.titre } : {}),
+      ...(article.chapo ? { description: article.chapo } : {}),
+      ...(article.image ? { images: [article.image.url] } : {}),
+    },
   };
 }
 
