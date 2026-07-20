@@ -77,11 +77,11 @@ export default async function RecherchePage({
             name="q"
             defaultValue={q}
             placeholder="Rechercher un article..."
-            className="flex-1 rounded-sm border border-border px-3 py-2 text-sm"
+            className="flex-1 rounded-sm border border-border px-3 py-2 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           />
           <button
             type="submit"
-            className="rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white transition-colors duration-[120ms] hover:opacity-90"
+            className="rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white outline-none transition-colors duration-[120ms] hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             Rechercher
           </button>
@@ -96,7 +96,7 @@ export default async function RecherchePage({
               id="categorie"
               name="categorie"
               defaultValue={categorieSlug}
-              className="rounded-sm border border-border px-3 py-2 text-sm"
+              className="rounded-sm border border-border px-3 py-2 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
             >
               <option value="">Toutes les catégories</option>
               {categories.map((categorie) => (
@@ -115,7 +115,7 @@ export default async function RecherchePage({
               id="zone"
               name="zone"
               defaultValue={zoneSlug}
-              className="rounded-sm border border-border px-3 py-2 text-sm"
+              className="rounded-sm border border-border px-3 py-2 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
             >
               <option value="">Toutes les zones</option>
               {zones.map((zone) => (
@@ -134,7 +134,7 @@ export default async function RecherchePage({
               id="type"
               name="type"
               defaultValue={typeContenu}
-              className="rounded-sm border border-border px-3 py-2 text-sm"
+              className="rounded-sm border border-border px-3 py-2 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
             >
               <option value="">Tous les types</option>
               {TYPES_CONTENU_OPTIONS.map((option) => (

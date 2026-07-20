@@ -56,7 +56,10 @@ export function ArticleCard({
 
   return (
     <article className="rounded-sm border border-border p-3">
-      <Link href={`/articles/${slug}`} className="relative block aspect-video overflow-hidden rounded-sm">
+      <Link
+        href={`/articles/${slug}`}
+        className="relative block aspect-video overflow-hidden rounded-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+      >
         <Image
           src={imagePrincipaleUrl}
           alt={imageAltText}
@@ -67,7 +70,10 @@ export function ArticleCard({
       </Link>
 
       <h3 className="mt-3 font-editorial text-xl">
-        <Link href={`/articles/${slug}`} className="transition-colors duration-fast hover:text-accent-primary">
+        <Link
+          href={`/articles/${slug}`}
+          className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+        >
           {titre}
         </Link>
       </h3>
@@ -76,7 +82,7 @@ export function ArticleCard({
         {liensTaxonomieActifs ? (
           <Link
             href={`/categorie/${categorieSlug}`}
-            className="transition-colors duration-fast hover:text-accent-primary"
+            className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             {categorieNom}
           </Link>
@@ -85,7 +91,10 @@ export function ArticleCard({
         )}
         <span aria-hidden="true">·</span>
         {liensTaxonomieActifs ? (
-          <Link href={`/zone/${zoneSlug}`} className="transition-colors duration-fast hover:text-accent-primary">
+          <Link
+            href={`/zone/${zoneSlug}`}
+            className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+          >
             {zoneNom}
           </Link>
         ) : (

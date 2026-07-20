@@ -25,7 +25,7 @@ export async function FooterTaxonomies() {
               <li key={categorie.slug}>
                 <Link
                   href={`/categorie/${categorie.slug}`}
-                  className="transition-colors duration-[120ms] hover:text-accent-primary"
+                  className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
                 >
                   {categorie.nom}
                 </Link>
@@ -43,7 +43,7 @@ export async function FooterTaxonomies() {
               <li key={zone.slug}>
                 <Link
                   href={`/zone/${zone.slug}`}
-                  className="transition-colors duration-[120ms] hover:text-accent-primary"
+                  className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
                 >
                   {zone.nom}
                 </Link>

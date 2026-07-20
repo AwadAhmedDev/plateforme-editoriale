@@ -38,7 +38,7 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
                 ) : (
                   <Link
                     href={item.href}
-                    className="transition-colors duration-fast hover:text-accent-primary"
+                    className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
                   >
                     {item.label}
                   </Link>
@@ -52,7 +52,7 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
       {parent?.href && (
         <Link
           href={parent.href}
-          className="inline-block text-sm text-text-secondary transition-colors duration-fast hover:text-accent-primary lg:hidden"
+          className="inline-block text-sm text-text-secondary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary lg:hidden"
         >
           ← Retour
         </Link>

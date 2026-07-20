@@ -20,11 +20,11 @@ export const metadata: Metadata = {
 export default function ConfidentialitePage() {
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 p-7">
-      <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Politique de confidentialité</h1>
+      <h1 className="font-editorial text-3xl">Politique de confidentialité</h1>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Données collectées et finalité</h2>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <h2 className="text-sm font-semibold">Données collectées et finalité</h2>
+        <p className="text-sm text-text-secondary">
           Lors de votre inscription à la newsletter, seule votre adresse e-mail est collectée. Elle est utilisée
           exclusivement pour l&apos;envoi des communications de la newsletter, à l&apos;exclusion de toute autre
           finalité.
@@ -32,24 +32,24 @@ export default function ConfidentialitePage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Durée de conservation</h2>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <h2 className="text-sm font-semibold">Durée de conservation</h2>
+        <p className="text-sm text-text-secondary">
           Votre adresse e-mail est conservée tant que votre inscription à la newsletter reste active. Elle cesse
           d&apos;être utilisée dès votre désinscription.
         </p>
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Vos droits</h2>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <h2 className="text-sm font-semibold">Vos droits</h2>
+        <p className="text-sm text-text-secondary">
           Vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression de votre adresse e-mail
           inscrite à la newsletter.
         </p>
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Exercer vos droits</h2>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <h2 className="text-sm font-semibold">Exercer vos droits</h2>
+        <p className="text-sm text-text-secondary">
           Vous pouvez vous désinscrire à tout moment via le lien de désinscription à usage unique présent dans
           chaque communication envoyée.
         </p>

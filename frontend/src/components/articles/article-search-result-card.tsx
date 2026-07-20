@@ -38,14 +38,17 @@ export function ArticleSearchResultCard({
     <article className="flex flex-col gap-3 border-b border-border py-4 sm:flex-row">
       <Link
         href={`/articles/${slug}`}
-        className="relative block h-[80px] w-full shrink-0 overflow-hidden rounded-sm sm:w-[120px]"
+        className="relative block h-[80px] w-full shrink-0 overflow-hidden rounded-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary sm:w-[120px]"
       >
         <Image src={imagePrincipaleUrl} alt={imageAltText} fill sizes="120px" className="object-cover" />
       </Link>
 
       <div className="flex flex-1 flex-col">
         <h3 className="font-editorial text-lg">
-          <Link href={`/articles/${slug}`} className="transition-colors duration-fast hover:text-accent-primary">
+          <Link
+            href={`/articles/${slug}`}
+            className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+          >
             {titre}
           </Link>
         </h3>

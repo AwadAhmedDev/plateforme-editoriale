@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 export default function NewsletterPage() {
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 p-7">
-      <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Newsletter</h1>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <h1 className="font-editorial text-3xl">Newsletter</h1>
+      <p className="text-sm text-text-secondary">
         Recevez les nouvelles publications, analyses et actualités du média directement par e-mail.
       </p>
       <NewsletterForm />

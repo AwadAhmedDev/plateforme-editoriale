@@ -29,12 +29,15 @@ export default function PublicLayout({
       </a>
 
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-bg-primary px-5 lg:h-16 lg:px-15">
-        <Link href="/" className="font-editorial text-lg font-medium text-text-primary">
+        <Link
+          href="/"
+          className="font-editorial text-lg font-medium text-text-primary outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+        >
           Corne de l&apos;Afrique
         </Link>
         <Link
           href="/newsletter"
-          className="rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white transition-colors duration-[120ms] hover:opacity-90"
+          className="rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white outline-none transition-colors duration-[120ms] hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
         >
           S&apos;abonner
         </Link>
@@ -46,21 +49,21 @@ export default function PublicLayout({
 
       <footer className="border-t border-border bg-bg-secondary px-5 py-8 text-sm text-text-secondary lg:px-15">
         <nav aria-label="Pied de page" className="flex flex-wrap gap-6">
-          <Link href="/" className="transition-colors duration-[120ms] hover:text-accent-primary">
+          <Link href="/" className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
             Accueil
           </Link>
-          <Link href="/articles" className="transition-colors duration-[120ms] hover:text-accent-primary">
+          <Link href="/articles" className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
             Articles
           </Link>
-          <Link href="/recherche" className="transition-colors duration-[120ms] hover:text-accent-primary">
+          <Link href="/recherche" className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
             Recherche
           </Link>
-          <Link href="/newsletter" className="transition-colors duration-[120ms] hover:text-accent-primary">
+          <Link href="/newsletter" className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
             Newsletter
           </Link>
           <Link
             href="/confidentialite"
-            className="transition-colors duration-[120ms] hover:text-accent-primary"
+            className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             Politique de confidentialité
           </Link>

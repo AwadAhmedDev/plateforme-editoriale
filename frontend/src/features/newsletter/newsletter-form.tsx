@@ -34,7 +34,7 @@ export function NewsletterForm() {
   return (
     <form action={formAction} className="flex max-w-sm flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <label htmlFor="newsletter-email" className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+        <label htmlFor="newsletter-email" className="text-sm font-medium">
           Adresse e-mail
         </label>
         <input
@@ -43,14 +43,14 @@ export function NewsletterForm() {
           name="email"
           type="email"
           required
-          className="h-11 rounded-md border border-zinc-300 px-3.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-zinc-100"
+          className="h-11 rounded-sm border border-border px-3.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
         />
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="h-11 rounded-md bg-orange-600 px-5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-70"
+        className="h-11 rounded-sm bg-accent-warm px-5 text-sm font-medium text-white outline-none transition-colors duration-fast hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
       >
         {pending ? "Inscription…" : "S'abonner"}
       </button>
@@ -61,9 +61,12 @@ export function NewsletterForm() {
         </p>
       )}
 
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+      <p className="text-xs text-text-secondary">
         Votre adresse e-mail est utilisée exclusivement pour l&apos;envoi de la newsletter. Consultez notre{" "}
-        <Link href="/confidentialite" className="text-zinc-900 underline-offset-2 hover:underline dark:text-zinc-100">
+        <Link
+          href="/confidentialite"
+          className="text-accent-primary underline-offset-2 outline-none transition-colors duration-fast hover:text-accent-primary-hover hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+        >
           Politique de confidentialité
         </Link>
         .
