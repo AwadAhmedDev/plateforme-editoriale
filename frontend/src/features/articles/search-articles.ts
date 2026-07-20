@@ -1,3 +1,6 @@
+import type { TypeContenu } from "@prisma/client";
+import { CategorieRepository } from "@/lib/db/categorie-repository";
+import { ZoneGeographiqueRepository } from "@/lib/db/zone-geographique-repository";
 import { ContenuEditorialRepository } from "@/lib/db/contenu-editorial-repository";
 
 export type SearchResultArticle = {
@@ -11,18 +14,57 @@ export type SearchResultArticle = {
   chapo: string | null;
 };
 
-// Lecture publique pour app/(public)/recherche/page.tsx (Lot L9, contrat
-// validé) : réutilise ContenuEditorialRepository.search sans filtre
-// supplémentaire (categorieId/zoneId/typeContenu/dateFrom/dateTo omis),
-// page 1 uniquement — aucune pagination dans ce lot. Complétude des champs
-// (hors chapo) déjà garantie par chk_publie_champs_requis pour tout article
-// statut='publie' : simple projection, jamais une revalidation métier.
-// chapo n'est pas couvert par cette contrainte — conservé nullable, jamais
-// asserté, affichage conditionnel délégué à ArticleSearchResultCard.
-// Projection volontairement réduite à ce que le gabarit affiche réellement
-// (pas de categorieSlug/zoneSlug : aucun lien taxonomie dans ce composant).
-export async function searchArticles(q: string): Promise<SearchResultArticle[]> {
-  const { items } = await ContenuEditorialRepository.search({ q, page: 1 });
+export type SearchArticlesParams = {
+  q?: string;
+  categorieSlug?: string;
+  zoneSlug?: string;
+  typeContenu?: string;
+};
+
+const TYPES_CONTENU_VALIDES: readonly string[] = [
+  "article",
+  "analyse",
+  "enquete",
+  "interview",
+  "dossier_thematique",
+];
+
+function estTypeContenuValide(value: string | undefined): value is TypeContenu {
+  return value !== undefined && TYPES_CONTENU_VALIDES.includes(value);
+}
+
+// Lecture publique pour app/(public)/recherche/page.tsx (Lot L11, contrat
+// validé) : étend searchArticles (L9) avec les filtres catégorie/zone/type
+// déjà supportés par ContenuEditorialRepository.search (categorieId, zoneId,
+// typeContenu), jamais exposés jusqu'ici — aucun changement Repository.
+// Résolution slug → id via CategorieRepository.findBySlug /
+// ZoneGeographiqueRepository.findBySlug (existants, non modifiés) : un slug
+// fourni qui ne correspond à aucune catégorie/zone réelle produit un
+// résultat vide (jamais un 404, jamais une erreur Prisma, jamais un filtre
+// silencieusement ignoré — décision L11 validée), sans appeler search().
+// typeContenu hors de l'enum est ignoré silencieusement (traité comme
+// absent), jamais transmis tel quel à Prisma. Aucune date dans ce lot
+// (décision L11 validée).
+export async function searchArticles(params: SearchArticlesParams): Promise<SearchResultArticle[]> {
+  const q = params.q?.trim() || undefined;
+  const typeContenu = estTypeContenuValide(params.typeContenu) ? params.typeContenu : undefined;
+
+  const [categorie, zone] = await Promise.all([
+    params.categorieSlug ? CategorieRepository.findBySlug(params.categorieSlug) : null,
+    params.zoneSlug ? ZoneGeographiqueRepository.findBySlug(params.zoneSlug) : null,
+  ]);
+
+  if ((params.categorieSlug && !categorie) || (params.zoneSlug && !zone)) {
+    return [];
+  }
+
+  const { items } = await ContenuEditorialRepository.search({
+    q,
+    ...(categorie ? { categorieId: categorie.id } : {}),
+    ...(zone ? { zoneId: zone.id } : {}),
+    ...(typeContenu ? { typeContenu } : {}),
+    page: 1,
+  });
 
   return items.map((item) => ({
     slug: item.slug,
