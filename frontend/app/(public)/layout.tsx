@@ -52,6 +52,9 @@ export default function PublicLayout({
           <Link href="/articles" className="transition-colors duration-[120ms] hover:text-accent-primary">
             Articles
           </Link>
+          <Link href="/recherche" className="transition-colors duration-[120ms] hover:text-accent-primary">
+            Recherche
+          </Link>
           <Link href="/newsletter" className="transition-colors duration-[120ms] hover:text-accent-primary">
             Newsletter
           </Link>
