@@ -6,6 +6,7 @@ import { getArticleDetail } from "@/features/articles/get-article-detail";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { ShareBar } from "@/features/articles/share-bar";
 import { resoudreSiteUrl } from "@/lib/site-url";
+import { serializeJsonLd } from "@/lib/json-ld";
 
 // Route Détail d'un article (Lot L3, contrat révisé) : lecture via
 // getArticleDetail uniquement — aucun accès repository ni Prisma direct ici.
@@ -89,10 +90,6 @@ export default async function ArticleDetailPage({
   // l'API Metadata, d'où la construction manuelle via `new URL()`.
   const siteUrl = resoudreSiteUrl();
   const absoluteUrl = (path: string) => new URL(path, siteUrl).toString();
-  // Échappement systématique de "<" en son équivalent JSON < : empêche
-  // toute rupture de balise </script> si un champ éditorial (titre, chapo,
-  // auteur) contient littéralement cette séquence.
-  const serializeJsonLd = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");
 
   const articleJsonLd = {
     "@context": "https://schema.org",
