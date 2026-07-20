@@ -4,10 +4,10 @@ import { listPublishedArticleSlugs } from "@/features/articles/list-published-ar
 import { listCategorieSlugs } from "@/features/taxonomies/list-categorie-slugs";
 import { listZoneSlugs } from "@/features/taxonomies/list-zone-slugs";
 
-// Sitemap V1 (Lot L7e, étendu en L8c/L8d, contrat validé) : /, /articles,
-// /articles/{slug} publiés, /categorie/{slug} et /zone/{slug} — routes
-// publiques réellement existantes à ce jour. Aucun accès repository direct
-// ici, uniquement des features publiques de lecture
+// Sitemap V1 (Lot L7e, étendu en L8c/L8d/L9, contrat validé) : /, /articles,
+// /recherche, /articles/{slug} publiés, /categorie/{slug} et /zone/{slug} —
+// routes publiques réellement existantes à ce jour. Aucun accès repository
+// direct ici, uniquement des features publiques de lecture
 // (list-published-article-slugs.ts, list-categorie-slugs.ts,
 // list-zone-slugs.ts). Revalidation à la demande déjà câblée via
 // revalidatePath("/sitemap.xml") dans revalidate-article-surfaces.ts :
@@ -25,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: absoluteUrl("/") },
     { url: absoluteUrl("/articles") },
+    { url: absoluteUrl("/recherche") },
     ...articles.map((article) => ({
       url: absoluteUrl(`/articles/${article.slug}`),
       lastModified: article.dateDerniereModification,
