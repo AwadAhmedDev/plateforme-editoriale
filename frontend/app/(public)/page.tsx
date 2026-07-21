@@ -61,7 +61,9 @@ export default async function Home() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd(organizationJsonLd),
+        }}
       />
       <script
         type="application/ld+json"
@@ -88,7 +90,9 @@ export default async function Home() {
             ))}
           </div>
         ) : (
-          <p className="mt-6 text-text-secondary">Aucun article publié pour le moment.</p>
+          <p className="mt-6 text-text-secondary">
+            Aucun article publié pour le moment.
+          </p>
         )}
       </main>
     </>
