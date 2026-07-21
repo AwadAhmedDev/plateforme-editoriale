@@ -75,11 +75,11 @@ export default async function ZonePage({
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionPageJsonLd) }}
         />
       )}
-      <main className="mx-auto w-full max-w-[1200px] flex-1 px-5 py-8 lg:px-15">
+      <main className="mx-auto w-full max-w-300 flex-1 px-5 py-8 lg:px-15">
         <h1 className="font-editorial text-3xl">{zone.nom}</h1>
 
         {zone.articles.length > 0 ? (
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-[18px]">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4.5">
             {zone.articles.map((article) => (
               <ArticleCard
                 key={article.slug}
