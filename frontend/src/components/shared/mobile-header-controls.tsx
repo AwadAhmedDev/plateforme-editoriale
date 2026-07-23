@@ -92,7 +92,7 @@ export function MobileHeaderControls({
         aria-expanded={panneau === "recherche"}
         aria-controls="panneau-recherche-mobile"
         onClick={() => setPanneau(panneau === "recherche" ? "aucun" : "recherche")}
-        className="flex h-11 w-11 items-center justify-center rounded-sm text-text-primary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+        className="flex h-11 w-11 items-center justify-center rounded-sm text-white/80 outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
       >
         <IconeRecherche />
       </button>
@@ -104,7 +104,7 @@ export function MobileHeaderControls({
         aria-expanded={panneau === "menu"}
         aria-controls="panneau-menu-mobile"
         onClick={() => setPanneau(panneau === "menu" ? "aucun" : "menu")}
-        className="flex h-11 w-11 items-center justify-center rounded-sm text-text-primary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+        className="flex h-11 w-11 items-center justify-center rounded-sm text-white/80 outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
       >
         <IconeMenu />
       </button>

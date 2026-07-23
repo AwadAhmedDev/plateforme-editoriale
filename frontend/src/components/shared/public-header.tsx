@@ -39,10 +39,10 @@ export async function PublicHeader() {
   const [categories, zones] = await Promise.all([listCategorieMenu(), listZoneMenu()]);
 
   return (
-    <header className="sticky top-0 z-40 flex h-[var(--header-height-mobile)] items-center gap-4 border-b border-border bg-bg-primary px-5 lg:h-[var(--header-height-desktop)] lg:gap-8 lg:px-15">
+    <header className="sticky top-0 z-40 flex h-[var(--header-height-mobile)] items-center gap-4 bg-accent-primary px-5 lg:h-[var(--header-height-desktop)] lg:justify-between lg:px-15">
       <Link
         href="/"
-        className="font-editorial text-lg font-medium text-text-primary outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+        className="font-editorial text-lg font-medium text-white outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
       >
         Corne de l&apos;Afrique
       </Link>
@@ -52,7 +52,7 @@ export async function PublicHeader() {
           {categories.length > 0 && (
             <li>
               <details className="relative">
-                <summary className="cursor-pointer list-none text-sm text-text-secondary outline-none [&::-webkit-details-marker]:hidden hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
+                <summary className="cursor-pointer list-none text-sm text-white/80 outline-none [&::-webkit-details-marker]:hidden hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                   Catégories
                 </summary>
                 <ul className="absolute left-0 top-full z-50 mt-2 min-w-40 rounded-sm border border-border bg-bg-primary p-2 shadow-lg">
@@ -74,7 +74,7 @@ export async function PublicHeader() {
           {zones.length > 0 && (
             <li>
               <details className="relative">
-                <summary className="cursor-pointer list-none text-sm text-text-secondary outline-none [&::-webkit-details-marker]:hidden hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
+                <summary className="cursor-pointer list-none text-sm text-white/80 outline-none [&::-webkit-details-marker]:hidden hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                   Zones géographiques
                 </summary>
                 <ul className="absolute left-0 top-full z-50 mt-2 min-w-40 rounded-sm border border-border bg-bg-primary p-2 shadow-lg">
@@ -96,7 +96,7 @@ export async function PublicHeader() {
           <li>
             <Link
               href="/a-propos"
-              className="text-sm text-text-secondary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+              className="text-sm text-white/80 outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               À propos
             </Link>
@@ -124,7 +124,7 @@ export async function PublicHeader() {
 
       <Link
         href="/newsletter"
-        className="ml-auto hidden rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white outline-none transition-colors duration-[120ms] hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary lg:inline-block"
+        className="hidden rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white outline-none transition-colors duration-[120ms] hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary lg:inline-block"
       >
         S&apos;abonner
       </Link>
