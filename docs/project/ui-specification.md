@@ -1,3 +1,4 @@
+
 # UI Specification — Plateforme éditoriale Corne de l'Afrique (MVP)
 
 **Version finale — document unique de référence pour le développement frontend.**
