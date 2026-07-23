@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { ZoneGeographiqueRepository } from "@/lib/db/zone-geographique-repository";
 
 export type ZoneMenuItem = {
@@ -10,8 +11,8 @@ export type ZoneMenuItem = {
 // ZoneGeographiqueRepository.findAllWithArticleCount sans modification —
 // déjà trié nom asc. Distinct de list-zone-slugs.ts (L8c, réservé à
 // app/sitemap.ts, slug seul).
-export async function listZoneMenu(): Promise<ZoneMenuItem[]> {
+export const listZoneMenu = cache(async (): Promise<ZoneMenuItem[]> => {
   const zones = await ZoneGeographiqueRepository.findAllWithArticleCount();
 
   return zones.map((zone) => ({ nom: zone.nom, slug: zone.slug }));
-}
+});

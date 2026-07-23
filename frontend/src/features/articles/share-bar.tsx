@@ -43,9 +43,12 @@ export function ShareBar({ titre }: { titre: string }) {
   }
 
   return (
+    // Offset desktop dérivé de --header-height-desktop (app/globals.css,
+    // Lot 6.1 contrat final §4) plutôt que codé en dur : reste synchronisé
+    // avec la hauteur réelle du header sans duplication de valeur.
     <div
       className="fixed inset-x-0 bottom-0 z-30 flex flex-wrap items-center justify-center gap-2 border-t border-border bg-bg-primary px-5 py-3
-                 lg:sticky lg:inset-x-auto lg:bottom-auto lg:top-24 lg:flex-col lg:items-start lg:justify-start lg:border-t-0 lg:border lg:px-3 lg:py-4"
+                 lg:sticky lg:inset-x-auto lg:bottom-auto lg:top-[calc(var(--header-height-desktop)_+_2rem)] lg:flex-col lg:items-start lg:justify-start lg:border-t-0 lg:border lg:px-3 lg:py-4"
     >
       <button
         type="button"

@@ -38,6 +38,15 @@
      120ms, d'où --duration-fast, propre au projet. */
   --radius-sm: 0.25rem;
   --duration-fast: 120ms;
+
+  /* Hauteur du header public (Lot 6.1, contrat final §4) : source de vérité
+     unique, consommée par PublicHeader (sa propre hauteur) et par ShareBar
+     (son offset sticky desktop, dérivé de --header-height-desktop + 2rem).
+     Valeurs strictement identiques aux anciennes classes h-14/lg:h-16 —
+     aucun changement de rendu, seulement une seule valeur au lieu de deux
+     déclarations indépendantes. */
+  --header-height-mobile: 3.5rem;
+  --header-height-desktop: 4rem;
 }
 
 /*

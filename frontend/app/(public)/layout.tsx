@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PublicHeader } from "@/components/shared/public-header";
 import { FooterTaxonomies } from "@/components/shared/footer-taxonomies";
 
 // Layout de l'espace public (Lot L0A Étape 1, frontend-specification.md
@@ -9,11 +10,11 @@ import { FooterTaxonomies } from "@/components/shared/footer-taxonomies";
 // app/admin/(protected)/layout.tsx, qui applique déjà ce même principe côté
 // admin — sa <div className="flex-1"> autour de {children}, jamais un <main>).
 //
-// Contenu volontairement réduit à ce qui est réellement résolvable aujourd'hui :
-// aucun menu Catégories/Zones, aucun champ de recherche, aucun lien À
-// propos/Contact (pages inexistantes, cf. ui-specification.md §Navigation
-// principale) ; aucun menu mobile (rien à révéler tant que ces pages
-// n'existent pas). Server Component pur, aucune interactivité cliente.
+// Header délégué à PublicHeader (Lot 6.1, contrat consolidé) : Catégories,
+// Zones géographiques et À propos en desktop, recherche visible à tous les
+// breakpoints — menu mobile pour Catégories/Zones reste hors périmètre
+// (Lot 6.2). Toujours aucun lien Contact (page inexistante). Server
+// Component pur, aucune interactivité cliente.
 export default function PublicLayout({
   children,
 }: {
@@ -28,20 +29,7 @@ export default function PublicLayout({
         Aller au contenu principal
       </a>
 
-      <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-bg-primary px-5 lg:h-16 lg:px-15">
-        <Link
-          href="/"
-          className="font-editorial text-lg font-medium text-text-primary outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-        >
-          Corne de l&apos;Afrique
-        </Link>
-        <Link
-          href="/newsletter"
-          className="rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white outline-none transition-colors duration-[120ms] hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-        >
-          S&apos;abonner
-        </Link>
-      </header>
+      <PublicHeader />
 
       <div id="contenu-principal" className="flex flex-1 flex-col">
         {children}
