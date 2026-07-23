@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { listCategorieMenu } from "@/features/taxonomies/list-categorie-menu";
 import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
+import { aProposContent } from "../../../app/(public)/a-propos/content";
+import { MobileHeaderControls } from "@/components/shared/mobile-header-controls";
 
 // Header public (Lot 6.1, contrat consolidé) : 100% Server Component,
 // asynchrone (charge catégories/zones via les mêmes fonctions déjà
@@ -22,12 +24,17 @@ import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
 // <details> sans contenu.
 //
 // Recherche : formulaire GET natif vers /recherche, seul paramètre `q`,
-// aucun bouton visible (conforme au wireframe), visible à tous les
-// breakpoints (ne dépend d'aucun mécanisme propre au mobile).
+// aucun bouton visible (conforme au wireframe) — visible en desktop
+// uniquement (lg et au-delà) ; sous lg, remplacée par l'icône + overlay de
+// MobileHeaderControls (Lot 6.2), qui réutilise ce même formulaire.
 //
-// Hors périmètre assumé (contrat consolidé §8) : menu mobile pour
-// Catégories/Zones (Lot 6.2), item de navigation actif, icône+overlay de
-// recherche mobile, fermeture au clavier/clic extérieur des <details>.
+// Menu mobile (Catégories/Zones/À propos/Contact/S'abonner, panneau plein
+// écran) livré par MobileHeaderControls (Lot 6.2, contrat technique) — seul
+// Client Component du header, recevant les données déjà chargées ici en
+// props.
+//
+// Hors périmètre assumé (contrat consolidé §8) : item de navigation actif,
+// fermeture au clavier/clic extérieur des <details> desktop.
 export async function PublicHeader() {
   const [categories, zones] = await Promise.all([listCategorieMenu(), listZoneMenu()]);
 
@@ -97,7 +104,12 @@ export async function PublicHeader() {
         </ul>
       </nav>
 
-      <form role="search" action="/recherche" method="GET" className="flex-1 lg:max-w-[220px] lg:flex-none">
+      <form
+        role="search"
+        action="/recherche"
+        method="GET"
+        className="hidden lg:flex lg:max-w-[220px] lg:flex-none"
+      >
         <label htmlFor="header-search-q" className="sr-only">
           Rechercher un article
         </label>
@@ -112,10 +124,17 @@ export async function PublicHeader() {
 
       <Link
         href="/newsletter"
-        className="ml-auto rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white outline-none transition-colors duration-[120ms] hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+        className="ml-auto hidden rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white outline-none transition-colors duration-[120ms] hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary lg:inline-block"
       >
         S&apos;abonner
       </Link>
+
+      <MobileHeaderControls
+        categories={categories}
+        zones={zones}
+        ctaHref="/newsletter"
+        contactEmail={aProposContent.contact.email}
+      />
     </header>
   );
 }
