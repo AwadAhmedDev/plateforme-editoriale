@@ -27,6 +27,21 @@ async function main() {
 
   const articles = [
     {
+      slug: "dossier-dynamiques-regionales-corne-afrique",
+      titre: "Dossier : comprendre les dynamiques régionales de la Corne de l'Afrique",
+      chapo:
+        "Un tour d'horizon synthétique des enjeux politiques, économiques et sécuritaires qui structurent la région, pour resituer l'actualité dans son contexte de long terme.",
+      corps:
+        "Ce dossier propose une lecture transversale des grands équilibres régionaux de la Corne de l'Afrique, à l'usage des lecteurs qui découvrent la zone comme de ceux qui en suivent l'actualité au quotidien.\n\nIl reprend, axe par axe, les principales lignes de force identifiées par la rédaction : rapports de force politiques, trajectoires économiques nationales et enjeux sécuritaires transfrontaliers.\n\nCe dossier sera mis à jour au fil des publications, à mesure que de nouvelles analyses viendront enrichir chacun de ces axes.",
+      categorieId: politique.id,
+      zoneId: ethiopie.id,
+      auteur: "Rédaction",
+      image: "article-1.png",
+      motsCles: ["dossier", "analyse régionale", "corne de l'afrique"],
+      joursDecalage: 0,
+      typeContenu: "dossier_thematique" as const,
+    },
+    {
       slug: "ethiopie-reforme-fonciere-regions-rurales",
       titre: "L'Éthiopie engage une réforme foncière dans les régions rurales",
       chapo: "Le gouvernement fédéral annonce un plan de clarification des titres fonciers destiné aux exploitants agricoles.",
@@ -116,7 +131,7 @@ async function main() {
         titre: a.titre,
         chapo: a.chapo,
         corps: a.corps,
-        typeContenu: "article",
+        typeContenu: "typeContenu" in a ? a.typeContenu : "article",
         categorieId: a.categorieId,
         zoneId: a.zoneId,
         imagePrincipaleUrl: `/seed/${a.image}`,

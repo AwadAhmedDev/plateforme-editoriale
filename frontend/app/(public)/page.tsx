@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
 import { ArticleCard } from "@/components/shared/article-card";
+import { FeaturedArticle } from "@/components/shared/featured-article";
+import { TaxonomyPills } from "@/components/shared/taxonomy-pills";
+import { NewsletterForm } from "@/features/newsletter/newsletter-form";
 import { getHomeArticles } from "@/features/articles/get-home-articles";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
+import { accueilContent } from "./content";
 
-// Homepage publique (Lot L8b, contrat validé) : remplace le scaffold
-// create-next-app précédemment à app/page.tsx, déplacée sous (public) pour
-// hériter automatiquement de PublicLayout (header/footer) sans dupliquer ce
-// chrome — l'URL publique reste / (les route groups Next.js n'affectent
-// jamais l'URL générée). title/description hérités tels quels de
-// app/layout.tsx (aucune duplication) ; seul alternates.canonical est
-// ajouté ici. Hors périmètre (aucune donnée/route ne les supporte
-// encore) : bloc "À la une" curaté, catégories/zones phares, recherche,
-// encart newsletter inline — uniquement les derniers articles publiés.
+// Homepage publique (Lot Homepage, contrat validé) : compose l'accroche
+// éditoriale (content.ts, séparée de la structure), le contenu phare
+// (FeaturedArticle, hero — maquettes-haute-fidelite.md §1 "Accueil"), la
+// section "À la une" (ArticleCard non modifié depuis le lot précédent),
+// l'accès aux catégories/zones phares (TaxonomyPills, auto-suffisant,
+// aucune prop reçue ici) et le bandeau newsletter compact (NewsletterForm
+// variant="compact", même action serveur que /newsletter). metadata,
+// JSON-LD et canonical hérités tels quels — aucune modification.
 export const metadata: Metadata = {
   alternates: {
     canonical: "/",
@@ -22,11 +25,12 @@ export const metadata: Metadata = {
 // Nom repris tel quel de app/layout.tsx (title.default) — même valeur déjà
 // publiée, aucune invention. Reste documentée comme provisoire (cf.
 // commentaire de layout.tsx : aucun nom de marque réel n'est encore fixé
-// par le corpus documentaire) ; cette réserve s'applique aussi ici.
+// par le corpus documentaire).
 const NOM_MEDIA = "Plateforme éditoriale — Corne de l'Afrique";
 
 export default async function Home() {
-  const articles = await getHomeArticles();
+  const { featured, articles } = await getHomeArticles();
+  const { accroche } = accueilContent;
 
   // JSON-LD (Lot L12, contrat validé) : Organization + WebSite, seule page
   // à les porter (jamais dupliqué sur les autres routes). SearchAction
@@ -70,30 +74,47 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }}
       />
       <main className="mx-auto w-full max-w-300 flex-1 px-5 py-8 lg:px-15">
-        <h1 className="font-editorial text-3xl">Derniers articles publiés</h1>
+        <h1 className="font-editorial text-3xl text-accent-warm lg:text-4xl">
+          {accroche.texte}
+        </h1>
 
-        {articles.length > 0 ? (
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4.5">
-            {articles.map((article) => (
-              <ArticleCard
-                key={article.slug}
-                slug={article.slug}
-                titre={article.titre}
-                imagePrincipaleUrl={article.imagePrincipaleUrl}
-                imageAltText={article.imageAltText}
-                categorieNom={article.categorieNom}
-                categorieSlug={article.categorieSlug}
-                zoneNom={article.zoneNom}
-                zoneSlug={article.zoneSlug}
-                datePublication={article.datePublication}
-              />
-            ))}
+        {featured && <FeaturedArticle article={featured} />}
+
+        <section className="mt-12">
+          <h2 className="font-editorial text-2xl">À la une</h2>
+
+          {articles.length > 0 ? (
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4.5">
+              {articles.map((article) => (
+                <ArticleCard
+                  key={article.slug}
+                  slug={article.slug}
+                  titre={article.titre}
+                  imagePrincipaleUrl={article.imagePrincipaleUrl}
+                  imageAltText={article.imageAltText}
+                  categorieNom={article.categorieNom}
+                  categorieSlug={article.categorieSlug}
+                  zoneNom={article.zoneNom}
+                  zoneSlug={article.zoneSlug}
+                  datePublication={article.datePublication}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="mt-6 text-text-secondary">
+              Aucun article publié pour le moment.
+            </p>
+          )}
+        </section>
+
+        <TaxonomyPills />
+
+        <section className="mt-12">
+          <h2 className="font-editorial text-2xl">Newsletter</h2>
+          <div className="mt-6">
+            <NewsletterForm variant="compact" />
           </div>
-        ) : (
-          <p className="mt-6 text-text-secondary">
-            Aucun article publié pour le moment.
-          </p>
-        )}
+        </section>
       </main>
     </>
   );
