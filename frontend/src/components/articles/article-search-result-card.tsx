@@ -44,7 +44,13 @@ export function ArticleSearchResultCard({
         href={`/articles/${slug}`}
         className="relative block aspect-[16/10] w-full shrink-0 overflow-hidden rounded-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary sm:w-[150px]"
       >
-        <Image src={imagePrincipaleUrl} alt={imageAltText} fill sizes="150px" className="object-cover" />
+        <Image
+          src={imagePrincipaleUrl}
+          alt={imageAltText}
+          fill
+          sizes="150px"
+          className="object-cover"
+        />
       </Link>
 
       <div className="flex flex-1 flex-col gap-1.5">
@@ -61,7 +67,9 @@ export function ArticleSearchResultCard({
           </Link>
         </h3>
 
-        {chapo && <p className="line-clamp-2 text-sm text-text-secondary">{chapo}</p>}
+        {chapo && (
+          <p className="line-clamp-2 text-sm text-text-secondary">{chapo}</p>
+        )}
 
         <p className="text-xs text-text-secondary">
           {auteur && <>{auteur} · </>}
