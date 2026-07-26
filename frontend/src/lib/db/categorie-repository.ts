@@ -1,5 +1,6 @@
 import type { Categorie } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { ORDRE_RUBRIQUES } from "@/lib/ordre-taxonomies";
 
 export type CategorieAvecNombreArticles = Categorie & { _count: { contenus: number } };
 
@@ -12,10 +13,18 @@ export const CategorieRepository = {
   },
 
   findAllWithArticleCount(): Promise<CategorieAvecNombreArticles[]> {
-    return prisma.categorie.findMany({
-      orderBy: { nom: "asc" },
-      include: { _count: { select: { contenus: true } } },
-    });
+    return prisma.categorie
+      .findMany({ include: { _count: { select: { contenus: true } } } })
+      .then((categories) =>
+        categories.sort((a, b) => {
+          const rangA = ORDRE_RUBRIQUES.indexOf(a.slug);
+          const rangB = ORDRE_RUBRIQUES.indexOf(b.slug);
+          if (rangA === -1 && rangB === -1) return a.nom.localeCompare(b.nom);
+          if (rangA === -1) return 1;
+          if (rangB === -1) return -1;
+          return rangA - rangB;
+        })
+      );
   },
 
   findById(id: string): Promise<Categorie | null> {
