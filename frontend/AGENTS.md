@@ -20,7 +20,7 @@ Every admin-only Server Action re-checks the session itself (`ensureAdministrate
 
 `statut` and `datePublication` on `ContenuEditorial` are never read from user input — only changed via dedicated transitions (`publishArticle`, `unpublishArticle`, `archiveArticle`).
 
-No shared `components/` directory exists yet. Interactive forms follow the `useActionState` + directly-imported Server Action pattern (see `NewsletterForm`, `CategoryCreateForm`).
+`src/components/shared/` holds shared public UI components (e.g. `public-header.tsx`, `article-card.tsx`) — REPO-1→9 lots edit these in place. Interactive forms follow the `useActionState` + directly-imported Server Action pattern (see `NewsletterForm`, `CategoryCreateForm`).
 
 ## Auth
 
@@ -50,7 +50,7 @@ No test framework is configured (no `test` script, no Jest/Vitest dependency). D
 
 ## Documentation priority
 
-When docs conflict, trust in this order: (1) the code and `tsconfig.json`, (2) `docs/project/ui-specification.md` for anything visual/behavioral, (3) `docs/project/security-specification.md` and `docs/project/domain-model.md` for security rules and domain decisions (DR-00x), (4) `docs/project/frontend-specification.md` last and with caution — it contains claims not aligned with the real code (see Stack above).
+When docs conflict, trust in this order: (0) `docs/project/regle-fidelite-design.md` and `Corne de l'Afrique.dc.html` for anything visual/UX in scope of REPO-1→9 — `ui-specification.md` (2) remains authoritative only for what the design doesn't cover (responsive/mobile, scroll behavior); (1) the code and `tsconfig.json`, (2) `docs/project/ui-specification.md` for anything visual/behavioral, (3) `docs/project/security-specification.md` and `docs/project/domain-model.md` for security rules and domain decisions (DR-00x), (4) `docs/project/frontend-specification.md` last and with caution — it contains claims not aligned with the real code (see Stack above).
 
 ## Repository rule
 
@@ -58,4 +58,4 @@ When docs conflict, trust in this order: (1) the code and `tsconfig.json`, (2) `
 
 ## MVP scope
 
-Single administrator, no roles system. No V2/V3 features anywhere in the code: no user accounts, no premium/paid content, no subscriptions, no advanced statistics/charts. Don't add scaffolding "for later" — the features-based architecture already extends without a rewrite when V2 actually starts.
+Single administrator, no roles system. No V2/V3 features anywhere in the code: no user accounts, no premium/paid content, no subscriptions, no advanced statistics/charts. Don't add scaffolding "for later" — the features-based architecture already extends without a rewrite when V2 actually starts. (The reference design `Corne de l'Afrique.dc.html` shows a premium/subscription tier and per-country publication counts — the former is excluded per `docs/project/plan-implementation-repositionnement-asile.md` §E; the latter, a simple aggregate count, is not "advanced statistics" under this rule.)
