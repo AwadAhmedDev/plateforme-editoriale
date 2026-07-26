@@ -7,21 +7,25 @@ import { subscribeNewsletter, type NewsletterActionState } from "@/features/news
 const initialState: NewsletterActionState = { status: "idle", message: null };
 
 type NewsletterFormProps = {
-  variant?: "full" | "compact";
+  variant?: "full" | "compact" | "banner";
 };
 
 // Formulaire d'inscription newsletter (ui-specification.md §Newsletter) : champ unique
 // (e-mail), mention de confidentialité toujours visible, confirmation in situ (le
 // formulaire est remplacé par le message de succès, jamais de redirection). Un seul
-// composant, deux présentations (`variant`) — jamais deux implémentations parallèles de
+// composant, trois présentations (`variant`) — jamais deux implémentations parallèles de
 // la logique de soumission (Lot Homepage, contrat validé) : `useActionState`, l'effet de
 // restitution de saisie en cas d'erreur et l'état de succès sont partagés sans
 // distinction de variant, seule la présentation du formulaire (avant succès) diffère.
 //
 // `variant="full"` (défaut, comportement strictement inchangé) : page dédiée
 // /newsletter, label visible, colonne verticale. `variant="compact"` : bandeau Accueil,
-// inline (email + bouton sur une ligne dès sm), label uniquement accessible (sr-only) —
-// même action serveur, mêmes messages, même traitement "déjà inscrit".
+// inline (email + bouton sur une ligne dès sm), label uniquement accessible (sr-only).
+// `variant="banner"` (REPO-8, Corne de l'Afrique.dc.html l.436-455) : bandeau sombre
+// sitewide (app/(public)/layout.tsx, avant le footer, sur toutes les pages) — mêmes
+// champs que "compact", présentation alignée sur le design (fond sombre, bouton
+// pleinement arrondi). Les trois variantes partagent même action serveur, mêmes
+// messages, même traitement "déjà inscrit".
 export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
   const [state, formAction, pending] = useActionState(subscribeNewsletter, initialState);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -35,9 +39,61 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
 
   if (state.status === "success") {
     return (
-      <p role="status" className="text-sm text-green-700 dark:text-green-400">
+      <p
+        role="status"
+        className={
+          variant === "banner"
+            ? "rounded-md border border-white/20 bg-white/10 px-5 py-4 text-[15px] text-white"
+            : "text-sm text-green-700 dark:text-green-400"
+        }
+      >
         {state.message}
       </p>
+    );
+  }
+
+  if (variant === "banner") {
+    return (
+      <div className="min-w-0 lg:min-w-[380px]">
+        <form action={formAction} className="flex gap-2.5">
+          <label htmlFor="newsletter-email-banner" className="sr-only">
+            Adresse e-mail
+          </label>
+          <input
+            ref={emailRef}
+            id="newsletter-email-banner"
+            name="email"
+            type="email"
+            required
+            placeholder="Votre adresse e-mail"
+            className="h-[46px] flex-1 rounded-md border border-white/25 bg-white/[0.06] px-4 text-sm text-white placeholder:text-white/50 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          />
+          <button
+            type="submit"
+            disabled={pending}
+            className="h-[46px] shrink-0 whitespace-nowrap rounded-md bg-accent-primary px-[22px] text-sm font-semibold text-white outline-none transition-colors duration-fast hover:bg-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+          >
+            {pending ? "Inscription…" : "S'inscrire"}
+          </button>
+        </form>
+
+        {state.status === "error" && (
+          <p role="alert" className="mt-2.5 text-sm text-red-400">
+            {state.message}
+          </p>
+        )}
+
+        <p className="mt-2.5 text-xs text-[#9a9484]">
+          En vous inscrivant, vous acceptez notre{" "}
+          <Link
+            href="/confidentialite"
+            className="text-[#c8c2b6] underline-offset-2 outline-none transition-colors duration-fast hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            politique de confidentialité
+          </Link>
+          . Désinscription en un clic.
+        </p>
+      </div>
     );
   }
 
