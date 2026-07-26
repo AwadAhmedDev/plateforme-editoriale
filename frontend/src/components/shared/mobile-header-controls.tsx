@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { CategorieMenuItem } from "@/features/taxonomies/list-categorie-menu";
 import type { ZoneMenuItem } from "@/features/taxonomies/list-zone-menu";
 
@@ -22,11 +23,20 @@ export function MobileHeaderControls({
   ctaHref: string;
 }) {
   const [panneau, setPanneau] = useState<Panneau>("aucun");
+  // Monté après hydratation uniquement : `document.body` n'existe pas côté serveur, et
+  // rendre le portail dès le premier rendu client (avant que React n'ait confirmé
+  // l'hydratation) provoquerait un mismatch. Aucun impact perçu : les panneaux sont de
+  // toute façon fermés (`panneau === "aucun"`) tant que l'utilisateur n'a rien cliqué.
+  const [monte, setMonte] = useState(false);
   const declencheurRechercheRef = useRef<HTMLButtonElement>(null);
   const declencheurMenuRef = useRef<HTMLButtonElement>(null);
   const champRechercheRef = useRef<HTMLInputElement>(null);
   const fermetureMenuRef = useRef<HTMLButtonElement>(null);
   const panneauRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMonte(true);
+  }, []);
 
   const fermer = useCallback(() => {
     const declencheur =
@@ -90,7 +100,7 @@ export function MobileHeaderControls({
         aria-expanded={panneau === "recherche"}
         aria-controls="panneau-recherche-mobile"
         onClick={() => setPanneau(panneau === "recherche" ? "aucun" : "recherche")}
-        className="flex h-11 w-11 items-center justify-center rounded-sm text-white/80 outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        className="flex h-11 w-11 items-center justify-center rounded-sm text-text-secondary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
       >
         <IconeRecherche />
       </button>
@@ -102,12 +112,19 @@ export function MobileHeaderControls({
         aria-expanded={panneau === "menu"}
         aria-controls="panneau-menu-mobile"
         onClick={() => setPanneau(panneau === "menu" ? "aucun" : "menu")}
-        className="flex h-11 w-11 items-center justify-center rounded-sm text-white/80 outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        className="flex h-11 w-11 items-center justify-center rounded-sm text-text-secondary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
       >
         <IconeMenu />
       </button>
 
-      {panneau === "recherche" && (
+      {/* Portail vers document.body (pas un simple `fixed` en place) : `<header>`
+          (public-header.tsx) a `backdrop-blur-[10px]`, qui — comme `transform`/`filter` —
+          fait de lui le containing block de ses descendants `position: fixed`
+          (spec CSS). Sans portail, ce panneau resterait piégé dans la boîte du header
+          (~150-180px de haut) au lieu de couvrir l'écran, et son `z-[70]` ne compterait
+          que dans la pile d'empilement du header, pas dans celle de la page entière —
+          exactement le bug remonté (panneau rendu derrière le hero). */}
+      {panneau === "recherche" && monte && createPortal(
         <div
           id="panneau-recherche-mobile"
           ref={panneauRef}
@@ -142,10 +159,11 @@ export function MobileHeaderControls({
               className="h-11 w-full rounded-full border border-border bg-bg-primary px-4 text-base text-text-primary outline-none placeholder:text-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
             />
           </form>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {panneau === "menu" && (
+      {panneau === "menu" && monte && createPortal(
         <div
           id="panneau-menu-mobile"
           ref={panneauRef}
@@ -252,7 +270,8 @@ export function MobileHeaderControls({
           >
             S&apos;inscrire
           </Link>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
