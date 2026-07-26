@@ -111,7 +111,10 @@ async function main() {
       categorieId: parSlugCategorie("analyses-pays").id,
       zoneId: parSlugZone("ethiopie").id,
       auteur: "La rédaction",
-      image: "article-3.png",
+      // Photo réelle (fournie par l'utilisateur) : port à conteneurs et grues au
+      // crépuscule — même image que le design réutilise pour cet article et pour
+      // "ethiopie-somaliland-accord-populations-deplacees" ci-dessous.
+      image: "port-conteneurs-grues.jpg",
       motsCles: ["barrage", "déplacement", "diplomatie de l'eau"],
       joursDecalage: 2,
       typeContenu: "enquete" as const,
@@ -290,7 +293,9 @@ async function main() {
       categorieId: parSlugCategorie("analyses-pays").id,
       zoneId: parSlugZone("ethiopie").id,
       auteur: "La rédaction",
-      image: "article-3.png",
+      // Même photo que "ethiopie-barrage-nil-bleu-populations-deplacees" : le design
+      // réutilise cette image pour les deux cartes de la section Analyses & enquêtes.
+      image: "port-conteneurs-grues.jpg",
       motsCles: ["accord bilatéral", "frontières", "déplacement"],
       joursDecalage: 1,
       typeContenu: "analyse" as const,
@@ -304,7 +309,9 @@ async function main() {
       categorieId: parSlugCategorie("droits-humains").id,
       zoneId: parSlugZone("soudan").id,
       auteur: "La rédaction",
-      image: "article-6.png",
+      // Photo réelle (fournie par l'utilisateur) : orpaillage artisanal, mains et tamis —
+      // même image que celle montrée par le design pour cet article.
+      image: "orpaillage-mains-tamis.jpg",
       motsCles: ["or", "économie de guerre", "milices"],
       joursDecalage: 0,
       typeContenu: "enquete" as const,
@@ -318,7 +325,10 @@ async function main() {
       categorieId: parSlugCategorie("juridique").id,
       zoneId: parSlugZone("regional").id,
       auteur: "La rédaction",
-      image: "article-5.png",
+      // Photo réelle (fournie par l'utilisateur) : vue aérienne d'un détroit de la mer
+      // Rouge avec porte-conteneurs — même image que celle montrée par le design pour
+      // cet article.
+      image: "routes-mer-rouge-porte-conteneurs.jpg",
       motsCles: ["droit international", "recours", "réfugiés"],
       joursDecalage: 0,
       typeContenu: "rapport" as const,
