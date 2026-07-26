@@ -116,6 +116,20 @@ model ContenuMotCle {
   @@map("contenu_mot_cle")
 }
 
+model MessageContact {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nom       String
+  email     String
+  // TEXT + valeurs de code fermées côté Zod (contact-schema.ts), pas un ENUM Postgres
+  // natif — même choix que InscritNewsletter.statut ci-dessous (cf. rapport).
+  objet     String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([createdAt(sort: Desc)])
+  @@map("message_contact")
+}
+
 model InscritNewsletter {
   id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email               String    @unique
