@@ -12,6 +12,7 @@ enum TypeContenu {
   enquete
   interview
   dossier_thematique
+  rapport
 
   @@map("type_contenu")
 }
