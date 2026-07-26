@@ -10,13 +10,16 @@ const NAV_ITEMS: ReadonlyArray<{ href: string; label: string }> = [
   { href: "/admin/articles", label: "Articles" },
   { href: "/admin/categories", label: "Catégories" },
   { href: "/admin/newsletter", label: "Newsletter" },
+  { href: "/admin/contact", label: "Contact" },
 ];
 
-// Sidebar administrateur (ui-specification.md §Navigation secondaire : 220px fixe,
-// Dashboard/Articles/Catégories/Newsletter, item actif souligné + gras, pied "Voir le
-// site ↗"/"Déconnexion"). Rendue par app/admin/(protected)/layout.tsx sur tous les écrans
-// protégés — seul îlot client du layout (détection de route active via usePathname,
-// déclencheur de déconnexion), le layout parent reste un Server Component pur.
+// Sidebar administrateur (ui-specification.md §Navigation secondaire : 220px fixe, item
+// actif souligné + gras, pied "Voir le site ↗"/"Déconnexion"). "Contact" ajoutée en REPO-7
+// (consultation des messages soumis par /contact, D6) — hors périmètre de
+// ui-specification.md, qui ne couvre pas ce module. Rendue par
+// app/admin/(protected)/layout.tsx sur tous les écrans protégés — seul îlot client du
+// layout (détection de route active via usePathname, déclencheur de déconnexion), le
+// layout parent reste un Server Component pur.
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
