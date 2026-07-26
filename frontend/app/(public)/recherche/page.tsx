@@ -3,6 +3,7 @@ import { ArticleSearchResultCard } from "@/components/articles/article-search-re
 import { searchArticles } from "@/features/articles/search-articles";
 import { listCategorieMenu } from "@/features/taxonomies/list-categorie-menu";
 import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
+import { TYPE_CONTENU_LABELS } from "@/features/articles/type-contenu-labels";
 
 // Recherche publique (Lot L9, étendue en L11, contrat validé) : une seule
 // route, formulaire GET natif (aucun JavaScript, aucun composant client).
@@ -19,14 +20,6 @@ export const metadata: Metadata = {
     canonical: "/recherche",
   },
 };
-
-const TYPES_CONTENU_OPTIONS: { value: string; label: string }[] = [
-  { value: "article", label: "Article" },
-  { value: "analyse", label: "Analyse" },
-  { value: "enquete", label: "Enquête" },
-  { value: "interview", label: "Interview" },
-  { value: "dossier_thematique", label: "Dossier thématique" },
-];
 
 function lireParam(value: string | string[] | undefined): string {
   return typeof value === "string" ? value.trim() : "";
@@ -90,7 +83,7 @@ export default async function RecherchePage({
         <div className="flex flex-wrap gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="categorie" className="font-meta text-[13px] text-text-secondary">
-              Catégorie
+              Rubrique
             </label>
             <select
               id="categorie"
@@ -98,7 +91,7 @@ export default async function RecherchePage({
               defaultValue={categorieSlug}
               className="rounded-sm border border-border px-3 py-2 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
             >
-              <option value="">Toutes les catégories</option>
+              <option value="">Toutes les rubriques</option>
               {categories.map((categorie) => (
                 <option key={categorie.slug} value={categorie.slug}>
                   {categorie.nom}
@@ -109,7 +102,7 @@ export default async function RecherchePage({
 
           <div className="flex flex-col gap-1">
             <label htmlFor="zone" className="font-meta text-[13px] text-text-secondary">
-              Zone géographique
+              Pays
             </label>
             <select
               id="zone"
@@ -117,7 +110,7 @@ export default async function RecherchePage({
               defaultValue={zoneSlug}
               className="rounded-sm border border-border px-3 py-2 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
             >
-              <option value="">Toutes les zones</option>
+              <option value="">Tous les pays</option>
               {zones.map((zone) => (
                 <option key={zone.slug} value={zone.slug}>
                   {zone.nom}
@@ -137,9 +130,9 @@ export default async function RecherchePage({
               className="rounded-sm border border-border px-3 py-2 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
             >
               <option value="">Tous les types</option>
-              {TYPES_CONTENU_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {Object.entries(TYPE_CONTENU_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
                 </option>
               ))}
             </select>
