@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from "react";
 
-// Barre de partage (Lot L4, contrat validé) : copie de lien, X et WhatsApp
-// uniquement — Facebook/LinkedIn hors périmètre. Composant client unique
-// (aucun découpage Server/Client, disproportionné pour ce composant
-// entièrement interactif — cf. contrat). `window.location.href` n'est lu
-// qu'à l'intérieur des gestionnaires onClick, jamais dans le corps du rendu :
-// un Client Component est tout de même rendu côté serveur lors du SSR
-// initial, où `window` n'existe pas.
+const BOUTON_ICONE =
+  "flex h-9 w-9 items-center justify-center rounded-full border border-border bg-bg-secondary text-sm font-bold text-text-secondary outline-none transition-colors duration-fast hover:border-accent-primary hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary";
+
+// Barre de partage (REPO-5, D5 : Corne de l'Afrique.dc.html l.214-219 — rangée inline
+// sous l'image, plus de comportement sticky/fixe). L'ancien positionnement sticky
+// (sidebar flottante desktop / barre basse fixe mobile, offset dérivé de
+// --header-height-desktop) est abandonné : le header REPO-3 n'a plus de hauteur fixe
+// unique (bandeaux empilés), cet offset était déjà désynchronisé. Icônes alignées sur le
+// design : lien, X, LinkedIn, e-mail — WhatsApp retiré (B19), LinkedIn et e-mail ajoutés.
+// Composant client unique (aucun découpage Server/Client, disproportionné pour un
+// composant entièrement interactif) : `window`/`navigator` ne sont lus que dans les
+// gestionnaires onClick, jamais dans le corps du rendu — un Client Component est tout de
+// même rendu côté serveur lors du SSR initial, où `window` n'existe pas.
 export function ShareBar({ titre }: { titre: string }) {
   const [copie, setCopie] = useState(false);
 
@@ -37,46 +43,46 @@ export function ShareBar({ titre }: { titre: string }) {
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
-  function partagerSurWhatsApp() {
-    const url = "https://wa.me/?text=" + encodeURIComponent(titre + " " + window.location.href);
+  function partagerSurLinkedIn() {
+    const url = "https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(window.location.href);
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
+  function partagerParEmail() {
+    const sujet = encodeURIComponent(titre);
+    const corps = encodeURIComponent(window.location.href);
+    window.location.href = `mailto:?subject=${sujet}&body=${corps}`;
+  }
+
   return (
-    // Offset desktop dérivé de --header-height-desktop (app/globals.css,
-    // Lot 6.1 contrat final §4) plutôt que codé en dur : reste synchronisé
-    // avec la hauteur réelle du header sans duplication de valeur.
-    <div
-      className="fixed inset-x-0 bottom-0 z-30 flex flex-wrap items-center justify-center gap-2 border-t border-border bg-bg-primary px-5 py-3
-                 lg:sticky lg:inset-x-auto lg:bottom-auto lg:top-[calc(var(--header-height-desktop)_+_2rem)] lg:flex-col lg:items-start lg:justify-start lg:border-t-0 lg:border lg:px-3 lg:py-4"
-    >
+    <div className="mt-6 flex flex-wrap items-center gap-2.5">
+      <span className="mr-0.5 text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
+        Partager
+      </span>
+
       <button
         type="button"
         onClick={copierLeLien}
-        className="min-h-11 min-w-11 rounded-sm px-3 py-2 text-sm text-text-secondary transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+        className="flex items-center gap-1.5 rounded-full border border-border bg-bg-secondary px-3.5 py-1.5 text-[12.5px] font-medium text-text-secondary outline-none transition-colors duration-fast hover:border-accent-primary hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
       >
-        Copier le lien
-      </button>
-      <button
-        type="button"
-        onClick={partagerSurX}
-        className="min-h-11 min-w-11 rounded-sm px-3 py-2 text-sm text-text-secondary transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-      >
-        Partager sur X
-      </button>
-      <button
-        type="button"
-        onClick={partagerSurWhatsApp}
-        className="min-h-11 min-w-11 rounded-sm px-3 py-2 text-sm text-text-secondary transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-      >
-        Partager sur WhatsApp
+        <span aria-hidden="true">🔗</span>
+        <span>{copie ? "Lien copié" : "Copier le lien"}</span>
       </button>
 
-      {copie && (
-        <p role="status" className="text-sm text-text-secondary">
-          Lien copié
-        </p>
-      )}
+      <button type="button" onClick={partagerSurX} aria-label="Partager sur X" className={BOUTON_ICONE}>
+        𝕏
+      </button>
+      <button
+        type="button"
+        onClick={partagerSurLinkedIn}
+        aria-label="Partager sur LinkedIn"
+        className={`${BOUTON_ICONE} text-xs tracking-[.02em]`}
+      >
+        in
+      </button>
+      <button type="button" onClick={partagerParEmail} aria-label="Partager par e-mail" className={BOUTON_ICONE}>
+        <span aria-hidden="true">✉</span>
+      </button>
     </div>
   );
 }
