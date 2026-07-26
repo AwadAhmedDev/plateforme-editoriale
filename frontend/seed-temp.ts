@@ -17,9 +17,8 @@ async function main() {
     )
   );
 
-  // Pays (REPO-1, B2) : Éthiopie/Somalie/Kenya déjà présents conservés tels quels
-  // (slugs identiques dans COUNTRIES du design) ; 5 pays ajoutés. Ordre et libellés
-  // repris littéralement de COUNTRIES dans Corne de l'Afrique.dc.html.
+  // Pays (REPO-1, B2) : ordre et libellés repris littéralement de COUNTRIES dans
+  // Corne de l'Afrique.dc.html.
   const zones = await Promise.all(
     [
       { nom: "Somalie", slug: "somalie", descriptionCourte: "Actualités liées à la Somalie." },
@@ -36,113 +35,232 @@ async function main() {
   );
 
   // Recherche par slug (plutôt qu'une déstructuration positionnelle) : robuste à
-  // l'ordre des tableaux ci-dessus, qui reflète désormais l'ordre éditorial du
-  // design, pas un ordre technique arbitraire.
-  const analysesPays = categories.find((c) => c.slug === "analyses-pays")!;
-  const ethiopie = zones.find((z) => z.slug === "ethiopie")!;
-  const somalie = zones.find((z) => z.slug === "somalie")!;
-  const kenya = zones.find((z) => z.slug === "kenya")!;
+  // l'ordre des tableaux ci-dessus, qui reflète l'ordre éditorial du design, pas un
+  // ordre technique arbitraire.
+  const parSlugCategorie = (slug: string) => categories.find((c) => c.slug === slug)!;
+  const parSlugZone = (slug: string) => zones.find((z) => z.slug === slug)!;
 
-  // Les 7 articles de démonstration ci-dessous datent de l'ancien positionnement
-  // (Politique/Économie/Société) : aucun ne relève des thématiques Asile & protection /
-  // Migrations / Droits humains / Juridique / Interviews du nouveau design — reclassés
-  // dans "Analyses pays" (seule rubrique restante à portée générale par pays), sans
-  // réécriture de titre/chapô/corps/auteur (hors périmètre de REPO-1, qui ne porte que
-  // sur la taxonomie — voir analyse préalable). Zones inchangées : ethiopie/somalie/kenya
-  // restent des pays valides du nouveau design, aucune raison de les modifier.
+  // Anciens articles de démonstration (Lot Homepage, hors périmètre du repositionnement
+  // éditorial REPO-1→9) : sans rapport avec les thématiques Asile & protection /
+  // Migrations / Droits humains / Juridique / Analyses pays / Interviews du nouveau
+  // design — remplacés intégralement (pas de reclassement, contrairement à REPO-1) par
+  // le corpus ci-dessous, aligné sur le contenu réellement montré par Corne de
+  // l'Afrique.dc.html (écrans Accueil/Recherche). Supprimés avant la création des
+  // nouveaux articles : idempotent (deleteMany par slug), aucune erreur si déjà absents.
+  const anciensSlugs = [
+    "dossier-dynamiques-regionales-corne-afrique",
+    "ethiopie-reforme-fonciere-regions-rurales",
+    "somalie-peche-diversification-economique",
+    "kenya-education-numerique-programmes",
+    "addis-abeba-sommet-regional-securite",
+    "nairobi-investissements-technologiques",
+    "mogadiscio-reconstruction-infrastructures-sanitaires",
+  ];
+  await prisma.contenuMotCle.deleteMany({ where: { contenu: { slug: { in: anciensSlugs } } } });
+  await prisma.contenuEditorial.deleteMany({ where: { slug: { in: anciensSlugs } } });
+
+  // Corpus éditorial (REPO-10, alignement contenu sur le design) : 14 contenus Publiés,
+  // couvrant les 6 rubriques, les 8 pays et les 6 valeurs de TypeContenu (dont `rapport`,
+  // resté sans contenu depuis REPO-1). Texte générique et illustratif — aucun fait,
+  // organisation ou statistique présenté comme réel ou vérifié ; sujets traités
+  // (asile, violences de genre, déplacement) volontairement non graphiques, sur un
+  // registre documentaire neutre cohérent avec la ligne éditoriale du média fictif.
   const articles = [
     {
-      slug: "dossier-dynamiques-regionales-corne-afrique",
-      titre: "Dossier : comprendre les dynamiques régionales de la Corne de l'Afrique",
-      chapo:
-        "Un tour d'horizon synthétique des enjeux politiques, économiques et sécuritaires qui structurent la région, pour resituer l'actualité dans son contexte de long terme.",
+      slug: "ethiopie-rapport-dispositif-asile-afflux-regional",
+      titre: "Rapport pays : le dispositif d'asile éthiopien face à l'afflux régional",
+      chapo: "Cadre légal, capacités d'accueil, coopération internationale : un rapport documentaire destiné aux praticiens du droit d'asile.",
       corps:
-        "Ce dossier propose une lecture transversale des grands équilibres régionaux de la Corne de l'Afrique, à l'usage des lecteurs qui découvrent la zone comme de ceux qui en suivent l'actualité au quotidien.\n\nIl reprend, axe par axe, les principales lignes de force identifiées par la rédaction : rapports de force politiques, trajectoires économiques nationales et enjeux sécuritaires transfrontaliers.\n\nCe dossier sera mis à jour au fil des publications, à mesure que de nouvelles analyses viendront enrichir chacun de ces axes.",
-      categorieId: analysesPays.id,
-      zoneId: ethiopie.id,
-      auteur: "Rédaction",
+        "Ce rapport pays dresse un état des lieux du cadre légal éthiopien en matière d'asile, de son articulation avec les conventions internationales ratifiées par le pays et des procédures effectivement suivies par les autorités compétentes.\n\nIl détaille les capacités d'accueil actuelles, les délais moyens de traitement des dossiers et les principaux points de friction identifiés par les praticiens du droit d'asile et les organisations d'accompagnement juridique.\n\nUne section dédiée revient sur les mécanismes de coopération avec les agences internationales présentes dans la région, ainsi que sur les évolutions réglementaires envisagées à moyen terme.",
+      categorieId: parSlugCategorie("juridique").id,
+      zoneId: parSlugZone("ethiopie").id,
+      auteur: "La rédaction",
       image: "article-1.png",
-      motsCles: ["dossier", "analyse régionale", "corne de l'afrique"],
+      motsCles: ["asile", "droit", "rapport pays"],
       joursDecalage: 0,
+      typeContenu: "rapport" as const,
+    },
+    {
+      slug: "somalie-demandes-asile-femmes-violences-genre",
+      titre: "Ce que les demandes d'asile de femmes somaliennes disent des violences de genre",
+      chapo: "Un examen des motifs invoqués dans les dossiers d'asile déposés par des femmes fuyant conflits et violences ciblées.",
+      corps:
+        "L'analyse porte sur un ensemble de dossiers de demande d'asile déposés par des femmes originaires de Somalie, en s'attachant aux motifs recevables tels qu'exposés devant les instances compétentes, sans reproduire les détails les plus sensibles des récits individuels.\n\nElle met en évidence la manière dont les violences fondées sur le genre sont qualifiées juridiquement selon les juridictions, ainsi que les écarts d'appréciation qui en résultent d'un pays d'accueil à l'autre.\n\nLes limites documentaires de cet exercice sont également discutées : la difficulté à établir des preuves recevables et l'accompagnement psychosocial souvent nécessaire en parallèle de la procédure.",
+      categorieId: parSlugCategorie("asile").id,
+      zoneId: parSlugZone("somalie").id,
+      auteur: "Hodan Warsame",
+      image: "article-2.png",
+      motsCles: ["asile", "genre", "protection"],
+      joursDecalage: 1,
+      typeContenu: "analyse" as const,
+    },
+    {
+      slug: "ethiopie-barrage-nil-bleu-populations-deplacees",
+      titre: "Le grand barrage du Nil bleu et ses populations déplacées",
+      chapo: "Au-delà de la diplomatie de l'eau entre Éthiopie, Soudan et Égypte, des communautés entières ont dû quitter leurs terres.",
+      corps:
+        "Si les négociations diplomatiques autour du grand barrage de la Renaissance concentrent l'attention régionale, la construction a également entraîné le déplacement de plusieurs communautés riveraines, dont le relogement s'est étalé sur plusieurs années.\n\nCette enquête documente les modalités de compensation prévues, leur mise en œuvre effective et les recours dont disposent les populations concernées lorsque les indemnisations sont jugées insuffisantes.\n\nElle replace enfin ces déplacements dans le contexte plus large des tensions diplomatiques entre l'Éthiopie, le Soudan et l'Égypte autour du partage des eaux du Nil.",
+      categorieId: parSlugCategorie("analyses-pays").id,
+      zoneId: parSlugZone("ethiopie").id,
+      auteur: "Amina Tesfaye",
+      image: "article-3.png",
+      motsCles: ["barrage", "déplacement", "diplomatie de l'eau"],
+      joursDecalage: 2,
+      typeContenu: "enquete" as const,
+    },
+    {
+      slug: "djibouti-carrefour-migratoire-peninsule-arabique",
+      titre: "Djibouti, carrefour migratoire entre Corne de l'Afrique et péninsule Arabique",
+      chapo: "Port et aéroport de Djibouti concentrent une part croissante des flux migratoires vers le Golfe.",
+      corps:
+        "La position géographique de Djibouti en fait un point de passage privilégié pour les personnes originaires de la Corne de l'Afrique en direction de la péninsule Arabique, par voie maritime comme aérienne.\n\nCet article revient sur les infrastructures concernées, les acteurs qui organisent ces déplacements et les risques documentés par les organisations présentes sur place.\n\nIl aborde également les réponses apportées par les autorités djiboutiennes et leurs partenaires internationaux face à l'augmentation de ces flux.",
+      categorieId: parSlugCategorie("migrations").id,
+      zoneId: parSlugZone("djibouti").id,
+      auteur: "Fatouma Robleh",
+      image: "article-4.png",
+      motsCles: ["migration", "golfe", "transit"],
+      joursDecalage: 3,
+      typeContenu: "article" as const,
+    },
+    {
+      slug: "corne-afrique-routes-migratoires-trois-cartes",
+      titre: "Les routes migratoires de la Corne de l'Afrique, en trois cartes",
+      chapo: "Itinéraires terrestres et maritimes, points de passage, zones à risque : un tour d'horizon des principales routes migratoires régionales.",
+      corps:
+        "Ce dossier propose une lecture cartographique des principales routes migratoires qui traversent la Corne de l'Afrique, depuis les zones de départ jusqu'aux points de sortie régionaux.\n\nIl distingue les itinéraires terrestres, souvent empruntés par étapes, des traversées maritimes plus directes mais aussi plus risquées, et situe les principaux points de passage identifiés par les organisations humanitaires.\n\nCe dossier sera mis à jour au fil des publications, à mesure que de nouvelles données viendront enrichir chacun de ces itinéraires.",
+      categorieId: parSlugCategorie("migrations").id,
+      zoneId: parSlugZone("regional").id,
+      auteur: "La rédaction",
+      image: "article-5.png",
+      motsCles: ["cartographie", "routes migratoires", "dossier"],
+      joursDecalage: 4,
       typeContenu: "dossier_thematique" as const,
     },
     {
-      slug: "ethiopie-reforme-fonciere-regions-rurales",
-      titre: "L'Éthiopie engage une réforme foncière dans les régions rurales",
-      chapo: "Le gouvernement fédéral annonce un plan de clarification des titres fonciers destiné aux exploitants agricoles.",
+      slug: "kenya-entretien-ong-camps-refugies",
+      titre: "« Les camps ne sont pas une solution durable » — entretien avec une responsable d'ONG au Kenya",
+      chapo: "Une responsable d'une organisation d'aide aux réfugiés revient sur les limites du modèle des camps de longue durée.",
       corps:
-        "Le ministère de l'Agriculture a présenté cette semaine un plan pluriannuel visant à sécuriser les droits fonciers dans plusieurs régions rurales du pays.\n\nCe programme, financé en partie par des bailleurs internationaux, doit permettre à des dizaines de milliers d'exploitants agricoles d'obtenir un titre de propriété officiel.\n\nLes autorités locales seront chargées du déploiement sur le terrain, avec un premier bilan attendu d'ici la fin de l'année.",
-      categorieId: analysesPays.id,
-      zoneId: ethiopie.id,
-      auteur: "Amina Tesfaye",
-      image: "article-1.png",
-      motsCles: ["agriculture", "réforme", "foncier"],
-      joursDecalage: 1,
-    },
-    {
-      slug: "somalie-peche-diversification-economique",
-      titre: "La Somalie mise sur la pêche pour diversifier son économie",
-      chapo: "Un nouveau plan national entend développer la filière halieutique le long des côtes somaliennes.",
-      corps:
-        "Longtemps sous-exploitée, la filière pêche fait l'objet d'un plan de relance porté par le ministère des Ressources marines.\n\nL'objectif est de moderniser les infrastructures portuaires et de former une nouvelle génération de pêcheurs aux techniques durables.\n\nDes discussions sont en cours avec plusieurs partenaires régionaux pour financer les premières étapes du projet.",
-      categorieId: analysesPays.id,
-      zoneId: somalie.id,
-      auteur: "Hodan Warsame",
-      image: "article-2.png",
-      motsCles: ["pêche", "économie", "développement"],
-      joursDecalage: 3,
-    },
-    {
-      slug: "kenya-education-numerique-programmes",
-      titre: "Le Kenya renforce ses programmes d'éducation numérique",
-      chapo: "De nouveaux centres d'apprentissage numérique ouvrent dans plusieurs comtés du pays.",
-      corps:
-        "Le ministère de l'Éducation a inauguré une série de centres équipés en matériel informatique, destinés aux élèves du secondaire.\n\nCe programme s'inscrit dans une stratégie plus large de modernisation du système éducatif kényan.\n\nDes formations pour les enseignants sont également prévues au cours des prochains mois.",
-      categorieId: analysesPays.id,
-      zoneId: kenya.id,
+        "Après plusieurs années passées à coordonner des programmes d'assistance dans des camps de réfugiés au Kenya, notre interlocutrice revient sur les limites structurelles de ce modèle d'accueil, pensé pour l'urgence mais souvent prolongé sur plusieurs décennies.\n\nElle détaille les alternatives testées localement — intégration économique, accès à l'éducation hors camp, dispositifs de logement urbain — et les obstacles administratifs qui freinent leur généralisation.\n\nL'entretien aborde enfin la question du financement international, dont la baisse progressive complique la planification à long terme des organisations de terrain.",
+      categorieId: parSlugCategorie("interviews").id,
+      zoneId: parSlugZone("kenya").id,
       auteur: "James Otieno",
-      image: "article-3.png",
-      motsCles: ["éducation", "numérique", "jeunesse"],
-      joursDecalage: 5,
-    },
-    {
-      slug: "addis-abeba-sommet-regional-securite",
-      titre: "Addis-Abeba accueille un sommet régional sur la sécurité",
-      chapo: "Les chefs d'État de la région se sont réunis pour discuter de coopération sécuritaire.",
-      corps:
-        "Le sommet, organisé sur deux jours, a rassemblé des délégations venues de toute la Corne de l'Afrique.\n\nLes discussions ont porté sur le partage de renseignement et la coordination des forces frontalières.\n\nUn communiqué final doit être publié dans les prochains jours.",
-      categorieId: analysesPays.id,
-      zoneId: ethiopie.id,
-      auteur: "Amina Tesfaye",
-      image: "article-4.png",
-      motsCles: ["diplomatie", "sécurité", "sommet"],
-      joursDecalage: 8,
-    },
-    {
-      slug: "nairobi-investissements-technologiques",
-      titre: "Nairobi attire de nouveaux investissements technologiques",
-      chapo: "Plusieurs entreprises internationales annoncent l'ouverture de bureaux dans la capitale kényane.",
-      corps:
-        "La zone d'innovation de Nairobi continue d'attirer des investisseurs étrangers dans le secteur des technologies.\n\nCes annonces confirment la position du Kenya comme pôle technologique régional.\n\nLes autorités locales espèrent que ces investissements créeront plusieurs milliers d'emplois qualifiés.",
-      categorieId: analysesPays.id,
-      zoneId: kenya.id,
-      auteur: "James Otieno",
-      image: "article-5.png",
-      motsCles: ["technologie", "investissement", "emploi"],
-      joursDecalage: 12,
-    },
-    {
-      slug: "mogadiscio-reconstruction-infrastructures-sanitaires",
-      titre: "Mogadiscio reconstruit ses infrastructures sanitaires",
-      chapo: "Un vaste programme de rénovation des hôpitaux de la capitale a été lancé cette semaine.",
-      corps:
-        "Le ministère de la Santé a présenté un calendrier de rénovation pour plusieurs établissements hospitaliers de la capitale.\n\nCe programme vise à améliorer l'accès aux soins pour les habitants des quartiers les plus densément peuplés.\n\nLes premiers travaux devraient débuter dans les semaines à venir.",
-      categorieId: analysesPays.id,
-      zoneId: somalie.id,
-      auteur: "Hodan Warsame",
       image: "article-6.png",
-      motsCles: ["santé", "infrastructure", "reconstruction"],
-      joursDecalage: 15,
+      motsCles: ["entretien", "camps de réfugiés", "ong"],
+      joursDecalage: 5,
+      typeContenu: "interview" as const,
+    },
+    {
+      slug: "soudan-entretien-juriste-documenter-proteger",
+      titre: "Juriste au Soudan : « Documenter, c'est déjà protéger »",
+      chapo: "Entretien avec une avocate spécialisée dans l'assistance juridique aux personnes déplacées par le conflit.",
+      corps:
+        "Basée dans un centre d'assistance juridique, notre interlocutrice explique pourquoi la simple documentation des situations individuelles — identité, parcours, biens perdus — constitue déjà, selon elle, une première forme de protection pour les personnes déplacées.\n\nElle revient sur les difficultés pratiques de ce travail dans un contexte de conflit actif : accès limité à certaines zones, insécurité pour les équipes, archives administratives endommagées ou inaccessibles.\n\nL'entretien se conclut sur les perspectives de reconstruction des dispositifs d'état civil, condition jugée essentielle à la résolution durable des situations de déplacement.",
+      categorieId: parSlugCategorie("interviews").id,
+      zoneId: parSlugZone("soudan").id,
+      auteur: "Nour al-Tayeb",
+      image: "article-1.png",
+      motsCles: ["entretien", "assistance juridique", "déplacement"],
+      joursDecalage: 6,
+      typeContenu: "interview" as const,
+    },
+    {
+      slug: "erythree-temoignages-diaspora",
+      titre: "Érythrée : ce que documentent les témoignages de la diaspora",
+      chapo: "Recoupement de témoignages recueillis auprès de ressortissants érythréens ayant quitté le pays ces cinq dernières années.",
+      corps:
+        "Cette enquête s'appuie sur un ensemble de témoignages recueillis auprès de membres de la diaspora érythréenne installés dans différents pays d'accueil, recoupés autant que possible avec les rapports d'organisations internationales spécialisées.\n\nElle documente les circonstances de départ le plus souvent évoquées, ainsi que les parcours migratoires empruntés jusqu'à l'obtention d'un statut de protection.\n\nLes auteurs rappellent les limites méthodologiques de ce type de recueil : biais de sélection des témoins disponibles et impossibilité de vérification indépendante sur place.",
+      categorieId: parSlugCategorie("droits-humains").id,
+      zoneId: parSlugZone("erythree").id,
+      auteur: "Semhar Ghebrehiwet",
+      image: "article-2.png",
+      motsCles: ["diaspora", "témoignages", "enquête"],
+      joursDecalage: 7,
+      typeContenu: "enquete" as const,
+    },
+    {
+      slug: "somaliland-mecanismes-locaux-protection-deplaces",
+      titre: "Somaliland : les mécanismes locaux de protection des personnes déplacées",
+      chapo: "Face à l'absence de reconnaissance internationale, des dispositifs locaux tentent de combler le vide juridique.",
+      corps:
+        "En l'absence de reconnaissance internationale de son statut, le Somaliland a développé des dispositifs administratifs propres pour encadrer l'accueil et la protection des personnes déplacées présentes sur son territoire.\n\nCet article détaille le fonctionnement de ces mécanismes locaux, leur articulation informelle avec les cadres juridiques internationaux existants, et les zones grises qui en résultent pour les personnes concernées.\n\nIl évoque enfin les initiatives de coopération technique engagées avec certaines organisations internationales, malgré l'absence de reconnaissance diplomatique formelle.",
+      categorieId: parSlugCategorie("droits-humains").id,
+      zoneId: parSlugZone("somaliland").id,
+      auteur: "Ayaan Farah",
+      image: "article-3.png",
+      motsCles: ["protection", "déplacement interne", "cadre local"],
+      joursDecalage: 8,
+      typeContenu: "article" as const,
+    },
+    {
+      slug: "kenya-nouvelle-loi-refugies",
+      titre: "Kenya : ce que change la nouvelle loi sur les réfugiés",
+      chapo: "Adoptée après plusieurs années de négociation, la réforme légale kényane redéfinit les droits économiques des réfugiés.",
+      corps:
+        "La réforme législative kényane relative au statut des réfugiés introduit plusieurs changements significatifs, en particulier sur le plan des droits économiques : accès élargi au marché du travail formel et possibilité, sous conditions, de circuler hors des zones d'installation historiques.\n\nCette analyse détaille les mécanismes d'application prévus par le texte, les décrets d'exécution encore attendus et les premières réactions des organisations de la société civile.\n\nElle met en perspective cette réforme avec les engagements internationaux pris par le Kenya en matière d'intégration économique des populations réfugiées.",
+      categorieId: parSlugCategorie("juridique").id,
+      zoneId: parSlugZone("kenya").id,
+      auteur: "James Otieno",
+      image: "article-4.png",
+      motsCles: ["loi", "réfugiés", "droits économiques"],
+      joursDecalage: 9,
+      typeContenu: "analyse" as const,
+    },
+    {
+      slug: "somalie-diaspora-partenaire-economique",
+      titre: "Somalie : la diaspora, premier partenaire économique du pays",
+      chapo: "Les transferts de fonds de la diaspora somalienne dépassent largement l'aide internationale au développement.",
+      corps:
+        "Les transferts de fonds envoyés par la diaspora somalienne représentent, selon plusieurs estimations concordantes, un volume nettement supérieur à celui de l'aide internationale au développement reçue par le pays.\n\nCet article revient sur les canaux utilisés pour ces transferts, les secteurs économiques qui en bénéficient le plus directement et les difficultés d'accès aux services bancaires classiques rencontrées par une partie de la diaspora.\n\nIl aborde enfin les projets de structuration de ces flux portés par certaines institutions financières régionales.",
+      categorieId: parSlugCategorie("migrations").id,
+      zoneId: parSlugZone("somalie").id,
+      auteur: "Hodan Warsame",
+      image: "article-5.png",
+      motsCles: ["diaspora", "transferts de fonds", "économie"],
+      joursDecalage: 10,
+      typeContenu: "article" as const,
+    },
+    {
+      slug: "soudan-asile-interne-categorie-hors-statistiques",
+      titre: "Soudan : l'asile interne, une catégorie qui échappe aux statistiques",
+      chapo: "Les personnes déplacées à l'intérieur du pays restent largement absentes des cadres de protection internationale.",
+      corps:
+        "Contrairement aux personnes ayant franchi une frontière internationale, celles déplacées à l'intérieur même du Soudan relèvent d'un régime de protection distinct, moins outillé sur le plan statistique comme sur le plan juridique.\n\nCette analyse revient sur les raisons de cet écart de traitement, les tentatives récentes d'harmonisation des cadres de suivi, et les conséquences concrètes pour l'accès à l'assistance humanitaire.\n\nElle souligne enfin le rôle des acteurs locaux, souvent seuls en mesure de documenter ces situations sur la durée.",
+      categorieId: parSlugCategorie("asile").id,
+      zoneId: parSlugZone("soudan").id,
+      auteur: "Nour al-Tayeb",
+      image: "article-6.png",
+      motsCles: ["déplacement interne", "statistiques", "protection"],
+      joursDecalage: 11,
+      typeContenu: "analyse" as const,
+    },
+    {
+      slug: "corne-afrique-region-sept-crises-entremelees",
+      titre: "Corne de l'Afrique : une région, sept crises entremêlées",
+      chapo: "Panorama des dynamiques régionales qui se recoupent et se renforcent mutuellement, d'un pays à l'autre.",
+      corps:
+        "Conflits armés, tensions frontalières, sécheresses récurrentes, crises économiques : les dynamiques qui traversent la Corne de l'Afrique se recoupent rarement selon les frontières nationales.\n\nCet article propose un panorama synthétique de ces dynamiques régionales, en s'attachant à leurs points de contact plutôt qu'à une lecture strictement pays par pays.\n\nIl sera mis à jour au fil des publications, à mesure que de nouvelles analyses viendront enrichir chacun de ces axes.",
+      categorieId: parSlugCategorie("analyses-pays").id,
+      zoneId: parSlugZone("regional").id,
+      auteur: "La rédaction",
+      image: "article-1.png",
+      motsCles: ["panorama régional", "analyse", "dynamiques"],
+      joursDecalage: 12,
+      typeContenu: "article" as const,
+    },
+    {
+      slug: "ethiopie-defenseurs-droits-humains-sous-pression",
+      titre: "Éthiopie : les défenseurs des droits humains sous pression",
+      chapo: "Plusieurs organisations locales rapportent une multiplication des obstacles administratifs à leur travail documentaire.",
+      corps:
+        "Plusieurs organisations éthiopiennes de défense des droits humains font état, ces derniers mois, d'une multiplication des obstacles administratifs rencontrés dans le cadre de leur travail de documentation.\n\nCette enquête recense les types d'obstacles rapportés — délais d'enregistrement, restrictions d'accès à certaines zones, exigences de justification renforcées — et les recoupe avec les textes réglementaires en vigueur.\n\nElle donne également la parole à plusieurs de ces organisations sur les stratégies d'adaptation mises en place pour poursuivre leur mission documentaire.",
+      categorieId: parSlugCategorie("droits-humains").id,
+      zoneId: parSlugZone("ethiopie").id,
+      auteur: "Amina Tesfaye",
+      image: "article-2.png",
+      motsCles: ["droits humains", "société civile", "documentation"],
+      joursDecalage: 13,
+      typeContenu: "enquete" as const,
     },
   ];
 
@@ -150,17 +268,22 @@ async function main() {
     const datePublication = new Date(Date.now() - a.joursDecalage * 24 * 60 * 60 * 1000);
     await prisma.contenuEditorial.upsert({
       where: { slug: a.slug },
-      // REPO-1 : réassigne categorieId/zoneId même si l'article existe déjà (rejeu sur
-      // une base seedée avant ce lot) — sans cela, les 7 articles de démonstration
-      // resteraient rattachés aux anciennes rubriques Politique/Économie/Société,
-      // empêchant leur suppression (onDelete: Restrict) ci-dessous.
-      update: { categorieId: a.categorieId, zoneId: a.zoneId },
+      update: {
+        titre: a.titre,
+        chapo: a.chapo,
+        corps: a.corps,
+        typeContenu: a.typeContenu,
+        categorieId: a.categorieId,
+        zoneId: a.zoneId,
+        auteur: a.auteur,
+        datePublication,
+      },
       create: {
         slug: a.slug,
         titre: a.titre,
         chapo: a.chapo,
         corps: a.corps,
-        typeContenu: "typeContenu" in a ? a.typeContenu : "article",
+        typeContenu: a.typeContenu,
         categorieId: a.categorieId,
         zoneId: a.zoneId,
         imagePrincipaleUrl: `/seed/${a.image}`,
@@ -176,11 +299,6 @@ async function main() {
       },
     });
   }
-
-  // Anciennes rubriques (Politique/Économie/Société) : supprimées une fois tous les
-  // articles ci-dessus reclassés vers les 6 nouvelles rubriques (plus aucune référence
-  // entrante, onDelete: Restrict ne bloque donc pas). Idempotent (deleteMany).
-  await prisma.categorie.deleteMany({ where: { slug: { in: ["politique", "economie", "societe"] } } });
 
   console.log(`Seed terminé : ${categories.length} catégories, ${zones.length} zones, ${articles.length} articles.`);
 }
