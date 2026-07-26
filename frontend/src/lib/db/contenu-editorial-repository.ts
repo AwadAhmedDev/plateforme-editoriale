@@ -2,7 +2,11 @@ import { Prisma, type ContenuEditorial, type StatutContenu, type TypeContenu } f
 import { prisma } from "@/lib/prisma";
 
 const PAGE_SIZE = 20;
-const PUBLIC_PAGE_SIZE = 12;
+// Relevé de 12 à 24 (REPO-6/REPO-10) : /articles et /recherche restent sans pagination
+// (page 1 uniquement, décision déjà établie) — la valeur doit donc rester au-dessus du
+// volume de contenu Publié réellement seedé pour ne pas tronquer silencieusement des
+// résultats sans qu'aucune page 2 ne soit accessible pour les voir.
+const PUBLIC_PAGE_SIZE = 24;
 
 const ARTICLE_ADMIN_LIST_INCLUDE = { categorie: true, zone: true } satisfies Prisma.ContenuEditorialInclude;
 // Étendu au Lot 8 (stratégie de revalidation) : `categorie`/`zone` réduits à leur seul
