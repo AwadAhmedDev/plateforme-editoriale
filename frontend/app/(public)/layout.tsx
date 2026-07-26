@@ -52,14 +52,17 @@ export default function PublicLayout({
         </div>
       </section>
 
-      {/* Footer 4 colonnes (REPO-8, B26, design l.457-488) : marque / Rubriques
-          (FooterTaxonomies) / Pays (FooterTaxonomies) / Le média. Contact et
-          Méthodologie n'existent pas encore (REPO-7 à venir) — liens présents
-          par fidélité au design, 404 en attendant ; de même pour Mentions
-          légales (aucune page dédiée aujourd'hui). Abonnement pointe vers
-          /newsletter : l'abonnement payant du design est hors périmètre MVP
-          (AGENTS.md §MVP scope), la newsletter gratuite en est l'équivalent
-          fonctionnel le plus proche. */}
+      {/* Footer 4 colonnes (REPO-8, B26, design l.457-488 ; Contact/Méthodologie
+          livrées en REPO-7) : marque / Rubriques (FooterTaxonomies) / Pays
+          (FooterTaxonomies) / Le média. Mentions légales reste un lien mort
+          (aucune page dédiée pour l'instant, hors périmètre de REPO-7).
+          Abonnement pointe vers /newsletter : l'abonnement payant du design
+          est hors périmètre MVP (AGENTS.md §MVP scope), la newsletter
+          gratuite en est l'équivalent fonctionnel le plus proche. "À propos"
+          ajoutée en plus des liens du design (D4, plan-implementation-
+          repositionnement-asile.md §D0) : la page existe, n'est référencée
+          nulle part dans le design, mais reste accessible via ce lien plutôt
+          que retirée de toute navigation. */}
       <footer className="bg-[#141210] text-[14px] text-[#c8c2b6]">
         <div className="mx-auto grid max-w-[1220px] grid-cols-1 gap-9 px-5 pb-7 pt-12 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:px-[28px]">
           <div>
@@ -98,6 +101,11 @@ export default function PublicLayout({
               <li>
                 <Link href="/mentions-legales" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                   Mentions légales
+                </Link>
+              </li>
+              <li>
+                <Link href="/a-propos" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  À propos
                 </Link>
               </li>
             </ul>
