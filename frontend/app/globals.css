@@ -1,42 +1,60 @@
 @import "tailwindcss";
 
 /*
- * Design tokens publics — ui-specification.md §Design Tokens (OKLCH, source de
- * vérité). Noms de clés volontairement distincts des clés par défaut de Tailwind
- * (--font-sans / --font-serif / --font-mono) : ces clés par défaut ne sont jamais
- * redéfinies ici, car déjà consommées par l'espace admin et les features
- * existantes (usages directs de `font-mono`/`font-sans`, 168 occurrences de
- * `dark:` — cf. audit d'implémentation L0A Étape 1). Même logique pour les
- * breakpoints : aucun de sm/md/lg/xl n'est redéfini, `lg` (1024px) restant la
- * valeur dont app/admin/(protected)/layout.tsx dépend explicitement pour son
- * message d'orientation desktop-only.
+ * Design tokens publics — noms de clés volontairement distincts des clés par
+ * défaut de Tailwind (--font-sans / --font-serif / --font-mono) : ces clés par
+ * défaut ne sont jamais redéfinies ici, car déjà consommées par l'espace admin
+ * et les features existantes (usages directs de `font-mono`/`font-sans`, 168
+ * occurrences de `dark:` — cf. audit d'implémentation L0A Étape 1). Même logique
+ * pour les breakpoints : aucun de sm/md/lg/xl n'est redéfini, `lg` (1024px)
+ * restant la valeur dont app/admin/(protected)/layout.tsx dépend explicitement
+ * pour son message d'orientation desktop-only.
+ *
+ * Valeurs de couleur/typographie/rayon (Lot 1, migration UI Claude Design) :
+ * source de vérité désormais le design Claude Design (identité visuelle),
+ * converties en OKLCH pour rester cohérentes avec le format déjà utilisé ici —
+ * équivalent hex d'origine documenté en commentaire sur chaque ligne.
+ * ui-specification.md reste la référence pour tout ce qui n'est pas visuel
+ * (architecture de navigation, responsive, accessibilité, comportement des
+ * composants).
  */
 @theme inline {
   /* Couleurs */
-  --color-bg-primary: oklch(0.99 0.003 250);
-  --color-bg-secondary: oklch(0.97 0.004 250);
-  --color-text-primary: oklch(0.22 0.006 250);
-  --color-text-secondary: oklch(0.48 0.008 250);
-  --color-border: oklch(0.87 0.006 250);
-  --color-accent-primary: oklch(0.38 0.09 258);
-  --color-accent-primary-hover: oklch(0.33 0.09 258);
-  --color-accent-warm: oklch(0.62 0.09 55);
+  --color-bg-primary: oklch(0.965 0.010 87.5); /* #f6f3ec */
+  --color-bg-secondary: oklch(0.994 0.007 88.6); /* #fffdf8 */
+  --color-text-primary: oklch(0.214 0.008 84.6); /* #1b1915 */
+  --color-text-secondary: oklch(0.459 0.018 80.6); /* #5d574d */
+  --color-border: oklch(0.893 0.019 83.1); /* #e2dbce */
+  --color-accent-primary: oklch(0.487 0.150 32.8); /* #a3341f */
+  --color-accent-primary-hover: oklch(0.406 0.125 33.0); /* #7f2716 */
+  /* Alias temporaire (Lot 1) : le design Claude Design n'a qu'un seul accent,
+     utilisé aussi pour la newsletter — plus de second accent réservé. Conservé
+     comme alias plutôt que supprimé pour ne pas toucher aux composants
+     consommateurs dans ce lot (tokens uniquement) ; suppression du token et de
+     ses call-sites (`bg-accent-warm` etc.) prévue au lot qui restylera ces
+     composants. */
+  --color-accent-warm: var(--color-accent-primary);
 
-  /* Typographie éditoriale — clés propres (cf. note ci-dessus) */
-  --font-editorial: var(--font-source-serif-4), Georgia, serif;
-  --font-ui: var(--font-public-sans), system-ui, sans-serif;
-  --font-meta: var(--font-ibm-plex-mono), ui-monospace, monospace;
+  /* Typographie éditoriale — clés propres (cf. note ci-dessus). Familles
+     alignées sur le design Claude Design (Lot 1) : Spectral (serif) et Archivo
+     (sans), auto-hébergées via next/font (app/layout.tsx). */
+  --font-editorial: var(--font-spectral), Georgia, serif;
+  --font-ui: var(--font-archivo), system-ui, sans-serif;
+  /* Alias temporaire (Lot 1) : le design Claude Design n'utilise aucune police
+     mono, uniquement Archivo pour les métadonnées — plus de 3e rôle
+     typographique. Conservé comme alias pour la même raison que
+     --color-accent-warm ci-dessus ; IBM Plex Mono retiré de app/layout.tsx. */
+  --font-meta: var(--font-ui);
 
   /* Breakpoint additionnel — n'écrase aucun breakpoint par défaut */
   --breakpoint-tablet: 600px;
 
-  /* radius.sm et transition.fast (Lot L1, contrat révisé §F) : intentions
-     fonctionnelles déclarées explicitement — consommées par Breadcrumb et
-     ArticleCard. Valeur de --radius-sm strictement identique au défaut
-     Tailwind (0.25rem) : déclaration explicite à but de traçabilité, aucun
-     changement de rendu. Aucune clé --duration-* par défaut ne correspond à
-     120ms, d'où --duration-fast, propre au projet. */
-  --radius-sm: 0.25rem;
+  /* radius.sm et transition.fast : intentions fonctionnelles déclarées
+     explicitement — consommées par Breadcrumb et ArticleCard. Valeur de
+     --radius-sm alignée sur le rayon dominant des cartes/images du design
+     Claude Design (Lot 1 : 0.25rem → 0.375rem). Aucune clé --duration-* par
+     défaut ne correspond à 120ms, d'où --duration-fast, propre au projet. */
+  --radius-sm: 0.375rem;
   --duration-fast: 120ms;
 
   /* Hauteur du header public (Lot 6.1, contrat final §4) : source de vérité
@@ -47,14 +65,215 @@
      déclarations indépendantes. */
   --header-height-mobile: 3.5rem;
   --header-height-desktop: 4rem;
+
+  /* ============================================================
+   * Tailles de texte, line-heights, letter-spacing, espacements,
+   * rayons, ombres (Lot UI — Implémentation Design System, contrat
+   * exhaustif validé) : chaque valeur provient exclusivement de
+   * Corne de l'Afrique.dc.html (source de vérité unique), sans
+   * arrondi, fusion, ni rapprochement de valeurs proches — deux
+   * valeurs voisines dans le design (ex. 18px et 19px, .12em et
+   * .14em, 1.08 et 1.1) restent deux tokens distincts. Nommage
+   * indexé sur la valeur exacte, jamais sur un rôle supposé (pas de
+   * "--text-heading-2" : nommer par rôle présumerait une
+   * interprétation du design que ce lot exclut explicitement).
+   * Suffixe `px` systématique sur les tokens d'espacement : sans
+   * lui, un token `--spacing-11` sans suffixe entrerait en
+   * collision avec l'échelle dynamique par défaut de Tailwind
+   * (`p-11` = calc(--spacing * 11) = 44px, pas 11px) — le suffixe
+   * n'est pas une convention de style, il évite une valeur fausse.
+   * --font-weight-{500,600,700,800} ne sont volontairement PAS
+   * déclarés ici : les 4 valeurs exactes du design sont déjà
+   * disponibles sans écart via les utilitaires natifs non modifiés
+   * de Tailwind (font-medium/font-semibold/font-bold/font-extrabold
+   * — vérifié dans le CSS compilé : --font-weight-medium:500 et
+   * --font-weight-semibold:600 déjà présents tels quels) ; un token
+   * personnalisé identique n'ajouterait aucune fidélité, seulement
+   * une redondance.
+   */
+
+  /* Tailles de texte — 26 valeurs (font-size) */
+  --text-9px: 9px;
+  --text-9-5px: 9.5px;
+  --text-10px: 10px;
+  --text-10-5px: 10.5px;
+  --text-11px: 11px;
+  --text-11-5px: 11.5px;
+  --text-12px: 12px;
+  --text-12-5px: 12.5px;
+  --text-13px: 13px;
+  --text-13-5px: 13.5px;
+  --text-14px: 14px;
+  --text-14-5px: 14.5px;
+  --text-15px: 15px;
+  --text-16px: 16px;
+  --text-17px: 17px;
+  --text-18px: 18px;
+  --text-19px: 19px;
+  --text-20px: 20px;
+  --text-22px: 22px;
+  --text-23px: 23px;
+  --text-24px: 24px;
+  --text-28px: 28px;
+  --text-34px: 34px;
+  --text-36px: 36px;
+  --text-38px: 38px;
+  --text-40px: 40px;
+
+  /* Line-heights — 13 valeurs (line-height) */
+  --leading-1: 1;
+  --leading-1-08: 1.08;
+  --leading-1-1: 1.1;
+  --leading-1-12: 1.12;
+  --leading-1-15: 1.15;
+  --leading-1-18: 1.18;
+  --leading-1-2: 1.2;
+  --leading-1-4: 1.4;
+  --leading-1-5: 1.5;
+  --leading-1-55: 1.55;
+  --leading-1-6: 1.6;
+  --leading-1-72: 1.72;
+  --leading-30-25px: 30.25px;
+
+  /* Letter-spacing — 11 valeurs (letter-spacing) */
+  --tracking-neg-015em: -.015em;
+  --tracking-neg-01em: -.01em;
+  --tracking-neg-005em: -.005em;
+  --tracking-01em: .01em;
+  --tracking-02em: .02em;
+  --tracking-06em: .06em;
+  --tracking-08em: .08em;
+  --tracking-1em: .1em;
+  --tracking-12em: .12em;
+  --tracking-14em: .14em;
+  --tracking-16em: .16em;
+
+  /* Espacements — 31 valeurs atomiques (décomposition de tous les
+     padding/margin/gap du fichier design ; 0 et auto exclus, ce ne
+     sont pas des valeurs de conception) */
+  --spacing-2px: 2px;
+  --spacing-3px: 3px;
+  --spacing-4px: 4px;
+  --spacing-5px: 5px;
+  --spacing-6px: 6px;
+  --spacing-7px: 7px;
+  --spacing-8px: 8px;
+  --spacing-9px: 9px;
+  --spacing-10px: 10px;
+  --spacing-11px: 11px;
+  --spacing-12px: 12px;
+  --spacing-13px: 13px;
+  --spacing-14px: 14px;
+  --spacing-15px: 15px;
+  --spacing-16px: 16px;
+  --spacing-17px: 17px;
+  --spacing-18px: 18px;
+  --spacing-20px: 20px;
+  --spacing-22px: 22px;
+  --spacing-24px: 24px;
+  --spacing-28px: 28px;
+  --spacing-32px: 32px;
+  --spacing-34px: 34px;
+  --spacing-36px: 36px;
+  --spacing-38px: 38px;
+  --spacing-40px: 40px;
+  --spacing-44px: 44px;
+  --spacing-48px: 48px;
+  --spacing-52px: 52px;
+  --spacing-56px: 56px;
+  --spacing-60px: 60px;
+
+  /* Rayons — 6 nouvelles valeurs (border-radius). 6px est déjà
+     couvert par --radius-sm ci-dessus (Lot 1, conforme) : non
+     dupliqué ici. */
+  --radius-3px: 3px;
+  --radius-4px: 4px;
+  --radius-5px: 5px;
+  --radius-8px: 8px;
+  --radius-50pct: 50%;
+  --radius-999px: 999px;
+
+  /* Ombre — 1 valeur unique dans tout le fichier design (box-shadow),
+     exclusivement à l'état :hover des cartes (grille actualités,
+     listing) — jamais à l'état de repos. Ne pas appliquer par
+     défaut : ce serait ajouter un état visuel que le design ne
+     prévoit pas. */
+  --shadow-1: 0 12px 30px rgba(27, 25, 21, .09);
 }
 
 /*
- * radius.pill (rayon complet) et échelle d'espacement 4/8/12/16/24/32/48/64/96 :
- * toujours non déclarés — déjà strictement identiques aux valeurs par défaut
- * de Tailwind (`rounded-full` ; `--spacing: 0.25rem`), et hors périmètre du
- * Lot L1 (aucun consommateur actuel). Cf. décision de régularisation L0A.
+ * Correction (Lot UI — Implémentation Design System) : l'affirmation
+ * précédente de ce commentaire (« échelle d'espacement 4/8/12/16/24/32/
+ * 48/64/96 déjà strictement identique aux valeurs par défaut de Tailwind »)
+ * est factuellement inexacte au regard de Corne de l'Afrique.dc.html —
+ * 15 des 31 valeurs d'espacement du design (2, 3, 5, 6, 7, 9, 10, 11, 13,
+ * 14, 15, 17, 18, 22, 34, 38, 44, 52, 56, 60px) ne sont pas des multiples de
+ * 4px. Le design ne suit aucune grille régulière ; voir les tokens
+ * --spacing-*px ci-dessus, qui couvrent les 31 valeurs exactes sans
+ * arrondi ni recalage sur l'échelle par défaut de Tailwind.
+ *
+ * --radius-999px (ci-dessus) reste distinct de `rounded-full` (valeur par
+ * défaut Tailwind : 9999px) — les deux valeurs sont visuellement
+ * indiscernables mais textuellement différentes ; --radius-999px est la
+ * valeur exacte du design, à utiliser si la fidélité stricte au fichier
+ * source prime sur l'utilitaire par défaut du framework (Règle 3 du
+ * contrat : la fidélité l'emporte toujours en cas de conflit).
  */
+
+/*
+ * Bordures composites (Lot UI — Implémentation Design System) : `--border-*`
+ * n'est pas un espace de nommage reconnu par Tailwind v4 (aucune génération
+ * d'utilitaire à partir d'une valeur composite largeur+style+couleur) —
+ * déclarées ici en dehors de @theme inline, comme propriétés CSS
+ * personnalisées consommables via var(). Placées dans un bloc :root
+ * ordinaire (non JIT, toujours émis tel quel dans le CSS compilé) plutôt
+ * que dans @theme inline, dont les entrées ne sont émises dans le CSS final
+ * que si un composant les consomme effectivement (vérifié empiriquement sur
+ * le build de ce projet : --color-text-primary, par exemple, n'apparaît
+ * dans aucun CSS compilé tant qu'aucune classe arbitraire ne le référence
+ * via var()). Les couleurs de ces bordures sont donc écrites en valeur
+ * littérale (jamais var(--color-text-primary)), pour ne pas dépendre d'une
+ * variable qui pourrait ne jamais être émise.
+ *
+ * 1px solid var(--line) (37 occurrences, le motif de bordure dominant du
+ * design) et 2px solid var(--ink) — hors le token dédié ci-dessous — ne
+ * sont volontairement PAS dupliqués en tokens composites : ils se
+ * recomposent intégralement à partir de primitives déjà conformes (largeur
+ * native Tailwind non thémée `border`/`border-t-2`/`border-b-2`, non
+ * affectée par ce lot, + --color-border/--color-text-primary déjà exacts,
+ * Lot 1) — un token composite redondant n'ajouterait aucune fidélité.
+ * --border-ink-2px est néanmoins déclaré ci-dessous pour disponibilité
+ * immédiate du motif complet (Règle 2 du contrat : chaque valeur recensée
+ * doit être disponible), en plus de sa décomposition possible en classes
+ * natives.
+ */
+:root {
+  /* 2px solid var(--ink) — 4 occurrences (HOME:3 border-top, LISTING:1
+     border-bottom). Couleur en valeur littérale identique à
+     --color-text-primary (oklch(0.214 0.008 84.6), Lot 1, conforme) — pas
+     de var() vers un token @theme inline, pour la raison exposée ci-dessus. */
+  --border-ink-2px: 2px solid oklch(0.214 0.008 84.6);
+
+  /* 1px solid #d4dac2 — 2 occurrences (LISTING:1, SEARCH:1), exclusivement
+     le badge « Accès sur inscription ». Hors périmètre produit MVP
+     (Règle 10 : Premium hors périmètre) — documenté pour exhaustivité
+     (Règle 2/8 du contrat), non destiné à être consommé par un composant
+     tant que ce périmètre n'évolue pas. */
+  --border-d4dac2: 1px solid #d4dac2;
+
+  /* 1px solid rgba(255,255,255,.2) — 1 occurrence (NEWSLETTER, conteneur
+     de confirmation sur fond sombre). */
+  --border-white-20: 1px solid rgba(255, 255, 255, .2);
+
+  /* 1px solid rgba(255,255,255,.25) — 1 occurrence (NEWSLETTER, champ de
+     saisie sur fond sombre). Valeur distincte de la précédente, non
+     fusionnée malgré leur proximité (Règle 1 du contrat). */
+  --border-white-25: 1px solid rgba(255, 255, 255, .25);
+
+  /* 1px solid #2a2622 — 1 occurrence (FOOTER, séparateur du bandeau
+     légal). */
+  --border-2a2622: 1px solid #2a2622;
+}
 
 /*
  * Fond/texte par défaut du document — mécanisme de bascule sombre CONSERVÉ tel
