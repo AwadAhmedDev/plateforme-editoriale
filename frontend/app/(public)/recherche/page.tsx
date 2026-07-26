@@ -15,10 +15,14 @@ import { TYPE_CONTENU_LABELS } from "@/features/articles/type-contenu-labels";
 // combinaisons de filtres sont des résultats utilisateur, pas des pages éditoriales
 // permanentes.
 //
-// Sidebar non sticky (contrairement au design, qui la fixe à `top:150px`) : le header
-// REPO-3 n'a plus de hauteur fixe unique (bandeaux empilés), un offset sticky codé en dur
-// reproduirait exactement le bug corrigé sur ShareBar (REPO-5, D5) — décision cohérente,
-// pas une nouvelle question produit.
+// Sidebar sticky en desktop (conforme au design, qui la fixe à `top:150px`) — mais
+// jamais avec cette valeur codée en dur : le header REPO-3 n'a plus de hauteur fixe
+// unique (bandeaux empilés, bandeau Pays parfois absent), un offset statique
+// reproduirait exactement le bug déjà corrigé sur ShareBar (REPO-5, D5). L'offset
+// `top-[var(--header-height,10.5rem)]` est republié en direct par HeaderHeightSync
+// (rendu une fois dans PublicHeader) à chaque changement réel de la hauteur du header —
+// la valeur de repli (10.5rem) ne sert qu'avant l'hydratation ou si JavaScript est
+// désactivé, jamais comme source de vérité.
 export const metadata: Metadata = {
   title: "Recherche",
   alternates: {
@@ -65,7 +69,11 @@ export default async function RecherchePage({
       <h1 className="mb-5 font-editorial text-[34px] font-bold">Recherche documentaire</h1>
 
       <div className="grid gap-8 lg:grid-cols-[290px_1fr] lg:items-start lg:gap-9">
-        <form action="/recherche" method="GET" className="flex flex-col gap-5 rounded-[8px] border border-border bg-bg-secondary p-[22px]">
+        <form
+          action="/recherche"
+          method="GET"
+          className="flex flex-col gap-5 rounded-[8px] border border-border bg-bg-secondary p-[22px] lg:sticky lg:top-[var(--header-height,10.5rem)] lg:max-h-[calc(100vh_-_var(--header-height,10.5rem)_-_1.5rem)] lg:overflow-y-auto"
+        >
           <div>
             <label htmlFor="q" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
               Mot-clé
