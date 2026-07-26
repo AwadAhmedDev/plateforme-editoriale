@@ -1,77 +1,81 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { FeaturedHomeArticle } from "@/features/articles/get-home-articles";
-import { TYPE_CONTENU_LABELS } from "@/features/articles/type-contenu-labels";
 
-// Contenu phare de l'Accueil (Lot Homepage — hero, contrat validé sur
-// wireframe Claude Design "Wireframes MVP.dc.html", écran Accueil, et
-// maquettes-haute-fidelite.md §1 "Accueil" : "Contenu phare (dossier/analyse
-// en cours)", 2 colonnes desktop image 60% / texte 40%, image à gauche,
-// texte à droite ; empilé (image pleine largeur puis texte) sous 1024px ;
-// CTA secondaire "Lire l'analyse →" en lien tertiaire).
+// Contenu phare de l'Accueil (hero, REPO-4 : Corne de l'Afrique.dc.html l.93-104) : image
+// pleine largeur (16/9) au-dessus, rubrique/pays, titre — porte le seul <h1> de la page
+// tant qu'un contenu phare existe (app/(public)/page.tsx affiche un <h1> de repli
+// uniquement en son absence, jamais les deux à la fois). "Par {auteur} · {date} ·
+// {tempsLecture}" : `auteur` reste facultatif même pour un contenu Publié
+// (domain-model.md) — jamais force-unwrappé, segment omis si absent plutôt qu'un "Par
+// null" affiché.
 //
-// Reçoit les données en props depuis page.tsx (Server Component parent) :
-// contrairement à TaxonomyPills, la donnée est déjà chargée par
-// getHomeArticles() pour "À la une" — aucune requête indépendante à
-// dédupliquer ici, donc aucune justification à un fetch interne.
+// Reçoit les données en props depuis page.tsx (Server Component parent) : la donnée est
+// déjà chargée par getHomeArticles() — aucune requête indépendante à dédupliquer ici.
 export function FeaturedArticle({ article }: { article: FeaturedHomeArticle }) {
   const dateFormatee = article.datePublication.toLocaleDateString("fr-FR", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
-  const typeLabel = TYPE_CONTENU_LABELS[article.typeContenu] ?? article.typeContenu;
 
   return (
-    <section className="mt-12 flex flex-col gap-7 lg:flex-row lg:items-stretch">
+    <article className="flex flex-col gap-4">
       <Link
         href={`/articles/${article.slug}`}
-        className="relative block aspect-video w-full overflow-hidden rounded-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary lg:flex-[1.4]"
+        className="relative block aspect-video w-full overflow-hidden rounded-[6px] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
       >
         <Image
           src={article.imagePrincipaleUrl}
           alt={article.imageAltText}
           fill
-          sizes="(min-width: 1024px) 58vw, 100vw"
+          sizes="(min-width: 1024px) 62vw, 100vw"
           className="object-cover"
           priority
         />
       </Link>
 
-      <div className="flex flex-col justify-center gap-3 lg:flex-1">
-        <p className="flex flex-wrap items-center gap-1 font-meta text-[13px] uppercase text-text-secondary">
-          <span>{typeLabel}</span>
-          <span aria-hidden="true">·</span>
+      <div>
+        <p className="mb-2.5 flex flex-wrap items-center gap-2.5 text-xs font-semibold uppercase tracking-[.14em] text-accent-primary">
           <Link
             href={`/categorie/${article.categorieSlug}`}
-            className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+            className="outline-none transition-colors duration-fast hover:text-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             {article.categorieNom}
           </Link>
+          <span aria-hidden="true" className="text-border">
+            /
+          </span>
+          <Link
+            href={`/zone/${article.zoneSlug}`}
+            className="text-text-secondary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+          >
+            {article.zoneNom}
+          </Link>
         </p>
 
-        <h2 className="font-editorial text-2xl lg:text-3xl">
+        <h1 className="font-editorial text-[28px] font-bold leading-[1.1] tracking-[-.015em] lg:text-[40px] lg:leading-[1.08]">
           <Link
             href={`/articles/${article.slug}`}
             className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             {article.titre}
           </Link>
-        </h2>
+        </h1>
 
         {article.chapo && (
-          <p className="line-clamp-3 text-base text-text-secondary">{article.chapo}</p>
+          <p className="mt-3.5 max-w-[52ch] text-base leading-relaxed text-text-secondary">{article.chapo}</p>
         )}
 
-        <p className="font-meta text-[13px] text-text-secondary">{dateFormatee}</p>
-
-        <Link
-          href={`/articles/${article.slug}`}
-          className="inline-flex w-fit items-center gap-1 text-sm font-medium text-accent-primary outline-none transition-colors duration-fast hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-        >
-          Lire l&apos;analyse →
-        </Link>
+        <p className="mt-3.5 text-[13px] text-text-secondary">
+          {article.auteur && (
+            <>
+              Par <span className="font-medium text-text-primary">{article.auteur}</span> ·{" "}
+            </>
+          )}
+          {dateFormatee} · {article.tempsLecture}
+        </p>
       </div>
-    </section>
+    </article>
   );
 }
