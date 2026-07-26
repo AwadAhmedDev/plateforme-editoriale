@@ -8,16 +8,17 @@ export type ArticleSearchResultCardProps = {
   imageAltText: string;
   categorieNom: string;
   zoneNom: string;
+  typeLabel: string;
+  auteur: string | null;
   datePublication: Date;
+  tempsLecture: string;
   chapo: string | null;
 };
 
-// Composant serveur pur (Lot L9, contrat validé) : affichage d'un résultat
-// de recherche, liste verticale pleine largeur (jamais une grille,
-// ui-specification.md) — distinct d'ArticleCard (conçu pour une grille,
-// sans extrait), non réutilisé ici, non modifié. Aucune logique métier,
-// aucun état, aucun "use client" : reçoit des données déjà projetées par
-// search-articles.ts, se limite à les afficher.
+// Composant serveur pur (REPO-6, Corne de l'Afrique.dc.html l.334-346) : ligne de résultat
+// de recherche — deux lignes de métadonnées (rubrique · type · pays, puis auteur · date ·
+// temps de lecture) encadrant titre/extrait, conforme au design. Distinct d'ArticleCard
+// (grille, sans extrait), non réutilisé ici, non modifié.
 export function ArticleSearchResultCard({
   slug,
   titre,
@@ -25,7 +26,10 @@ export function ArticleSearchResultCard({
   imageAltText,
   categorieNom,
   zoneNom,
+  typeLabel,
+  auteur,
   datePublication,
+  tempsLecture,
   chapo,
 }: ArticleSearchResultCardProps) {
   const dateFormatee = datePublication.toLocaleDateString("fr-FR", {
@@ -38,13 +42,17 @@ export function ArticleSearchResultCard({
     <article className="flex flex-col gap-3 border-b border-border py-4 sm:flex-row">
       <Link
         href={`/articles/${slug}`}
-        className="relative block h-[80px] w-full shrink-0 overflow-hidden rounded-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary sm:w-[120px]"
+        className="relative block aspect-[16/10] w-full shrink-0 overflow-hidden rounded-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary sm:w-[150px]"
       >
-        <Image src={imagePrincipaleUrl} alt={imageAltText} fill sizes="120px" className="object-cover" />
+        <Image src={imagePrincipaleUrl} alt={imageAltText} fill sizes="150px" className="object-cover" />
       </Link>
 
-      <div className="flex flex-1 flex-col">
-        <h3 className="font-editorial text-lg">
+      <div className="flex flex-1 flex-col gap-1.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-accent-primary">
+          {categorieNom} · {typeLabel} · {zoneNom}
+        </p>
+
+        <h3 className="font-editorial text-lg font-semibold leading-tight">
           <Link
             href={`/articles/${slug}`}
             className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
@@ -53,15 +61,12 @@ export function ArticleSearchResultCard({
           </Link>
         </h3>
 
-        <p className="mt-1 flex flex-wrap items-center gap-1 font-meta text-[13px] text-text-secondary">
-          <span>{categorieNom}</span>
-          <span aria-hidden="true">·</span>
-          <span>{zoneNom}</span>
-          <span aria-hidden="true">·</span>
-          <span>{dateFormatee}</span>
-        </p>
+        {chapo && <p className="line-clamp-2 text-sm text-text-secondary">{chapo}</p>}
 
-        {chapo && <p className="mt-2 line-clamp-2 text-sm text-text-secondary">{chapo}</p>}
+        <p className="text-xs text-text-secondary">
+          {auteur && <>{auteur} · </>}
+          {dateFormatee} · {tempsLecture}
+        </p>
       </div>
     </article>
   );
