@@ -34,12 +34,12 @@ export async function TaxonomyPills() {
 
   return (
     <section className="mt-12">
-      <h2 className="font-editorial text-2xl">Catégories et zones géographiques</h2>
+      <h2 className="font-editorial text-2xl">Rubriques et pays</h2>
 
       <div className="mt-6 flex flex-col gap-6">
         {categories.length > 0 && (
-          <nav aria-label="Catégories">
-            <p className="mb-2 font-meta text-[13px] uppercase text-text-secondary">Catégories</p>
+          <nav aria-label="Rubriques">
+            <p className="mb-2 font-meta text-[13px] uppercase text-text-secondary">Rubriques</p>
             <ul className="flex flex-nowrap gap-3 overflow-x-auto">
               {categories.map((categorie) => (
                 <li key={categorie.slug} className="shrink-0">
@@ -56,8 +56,8 @@ export async function TaxonomyPills() {
         )}
 
         {zones.length > 0 && (
-          <nav aria-label="Zones géographiques">
-            <p className="mb-2 font-meta text-[13px] uppercase text-text-secondary">Zones géographiques</p>
+          <nav aria-label="Pays">
+            <p className="mb-2 font-meta text-[13px] uppercase text-text-secondary">Pays</p>
             <ul className="flex flex-nowrap gap-3 overflow-x-auto">
               {zones.map((zone) => (
                 <li key={zone.slug} className="shrink-0">
