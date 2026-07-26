@@ -24,7 +24,7 @@ export default function RootError({
         <button
           type="button"
           onClick={unstable_retry}
-          className="rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white transition-colors duration-fast hover:opacity-90"
+          className="rounded-sm bg-accent-primary px-5 py-2 text-sm font-medium text-white transition-colors duration-fast hover:opacity-90"
         >
           Réessayer
         </button>
