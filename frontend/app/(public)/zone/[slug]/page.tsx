@@ -96,7 +96,7 @@ export default async function ZonePage({
             ))}
           </div>
         ) : (
-          <p className="mt-6 text-text-secondary">Aucun article publié pour le moment dans cette zone géographique.</p>
+          <p className="mt-6 text-text-secondary">Aucun article publié pour le moment dans ce pays.</p>
         )}
       </main>
     </>
