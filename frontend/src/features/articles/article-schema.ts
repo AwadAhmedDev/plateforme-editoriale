@@ -9,7 +9,7 @@ import { z } from "zod";
 // Ne valide que des objets déjà extraits (ex. d'un FormData) — l'extraction FormData →
 // objet reste la responsabilité de la Server Action appelante, pas de ce fichier.
 
-const TYPES_CONTENU = ["article", "analyse", "enquete", "interview", "dossier_thematique"] as const;
+const TYPES_CONTENU = ["article", "analyse", "enquete", "interview", "dossier_thematique", "rapport"] as const;
 const STATUTS_CONTENU = ["brouillon", "publie", "archive"] as const;
 
 // Champs d'un Contenu éditorial (création ou modification) — tous optionnels, cohérent
