@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PublicHeader } from "@/components/shared/public-header";
 import { FooterTaxonomies } from "@/components/shared/footer-taxonomies";
+import { NewsletterForm } from "@/features/newsletter/newsletter-form";
 
 // Layout de l'espace public (Lot L0A Étape 1, frontend-specification.md
 // §Layouts) : fournit uniquement le chrome partagé (header + footer) dans un
@@ -10,11 +11,10 @@ import { FooterTaxonomies } from "@/components/shared/footer-taxonomies";
 // app/admin/(protected)/layout.tsx, qui applique déjà ce même principe côté
 // admin — sa <div className="flex-1"> autour de {children}, jamais un <main>).
 //
-// Header délégué à PublicHeader (Lot 6.1, contrat consolidé) : Catégories,
-// Zones géographiques et À propos en desktop, recherche visible à tous les
-// breakpoints — menu mobile pour Catégories/Zones reste hors périmètre
-// (Lot 6.2). Toujours aucun lien Contact (page inexistante). Server
-// Component pur, aucune interactivité cliente.
+// Header délégué à PublicHeader (Lot REPO-3) : voir ce fichier pour le détail
+// de sa structure. Server Component pur, aucune interactivité cliente au
+// niveau de ce layout lui-même (le bandeau newsletter et le footer en
+// contiennent, via NewsletterForm et FooterTaxonomies respectivement).
 export default function PublicLayout({
   children,
 }: {
@@ -35,29 +35,81 @@ export default function PublicLayout({
         {children}
       </div>
 
-      <footer className="border-t border-border bg-bg-secondary px-5 py-8 text-sm text-text-secondary lg:px-15">
-        <nav aria-label="Pied de page" className="flex flex-wrap gap-6">
-          <Link href="/" className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
-            Accueil
-          </Link>
-          <Link href="/articles" className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
-            Articles
-          </Link>
-          <Link href="/recherche" className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
-            Recherche
-          </Link>
-          <Link href="/newsletter" className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
-            Newsletter
-          </Link>
-          <Link
-            href="/confidentialite"
-            className="outline-none transition-colors duration-[120ms] hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-          >
-            Politique de confidentialité
-          </Link>
-        </nav>
+      {/* Bandeau newsletter sitewide (REPO-8, B27) : sur toutes les pages
+          publiques, pas seulement l'Accueil — juste avant le footer, fond
+          sombre partagé avec lui (design l.436-455). */}
+      <section className="bg-[#1b1915]">
+        <div className="mx-auto grid max-w-[1220px] gap-8 px-5 py-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-10 lg:px-[28px] lg:py-12">
+          <div>
+            <h2 className="font-editorial text-[28px] font-bold leading-[1.15] text-white">Recevez nos publications</h2>
+            <p className="mt-2.5 max-w-[52ch] text-[15px] text-[#c8c2b6]">
+              Analyses, enquêtes et actualités sur la Corne de l&apos;Afrique, directement dans votre boîte. Une
+              édition par semaine, sans publicité.
+            </p>
+          </div>
 
-        <FooterTaxonomies />
+          <NewsletterForm variant="banner" />
+        </div>
+      </section>
+
+      {/* Footer 4 colonnes (REPO-8, B26, design l.457-488) : marque / Rubriques
+          (FooterTaxonomies) / Pays (FooterTaxonomies) / Le média. Contact et
+          Méthodologie n'existent pas encore (REPO-7 à venir) — liens présents
+          par fidélité au design, 404 en attendant ; de même pour Mentions
+          légales (aucune page dédiée aujourd'hui). Abonnement pointe vers
+          /newsletter : l'abonnement payant du design est hors périmètre MVP
+          (AGENTS.md §MVP scope), la newsletter gratuite en est l'équivalent
+          fonctionnel le plus proche. */}
+      <footer className="bg-[#141210] text-[14px] text-[#c8c2b6]">
+        <div className="mx-auto grid max-w-[1220px] grid-cols-1 gap-9 px-5 pb-7 pt-12 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:px-[28px]">
+          <div>
+            <div className="font-editorial text-[22px] font-extrabold text-white">Corne de l&apos;Afrique</div>
+            <p className="mt-3 max-w-[34ch] leading-[1.6] text-[#9a9484]">
+              Le média francophone de référence sur la Corne de l&apos;Afrique : information vérifiée, analyses
+              géopolitiques, juridiques et culturelles, documentation.
+            </p>
+          </div>
+
+          <FooterTaxonomies />
+
+          <nav aria-label="Le média">
+            <p className="mb-3.5 text-[11px] font-semibold uppercase tracking-[.14em] text-[#6f6a5f]">Le média</p>
+            <ul className="flex flex-col gap-2.5">
+              <li>
+                <Link href="/recherche" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  Recherche documentaire
+                </Link>
+              </li>
+              <li>
+                <Link href="/newsletter" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  Abonnement
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/methodologie" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  Méthodologie
+                </Link>
+              </li>
+              <li>
+                <Link href="/mentions-legales" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  Mentions légales
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div className="border-t border-[#2a2622]">
+          <div className="mx-auto flex max-w-[1220px] flex-wrap justify-between gap-2 px-5 py-4.5 text-[12px] text-[#6f6a5f] lg:px-[28px]">
+            <span>© 2026 Corne de l&apos;Afrique — Tous droits réservés</span>
+            <span>Information indépendante · francophone · documentée</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
