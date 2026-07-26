@@ -5,6 +5,8 @@ import Link from "next/link";
 import { getArticleDetail } from "@/features/articles/get-article-detail";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { ShareBar } from "@/features/articles/share-bar";
+import { CitationBlock } from "@/features/articles/citation-block";
+import { construireCitation } from "@/features/articles/build-citation";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
 
@@ -90,6 +92,15 @@ export default async function ArticleDetailPage({
   // l'API Metadata, d'où la construction manuelle via `new URL()`.
   const siteUrl = resoudreSiteUrl();
   const absoluteUrl = (path: string) => new URL(path, siteUrl).toString();
+
+  const citation = article.titre
+    ? construireCitation({
+        titre: article.titre,
+        auteur: article.auteur,
+        dateFormatee: dateFormatee ?? null,
+        url: absoluteUrl(`/articles/${slug}`),
+      })
+    : null;
 
   const articleJsonLd = {
     "@context": "https://schema.org",
@@ -177,8 +188,6 @@ export default async function ArticleDetailPage({
           </p>
         )}
 
-        {article.titre && <ShareBar titre={article.titre} />}
-
         {article.image && (
           <Image
             src={article.image.url}
@@ -189,6 +198,10 @@ export default async function ArticleDetailPage({
             className="mt-6 h-auto w-full rounded-sm"
           />
         )}
+
+        {article.titre && <ShareBar titre={article.titre} />}
+
+        {citation && <CitationBlock citation={citation} />}
 
         {article.corps && (
           <div className="mt-6 whitespace-pre-wrap font-ui text-base leading-relaxed">{article.corps}</div>
