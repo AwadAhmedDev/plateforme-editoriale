@@ -97,7 +97,7 @@ export default async function CategoriePage({
             ))}
           </div>
         ) : (
-          <p className="mt-6 text-text-secondary">Aucun article publié pour le moment dans cette catégorie.</p>
+          <p className="mt-6 text-text-secondary">Aucun article publié pour le moment dans cette rubrique.</p>
         )}
       </main>
     </>
