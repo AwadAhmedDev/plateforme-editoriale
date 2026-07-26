@@ -16,12 +16,10 @@ export function MobileHeaderControls({
   categories,
   zones,
   ctaHref,
-  contactEmail,
 }: {
   categories: CategorieMenuItem[];
   zones: ZoneMenuItem[];
   ctaHref: string;
-  contactEmail: string;
 }) {
   const [panneau, setPanneau] = useState<Panneau>("aucun");
   const declencheurRechercheRef = useRef<HTMLButtonElement>(null);
@@ -236,16 +234,13 @@ export function MobileHeaderControls({
                 </Link>
               </li>
               <li>
-                {/* Contact : /contact n'existe pas encore (Lot 6.2, contrat
-                    technique) — repli mailto: réutilisant l'e-mail déjà
-                    défini pour la page À propos, jamais dupliqué. */}
-                <a
-                  href={`mailto:${contactEmail}`}
+                <Link
+                  href="/contact"
                   onClick={fermer}
                   className="block rounded-sm px-2 py-3 text-text-primary outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
                 >
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </nav>
