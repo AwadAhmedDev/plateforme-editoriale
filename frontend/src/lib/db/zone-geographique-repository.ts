@@ -1,5 +1,6 @@
 import type { ZoneGeographique } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { ORDRE_PAYS } from "@/lib/ordre-taxonomies";
 
 export type ZoneGeographiqueAvecNombreArticles = ZoneGeographique & { _count: { contenus: number } };
 
@@ -12,10 +13,18 @@ export const ZoneGeographiqueRepository = {
   },
 
   findAllWithArticleCount(): Promise<ZoneGeographiqueAvecNombreArticles[]> {
-    return prisma.zoneGeographique.findMany({
-      orderBy: { nom: "asc" },
-      include: { _count: { select: { contenus: true } } },
-    });
+    return prisma.zoneGeographique
+      .findMany({ include: { _count: { select: { contenus: true } } } })
+      .then((zones) =>
+        zones.sort((a, b) => {
+          const rangA = ORDRE_PAYS.indexOf(a.slug);
+          const rangB = ORDRE_PAYS.indexOf(b.slug);
+          if (rangA === -1 && rangB === -1) return a.nom.localeCompare(b.nom);
+          if (rangA === -1) return 1;
+          if (rangB === -1) return -1;
+          return rangA - rangB;
+        })
+      );
   },
 
   findById(id: string): Promise<ZoneGeographique | null> {
