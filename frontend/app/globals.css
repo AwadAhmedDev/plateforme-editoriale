@@ -27,13 +27,6 @@
   --color-border: oklch(0.893 0.019 83.1); /* #e2dbce */
   --color-accent-primary: oklch(0.487 0.150 32.8); /* #a3341f */
   --color-accent-primary-hover: oklch(0.406 0.125 33.0); /* #7f2716 */
-  /* Alias temporaire (Lot 1) : le design Claude Design n'a qu'un seul accent,
-     utilisé aussi pour la newsletter — plus de second accent réservé. Conservé
-     comme alias plutôt que supprimé pour ne pas toucher aux composants
-     consommateurs dans ce lot (tokens uniquement) ; suppression du token et de
-     ses call-sites (`bg-accent-warm` etc.) prévue au lot qui restylera ces
-     composants. */
-  --color-accent-warm: var(--color-accent-primary);
 
   /* Typographie éditoriale — clés propres (cf. note ci-dessus). Familles
      alignées sur le design Claude Design (Lot 1) : Spectral (serif) et Archivo
@@ -42,8 +35,8 @@
   --font-ui: var(--font-archivo), system-ui, sans-serif;
   /* Alias temporaire (Lot 1) : le design Claude Design n'utilise aucune police
      mono, uniquement Archivo pour les métadonnées — plus de 3e rôle
-     typographique. Conservé comme alias pour la même raison que
-     --color-accent-warm ci-dessus ; IBM Plex Mono retiré de app/layout.tsx. */
+     typographique. Conservé comme alias : IBM Plex Mono retiré de
+     app/layout.tsx, aucun composant ne consomme plus --font-ibm-plex-mono. */
   --font-meta: var(--font-ui);
 
   /* Breakpoint additionnel — n'écrase aucun breakpoint par défaut */
