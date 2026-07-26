@@ -77,7 +77,12 @@ async function main() {
       auteur: "La rédaction",
       image: "article-1.png",
       motsCles: ["asile", "droit", "rapport pays"],
-      joursDecalage: 0,
+      // 20, pas 0 : laisse "voies-de-recours-refugies-region" (rapport, plus proche du
+      // design confirmé par capture) et "ethiopie-barrage-nil-bleu-populations-
+      // deplacees" occuper les positions les plus récentes du bandeau "Analyses &
+      // enquêtes approfondies" (getHomeAnalyses, limite 4) plutôt que de les
+      // concurrencer.
+      joursDecalage: 20,
       typeContenu: "rapport" as const,
     },
     {
@@ -91,7 +96,10 @@ async function main() {
       auteur: "La rédaction",
       image: "article-2.png",
       motsCles: ["asile", "genre", "protection"],
-      joursDecalage: 1,
+      // 21, pas 1 : même raison que joursDecalage sur "ethiopie-rapport-dispositif-
+      // asile-afflux-regional" ci-dessus — laisse les 4 éléments confirmés par capture
+      // d'écran occuper le bandeau "Analyses & enquêtes approfondies" de l'Accueil.
+      joursDecalage: 21,
       typeContenu: "analyse" as const,
     },
     {
@@ -117,7 +125,10 @@ async function main() {
       categorieId: parSlugCategorie("migrations").id,
       zoneId: parSlugZone("djibouti").id,
       auteur: "La rédaction",
-      image: "article-4.png",
+      // Photo réelle (fournie par l'utilisateur, pas un placeholder générique) : ville
+      // côtière de la mer Rouge au coucher du soleil, cohérente avec le rôle de
+      // carrefour maritime de Djibouti décrit ci-dessus.
+      image: "djibouti-cote-portuaire.jpg",
       motsCles: ["migration", "golfe", "transit"],
       joursDecalage: 3,
       typeContenu: "article" as const,
@@ -262,6 +273,56 @@ async function main() {
       joursDecalage: 13,
       typeContenu: "enquete" as const,
     },
+    // Les 3 articles ci-dessous reprennent des titres confirmés directement contre une
+    // capture d'écran réelle du design (section Homepage "Analyses & enquêtes
+    // approfondies") — mêmes types/rubriques/pays que ceux affichés (Analyse·Éthiopie,
+    // Enquête·Soudan, Rapport·Corne(régional)). Placés en fin de tableau et datés
+    // joursDecalage 0-2 : avec "ethiopie-barrage-nil-bleu-populations-deplacees"
+    // (déjà présent, enquête), ce sont les 4 contenus analyse/enquête/rapport les plus
+    // récents — donc ceux affichés par getHomeAnalyses (limite 4), reproduisant les 4
+    // mêmes éléments que la capture.
+    {
+      slug: "ethiopie-somaliland-accord-populations-deplacees",
+      titre: "L'accord Éthiopie–Somaliland et ses conséquences pour les populations déplacées",
+      chapo: "Derrière l'enjeu de l'accès à la mer, les tensions frontalières fragilisent des zones où vivent des milliers de déplacés internes.",
+      corps:
+        "L'accord conclu entre l'Éthiopie et le Somaliland autour d'un accès à la façade maritime a ravivé des tensions frontalières dans plusieurs zones où sont déjà installées des populations déplacées internes.\n\nCette analyse revient sur les termes rendus publics de l'accord, les réactions des autorités somaliennes et des pays voisins, et les conséquences documentées pour les communautés vivant dans les zones frontalières concernées.\n\nElle souligne enfin la fragilité des dispositifs d'assistance existants dans ces zones, déjà sous tension avant même la signature de l'accord.",
+      categorieId: parSlugCategorie("analyses-pays").id,
+      zoneId: parSlugZone("ethiopie").id,
+      auteur: "La rédaction",
+      image: "article-3.png",
+      motsCles: ["accord bilatéral", "frontières", "déplacement"],
+      joursDecalage: 1,
+      typeContenu: "analyse" as const,
+    },
+    {
+      slug: "soudan-or-finance-milices-exil-civils",
+      titre: "Enquête : l'or qui finance les milices et pousse les civils à l'exil",
+      chapo: "Les routes de contrebande d'or entre Soudan et Érythrée financent des groupes armés dont les exactions alimentent les départs forcés.",
+      corps:
+        "Cette enquête retrace les grandes lignes des routes de contrebande d'or identifiées entre le Soudan et l'Érythrée, à partir de rapports d'organisations spécialisées dans le suivi des économies de guerre.\n\nElle documente le rôle de ce financement dans l'équipement et la solde de plusieurs groupes armés actifs dans la région, et le lien établi par plusieurs témoignages entre leurs exactions et des départs forcés de populations civiles.\n\nElle rappelle enfin les limites de ce type de traçage économique, mené en grande partie depuis l'extérieur des zones concernées.",
+      categorieId: parSlugCategorie("droits-humains").id,
+      zoneId: parSlugZone("soudan").id,
+      auteur: "La rédaction",
+      image: "article-6.png",
+      motsCles: ["or", "économie de guerre", "milices"],
+      joursDecalage: 0,
+      typeContenu: "enquete" as const,
+    },
+    {
+      slug: "voies-de-recours-refugies-region",
+      titre: "Quelles voies de recours pour les réfugiés de la région ?",
+      chapo: "Un rapport juridique sur les protections offertes par le droit international et leurs limites concrètes sur le terrain.",
+      corps:
+        "Ce rapport recense les principales voies de recours ouvertes aux personnes réfugiées dans la région, telles que prévues par les conventions internationales et les législations nationales applicables.\n\nIl met en regard ces protections théoriques avec leur mise en œuvre effective, en s'appuyant sur des cas documentés par des organisations d'assistance juridique présentes dans plusieurs pays de la région.\n\nUne dernière section identifie les principales limites pratiques rencontrées par les personnes cherchant à faire valoir ces recours, indépendamment du pays d'accueil concerné.",
+      categorieId: parSlugCategorie("juridique").id,
+      zoneId: parSlugZone("regional").id,
+      auteur: "La rédaction",
+      image: "article-5.png",
+      motsCles: ["droit international", "recours", "réfugiés"],
+      joursDecalage: 0,
+      typeContenu: "rapport" as const,
+    },
   ];
 
   for (const a of articles) {
@@ -280,6 +341,8 @@ async function main() {
         categorieId: a.categorieId,
         zoneId: a.zoneId,
         auteur: a.auteur,
+        imagePrincipaleUrl: `/seed/${a.image}`,
+        imageAltText: a.titre,
       },
       create: {
         slug: a.slug,
