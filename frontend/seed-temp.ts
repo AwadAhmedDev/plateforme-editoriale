@@ -257,7 +257,10 @@ async function main() {
       categorieId: parSlugCategorie("analyses-pays").id,
       zoneId: parSlugZone("regional").id,
       auteur: "La rédaction",
-      image: "orpaillage-mains-tamis.jpg",
+      // Reprend la photo du hero (voies-de-recours-refugies-region) : la grille
+      // "Actualités & terrain" n'a que 4 vraies photos à répartir sur 4 cartes,
+      // cette 4e carte partageait auparavant celle de la 2e (orpaillage-mains-tamis.jpg).
+      image: "routes-mer-rouge-porte-conteneurs.jpg",
       motsCles: ["panorama régional", "analyse", "dynamiques"],
       joursDecalage: 12,
       typeContenu: "article" as const,
