@@ -415,6 +415,20 @@ export const ContenuEditorialRepository = {
     });
   },
 
+  // Derniers Publiés restreints à une liste de types (REPO-4, Homepage : grille
+  // "Actualités & terrain" et bandeau "Analyses & enquêtes approfondies", deux sections
+  // distinguées par typeContenu plutôt que par catégorie). Distincte de
+  // findLatestPublished (sans filtre) : un type de plus dans `types` n'oblige jamais à
+  // republier findLatestPublished, ni l'inverse.
+  findLatestPublishedByTypes(types: TypeContenu[], limit: number): Promise<ArticlePublicListItem[]> {
+    return prisma.contenuEditorial.findMany({
+      where: { statut: "publie", typeContenu: { in: types } },
+      include: ARTICLE_PUBLIC_LIST_INCLUDE,
+      orderBy: { datePublication: "desc" },
+      take: limit,
+    });
+  },
+
   // Recherche publique (server-actions-specification.md §9.1) : `websearch_to_tsquery`
   // exclusivement — jamais `to_tsquery` brut (tolère nativement guillemets non fermés et
   // opérateurs `&`/`|` isolés sans jamais lever d'erreur de syntaxe côté Postgres,
