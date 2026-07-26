@@ -3,7 +3,6 @@ import { listCategorieMenu } from "@/features/taxonomies/list-categorie-menu";
 import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
 import { getTickerArticle } from "@/features/articles/get-ticker-article";
 import { LanguageToggle } from "@/components/shared/language-toggle";
-import { aProposContent } from "../../../app/(public)/a-propos/content";
 import { MobileHeaderControls } from "@/components/shared/mobile-header-controls";
 
 const LIEN_FOCUSABLE =
@@ -60,12 +59,12 @@ export async function PublicHeader() {
         <div className="ml-auto flex items-center gap-[18px]">
           <LanguageToggle />
 
-          <a
-            href={`mailto:${aProposContent.contact.email}`}
+          <Link
+            href="/contact"
             className={`font-medium text-text-secondary hover:text-text-secondary ${LIEN_FOCUSABLE}`}
           >
             Contact
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -111,12 +110,7 @@ export async function PublicHeader() {
           </Link>
         </div>
 
-        <MobileHeaderControls
-          categories={categories}
-          zones={zones}
-          ctaHref="/newsletter"
-          contactEmail={aProposContent.contact.email}
-        />
+        <MobileHeaderControls categories={categories} zones={zones} ctaHref="/newsletter" />
       </div>
 
       {/* Bandeau Pays (design l.68-77) */}
