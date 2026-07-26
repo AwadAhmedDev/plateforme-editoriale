@@ -1,4 +1,5 @@
 import { ContenuEditorialRepository } from "@/lib/db/contenu-editorial-repository";
+import { estimerTempsLecture } from "@/features/articles/reading-time";
 
 export type HomeArticle = {
   slug: string;
@@ -12,46 +13,42 @@ export type HomeArticle = {
   datePublication: Date;
 };
 
-// Contenu phare de l'Accueil (Lot Homepage — hero, maquettes-haute-fidelite.md
-// §1 "Accueil" : "Contenu phare (dossier/analyse en cours)", distinct de la
-// grille "À la une"). Un contenu de plus que HomeArticle : typeContenu
-// (garanti non nul pour un article Publié — chk_publie_champs_requis, même
-// garantie déjà exploitée ci-dessous pour titre!/categorieNom!) et chapo
-// (facultatif même pour un contenu Publié, cf. domain-model.md — jamais
-// force-unwrappé).
+// Contenu phare de l'Accueil (hero, REPO-4 : Corne de l'Afrique.dc.html l.93-104) : un
+// contenu de plus que HomeArticle : typeContenu (garanti non nul pour un article Publié
+// — chk_publie_champs_requis), chapo/auteur (facultatifs même pour un contenu Publié,
+// cf. domain-model.md — jamais force-unwrappés) et tempsLecture (dérivé de `corps`,
+// jamais stocké — cf. reading-time.ts).
 export type FeaturedHomeArticle = HomeArticle & {
   typeContenu: string;
   chapo: string | null;
+  auteur: string | null;
+  tempsLecture: string;
 };
 
 export type HomePageData = {
   featured: FeaturedHomeArticle | null;
-  articles: HomeArticle[];
+  // "À la une" (hero, colonne latérale, REPO-4 : design l.106-115) : 3 éléments, pas 6 —
+  // remplace l'ancienne grille "À la une" à 6 cartes (Lot Homepage précédent), absorbée
+  // par la nouvelle grille "Actualités & terrain" (get-home-actualites.ts).
+  secondary: HomeArticle[];
 };
 
-const HOME_ARTICLES_LIMIT = 6;
+const SECONDARY_LIMIT = 3;
 
-// Lecture publique pour app/(public)/page.tsx (Lot L8b, contrat validé ; étendu
-// Lot Homepage pour le contenu phare) : réutilise
-// ContenuEditorialRepository.findLatestPublished sans modification ni
-// validation supplémentaire — statut 'publie' (non contournable, porté par
-// le repository) combiné à la contrainte DB chk_publie_champs_requis
-// (migration 20260716202832_init_schema) garantit déjà que tout article
-// retourné a titre/type de contenu/catégorie/zone/image_principale_url/
-// image_alt_text/date_publication non nuls ; onDelete: Restrict sur
-// categorie/zone exclut toute relation orpheline.
+// Lecture publique pour app/(public)/page.tsx : réutilise
+// ContenuEditorialRepository.findLatestPublished sans modification ni validation
+// supplémentaire — statut 'publie' (non contournable, porté par le repository) combiné à
+// la contrainte DB chk_publie_champs_requis garantit déjà que tout article retourné a
+// titre/type de contenu/catégorie/zone/image_principale_url/image_alt_text/date_publication
+// non nuls ; onDelete: Restrict sur categorie/zone exclut toute relation orpheline.
 //
-// "Contenu phare" (maquettes-haute-fidelite.md) = le contenu Publié le plus
-// récent, pas un champ de mise en avant distinct : aucun champ "épinglé"/
-// "featured" n'existe dans domain-model.md/le schéma Prisma, et
-// maquettes-haute-fidelite.md documente lui-même l'état vide comme "aucun
-// contenu phare n'est encore publié" — la mise en avant découle donc de la
-// même sélection par date que "À la une", jamais d'une donnée inventée. Un
-// article de plus est demandé au repository (HOME_ARTICLES_LIMIT + 1) : le
-// premier (le plus récent) devient le contenu phare, les suivants
-// alimentent "À la une" — jamais le même article dans les deux blocs.
+// "Contenu phare" = le contenu Publié le plus récent, pas un champ de mise en avant
+// distinct : aucun champ "épinglé"/"featured" n'existe dans domain-model.md/le schéma
+// Prisma. Un article de plus est demandé au repository (SECONDARY_LIMIT + 1) : le
+// premier (le plus récent) devient le contenu phare, les 3 suivants alimentent "À la
+// une" — jamais le même article dans les deux blocs.
 export async function getHomeArticles(): Promise<HomePageData> {
-  const items = await ContenuEditorialRepository.findLatestPublished(HOME_ARTICLES_LIMIT + 1);
+  const items = await ContenuEditorialRepository.findLatestPublished(SECONDARY_LIMIT + 1);
 
   const toHomeArticle = (item: (typeof items)[number]): HomeArticle => ({
     slug: item.slug,
@@ -69,8 +66,14 @@ export async function getHomeArticles(): Promise<HomePageData> {
 
   return {
     featured: featuredItem
-      ? { ...toHomeArticle(featuredItem), typeContenu: featuredItem.typeContenu!, chapo: featuredItem.chapo }
+      ? {
+          ...toHomeArticle(featuredItem),
+          typeContenu: featuredItem.typeContenu!,
+          chapo: featuredItem.chapo,
+          auteur: featuredItem.auteur,
+          tempsLecture: estimerTempsLecture(featuredItem.corps),
+        }
       : null,
-    articles: restItems.map(toHomeArticle),
+    secondary: restItems.map(toHomeArticle),
   };
 }
