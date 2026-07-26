@@ -12,11 +12,12 @@ import type { ZoneListItem } from "@/features/taxonomies/list-zones";
 const initialState: ArticleActionState = { status: "idle", message: null };
 
 const TYPES_CONTENU: ReadonlyArray<{ value: string; label: string }> = [
-  { value: "article", label: "Article" },
+  { value: "article", label: "Actualité" },
   { value: "analyse", label: "Analyse" },
   { value: "enquete", label: "Enquête" },
   { value: "interview", label: "Interview" },
-  { value: "dossier_thematique", label: "Dossier thématique" },
+  { value: "dossier_thematique", label: "Dossier" },
+  { value: "rapport", label: "Rapport" },
 ];
 
 // Formulaire unique pour Création (article === null → createArticleAction) et Édition
