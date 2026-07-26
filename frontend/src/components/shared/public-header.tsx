@@ -4,6 +4,7 @@ import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
 import { getTickerArticle } from "@/features/articles/get-ticker-article";
 import { LanguageToggle } from "@/components/shared/language-toggle";
 import { MobileHeaderControls } from "@/components/shared/mobile-header-controls";
+import { HeaderHeightSync } from "@/components/shared/header-height-sync";
 
 const LIEN_FOCUSABLE =
   "outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary";
@@ -14,7 +15,10 @@ const LIEN_FOCUSABLE =
 // barre utilitaire (ticker + contact), barre principale (logo, nav plate,
 // recherche, CTA), bandeau Pays, bandeau tagline. Hauteur non contrainte
 // (plus de token --header-height-* sur cet élément, cf. audit REPO-3I/L) :
-// le header occupe la hauteur réelle de ses 4 bandeaux.
+// le header occupe la hauteur réelle de ses 4 bandeaux. HeaderHeightSync
+// (REPO-6) republie cette hauteur réelle dans --header-height à chaque
+// changement de mise en page — seul consommateur actuel : la sidebar
+// sticky de la page Recherche.
 //
 // Nav plate (6 rubriques, B7) : aucun état actif/courant, conforme au design
 // (navStyle identique pour chaque item, aucune donnée "page courante" dans
@@ -40,6 +44,7 @@ export async function PublicHeader() {
       className="sticky top-0 z-[60] border-b border-border bg-[rgba(246,243,236,0.94)] backdrop-blur-[10px]"
     >
       <style>{`.ticker-dot{animation:ticker-pulse 1.6s ease-in-out infinite}@keyframes ticker-pulse{0%,100%{opacity:1}50%{opacity:.3}}`}</style>
+      <HeaderHeightSync />
 
       {/* Barre utilitaire : ticker + Contact (design l.34-47) */}
       <div className="mx-auto flex h-[38px] max-w-[1220px] items-center border-b border-border px-[28px] text-[12px] tracking-[.02em] text-text-secondary">
