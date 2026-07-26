@@ -42,24 +42,20 @@ export default async function RecherchePage({
   const typeContenu = lireParam(resolvedSearchParams.type);
   const sort = lireParam(resolvedSearchParams.sort);
 
-  // Aucun critère soumis (ni q, ni aucun filtre) : aucun appel à
-  // searchArticles, formulaire seul — distinct de "critères soumis, zéro
-  // résultat" (articles === []). Un filtre seul, sans q, déclenche
-  // désormais une recherche (décision L11 validée). Le tri seul, sans autre
-  // critère, ne déclenche pas de recherche (même règle) — sinon "Trier par"
-  // se comporterait différemment des autres filtres.
-  const aUnCritere = q.length > 0 || categorieSlug.length > 0 || zoneSlug.length > 0 || typeContenu.length > 0;
-
+  // Aucun critère soumis (ni q, ni aucun filtre) : affiche tout le contenu Publié,
+  // trié "Plus récent" par défaut — comportement conforme au design (Corne de
+  // l'Afrique.dc.html : "Recherche documentaire" affiche déjà 14 résultats à l'arrivée
+  // sur la page, filtres tous sur "Tous/Toutes"). Un filtre seul, sans q, s'applique
+  // normalement (décision L11 déjà validée) ; le tri s'applique lui aussi sans qu'aucun
+  // autre critère ne soit requis, cohérent avec ce même principe.
   const [articles, categories, zones] = await Promise.all([
-    aUnCritere
-      ? searchArticles({
-          q: q || undefined,
-          categorieSlug: categorieSlug || undefined,
-          zoneSlug: zoneSlug || undefined,
-          typeContenu: typeContenu || undefined,
-          sort: sort || undefined,
-        })
-      : Promise.resolve(null),
+    searchArticles({
+      q: q || undefined,
+      categorieSlug: categorieSlug || undefined,
+      zoneSlug: zoneSlug || undefined,
+      typeContenu: typeContenu || undefined,
+      sort: sort || undefined,
+    }),
     listCategorieMenu(),
     listZoneMenu(),
   ]);
@@ -163,36 +159,30 @@ export default async function RecherchePage({
             Rechercher
           </button>
 
-          {aUnCritere && (
-            <Link
-              href="/recherche"
-              className="rounded-md border border-border py-2.5 text-center text-[13px] text-text-secondary outline-none transition-colors duration-fast hover:border-accent-primary hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-            >
-              Réinitialiser les filtres
-            </Link>
-          )}
+          <Link
+            href="/recherche"
+            className="rounded-md border border-border py-2.5 text-center text-[13px] text-text-secondary outline-none transition-colors duration-fast hover:border-accent-primary hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+          >
+            Réinitialiser les filtres
+          </Link>
         </form>
 
         <div>
-          {articles !== null && (
-            <>
-              <p className="mb-4 text-[13px] text-text-secondary">
-                {articles.length} résultat{articles.length > 1 ? "s" : ""}
-              </p>
+          <p className="mb-4 text-[13px] text-text-secondary">
+            {articles.length} résultat{articles.length > 1 ? "s" : ""}
+          </p>
 
-              {articles.length > 0 ? (
-                <div className="flex flex-col">
-                  {articles.map((article) => (
-                    <ArticleSearchResultCard key={article.slug} {...article} />
-                  ))}
-                </div>
-              ) : (
-                <div className="py-16 text-center text-text-secondary">
-                  <p className="font-editorial text-xl">Aucun résultat pour ces critères.</p>
-                  <p className="mt-2 text-sm">Essayez d&apos;élargir votre recherche.</p>
-                </div>
-              )}
-            </>
+          {articles.length > 0 ? (
+            <div className="flex flex-col">
+              {articles.map((article) => (
+                <ArticleSearchResultCard key={article.slug} {...article} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-16 text-center text-text-secondary">
+              <p className="font-editorial text-xl">Aucun résultat pour ces critères.</p>
+              <p className="mt-2 text-sm">Essayez d&apos;élargir votre recherche.</p>
+            </div>
           )}
         </div>
       </div>
