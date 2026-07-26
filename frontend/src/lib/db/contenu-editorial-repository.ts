@@ -72,7 +72,16 @@ export type ArticlesPubliesPagines = {
   page: number;
 };
 
-export type RechercheContenuParams = ArticlesPubliesFiltre & { q?: string; page: number };
+// "long" (REPO-6, B22 : tri "Lecture la plus longue") : aucun champ de temps de lecture
+// stocké (cf. reading-time.ts) — LENGTH(corps) sert de proxy, croissant avec le nombre de
+// mots dans la quasi-totalité des cas réels, sans nécessiter de colonne ni de migration.
+export type TriRechercheContenu = "recent" | "long";
+
+export type RechercheContenuParams = ArticlesPubliesFiltre & {
+  q?: string;
+  page: number;
+  sort?: TriRechercheContenu;
+};
 
 // Filtre public commun (findManyPublished, findLatestPublished) : `statut = 'publie'`
 // non négociable, jamais paramétrable par l'appelant — seule différence avec le filtre
@@ -441,6 +450,13 @@ export const ContenuEditorialRepository = {
   // déterminé par la deuxième requête SQL, que `WHERE id IN (...)` ne garantit pas.
   async search(params: RechercheContenuParams): Promise<ArticlesPubliesPagines> {
     const conditions = Prisma.join(construireConditionsRecherche(params), " AND ");
+    // NULLS LAST explicite : par défaut Postgres trie NULLS FIRST en DESC, ce qui
+    // remonterait en tête un contenu Publié sans corps (champ non garanti non nul par
+    // chk_publie_champs_requis) au lieu de le reléguer en fin de liste.
+    const orderBy =
+      params.sort === "long"
+        ? Prisma.sql`LENGTH(corps) DESC NULLS LAST, date_publication DESC`
+        : Prisma.sql`date_publication DESC`;
 
     const totalRows = await prisma.$queryRaw<{ count: bigint }[]>(
       Prisma.sql`SELECT COUNT(*)::bigint AS count FROM contenu_editorial WHERE ${conditions}`
@@ -450,7 +466,7 @@ export const ContenuEditorialRepository = {
     const page = Math.min(Math.max(1, params.page), totalPages);
 
     const idRows = await prisma.$queryRaw<{ id: string }[]>(
-      Prisma.sql`SELECT id FROM contenu_editorial WHERE ${conditions} ORDER BY date_publication DESC
+      Prisma.sql`SELECT id FROM contenu_editorial WHERE ${conditions} ORDER BY ${orderBy}
                  LIMIT ${PUBLIC_PAGE_SIZE} OFFSET ${(page - 1) * PUBLIC_PAGE_SIZE}`
     );
     const ids = idRows.map((row) => row.id);
