@@ -116,7 +116,7 @@ export function MobileHeaderControls({
           role="dialog"
           aria-modal="true"
           aria-label="Recherche"
-          className="fixed inset-0 z-50 flex flex-col gap-6 bg-bg-primary px-5 py-4"
+          className="fixed inset-0 z-[70] flex flex-col gap-6 bg-bg-primary px-5 py-4"
         >
           <div className="flex justify-end">
             <button
@@ -154,7 +154,7 @@ export function MobileHeaderControls({
           role="dialog"
           aria-modal="true"
           aria-label="Menu de navigation"
-          className="fixed inset-0 z-50 flex flex-col gap-6 overflow-y-auto bg-bg-primary px-5 py-4"
+          className="fixed inset-0 z-[70] flex flex-col gap-6 overflow-y-auto bg-bg-primary px-5 py-4"
         >
           <div className="flex justify-end">
             <button
@@ -182,47 +182,38 @@ export function MobileHeaderControls({
 
               {categories.length > 0 && (
                 <li>
-                  <details>
-                    <summary className="cursor-pointer list-none px-2 py-3 text-text-primary outline-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
-                      Catégories
-                    </summary>
-                    <ul className="flex flex-col gap-1 pl-4">
-                      {categories.map((categorie) => (
-                        <li key={categorie.slug}>
-                          <Link
-                            href={`/categorie/${categorie.slug}`}
-                            onClick={fermer}
-                            className="block rounded-sm px-2 py-2 text-base text-text-secondary outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-                          >
-                            {categorie.nom}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
+                  <ul className="flex flex-col gap-1">
+                    {categories.map((categorie) => (
+                      <li key={categorie.slug}>
+                        <Link
+                          href={`/categorie/${categorie.slug}`}
+                          onClick={fermer}
+                          className="block rounded-sm px-2 py-3 text-text-primary outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+                        >
+                          {categorie.nom}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </li>
               )}
 
               {zones.length > 0 && (
                 <li>
-                  <details>
-                    <summary className="cursor-pointer list-none px-2 py-3 text-text-primary outline-none [&::-webkit-details-marker]:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary">
-                      Zones géographiques
-                    </summary>
-                    <ul className="flex flex-col gap-1 pl-4">
-                      {zones.map((zone) => (
-                        <li key={zone.slug}>
-                          <Link
-                            href={`/zone/${zone.slug}`}
-                            onClick={fermer}
-                            className="block rounded-sm px-2 py-2 text-base text-text-secondary outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-                          >
-                            {zone.nom}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
+                  <p className="px-2 pb-1 pt-4 text-[13px] font-semibold uppercase text-text-secondary">Pays</p>
+                  <ul className="flex flex-col gap-1">
+                    {zones.map((zone) => (
+                      <li key={zone.slug}>
+                        <Link
+                          href={`/zone/${zone.slug}`}
+                          onClick={fermer}
+                          className="block rounded-sm px-2 py-3 text-text-primary outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+                        >
+                          {zone.nom}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </li>
               )}
 
@@ -262,9 +253,9 @@ export function MobileHeaderControls({
           <Link
             href={ctaHref}
             onClick={fermer}
-            className="block rounded-sm bg-accent-warm px-5 py-3 text-center text-base font-medium text-white outline-none transition-colors duration-fast hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+            className="block rounded-sm bg-accent-primary px-5 py-3 text-center text-base font-medium text-white outline-none transition-colors duration-fast hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
-            S&apos;abonner
+            S&apos;inscrire
           </Link>
         </div>
       )}
