@@ -1,140 +1,152 @@
 import Link from "next/link";
 import { listCategorieMenu } from "@/features/taxonomies/list-categorie-menu";
 import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
+import { getTickerArticle } from "@/features/articles/get-ticker-article";
+import { LanguageToggle } from "@/components/shared/language-toggle";
 import { aProposContent } from "../../../app/(public)/a-propos/content";
 import { MobileHeaderControls } from "@/components/shared/mobile-header-controls";
 
-// Header public (Lot 6.1, contrat consolidé) : 100% Server Component,
-// asynchrone (charge catégories/zones via les mêmes fonctions déjà
-// utilisées par FooterTaxonomies, enveloppées dans React.cache() — une
-// seule requête base de données par fonction et par requête HTTP malgré
-// l'appel indépendant du footer). Hauteur pilotée par les tokens
-// --header-height-mobile/--header-height-desktop (app/globals.css),
-// partagés avec l'offset sticky de ShareBar.
+const LIEN_FOCUSABLE =
+  "outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary";
+
+// Header public (Lot REPO-3, refonte structurelle conforme à Corne de
+// l'Afrique.dc.html l.33-83, contrat REPO-3M) : 100% Server Component,
+// asynchrone. Quatre bandeaux empilés, dans l'ordre exact du fichier source :
+// barre utilitaire (ticker + contact), barre principale (logo, nav plate,
+// recherche, CTA), bandeau Pays, bandeau tagline. Hauteur non contrainte
+// (plus de token --header-height-* sur cet élément, cf. audit REPO-3I/L) :
+// le header occupe la hauteur réelle de ses 4 bandeaux.
 //
-// Ordre non négociable (conforme aux 9 écrans du wireframe Claude Design) :
-// Logo → Catégories → Zones géographiques → À propos → Recherche → CTA.
-// Catégories/Zones en <details>/<summary> natif (zéro JS) — couvre le
-// "clic" de l'exigence "au survol/clic" de ui-specification.md. À propos
-// en lien plat, sans menu. Destination des menus : /categorie/[slug] et
-// /zone/[slug] (pages éditoriales canoniques), jamais /recherche?categorie=
-// — cf. décision L11 documentée dans recherche/page.tsx (les combinaisons
-// de filtres sont des résultats utilisateur, pas des pages permanentes).
-// Chaque menu est omis entièrement si sa liste est vide — jamais un
-// <details> sans contenu.
+// Nav plate (6 rubriques, B7) : aucun état actif/courant, conforme au design
+// (navStyle identique pour chaque item, aucune donnée "page courante" dans
+// .dc.html). Bandeau Pays masqué si aucune zone n'existe (convention déjà en
+// place dans le projet : une section sans donnée ne s'affiche pas).
 //
-// Recherche : formulaire GET natif vers /recherche, seul paramètre `q`,
-// aucun bouton visible (conforme au wireframe) — visible en desktop
-// uniquement (lg et au-delà) ; sous lg, remplacée par l'icône + overlay de
-// MobileHeaderControls (Lot 6.2), qui réutilise ce même formulaire.
+// Sélecteur de langue FR/EN (design l.40-44) : omis, DIV-D3
+// (regle-fidelite-design.md §6) — hors périmètre de ce lot.
 //
-// Menu mobile (Catégories/Zones/À propos/Contact/S'abonner, panneau plein
-// écran) livré par MobileHeaderControls (Lot 6.2, contrat technique) — seul
-// Client Component du header, recevant les données déjà chargées ici en
-// props.
-//
-// Hors périmètre assumé (contrat consolidé §8) : item de navigation actif,
-// fermeture au clavier/clic extérieur des <details> desktop.
+// CTA "S'inscrire" : DIV-D7 (regle-fidelite-design.md §6), le design
+// distingue "S'abonner" (abonnement payant, hors MVP) de "S'inscrire"
+// (newsletter) — le libellé existant est aligné sur ce dernier.
 export async function PublicHeader() {
-  const [categories, zones] = await Promise.all([listCategorieMenu(), listZoneMenu()]);
+  const [categories, zones, ticker] = await Promise.all([
+    listCategorieMenu(),
+    listZoneMenu(),
+    getTickerArticle(),
+  ]);
 
   return (
-    <header className="sticky top-0 z-40 flex h-(--header-height-mobile) items-center gap-4 bg-accent-primary px-5 lg:h-(--header-height-desktop) lg:justify-between lg:px-15">
-      <Link
-        href="/"
-        className="font-editorial text-lg font-medium text-white outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-      >
-        Corne de l&apos;Afrique
-      </Link>
+    <header
+      id="site-header"
+      className="sticky top-0 z-[60] border-b border-border bg-[rgba(246,243,236,0.94)] backdrop-blur-[10px]"
+    >
+      <style>{`.ticker-dot{animation:ticker-pulse 1.6s ease-in-out infinite}@keyframes ticker-pulse{0%,100%{opacity:1}50%{opacity:.3}}`}</style>
 
-      <nav aria-label="Navigation principale" className="hidden lg:flex lg:items-center">
-        <ul className="flex items-center gap-6">
-          {categories.length > 0 && (
-            <li>
-              <details className="relative">
-                <summary className="cursor-pointer list-none text-sm text-white/80 outline-none [&::-webkit-details-marker]:hidden hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-                  Catégories
-                </summary>
-                <ul className="absolute left-0 top-full z-50 mt-2 min-w-40 rounded-sm border border-border bg-bg-primary p-2 shadow-lg">
-                  {categories.map((categorie) => (
-                    <li key={categorie.slug}>
-                      <Link
-                        href={`/categorie/${categorie.slug}`}
-                        className="block rounded-sm px-3 py-2 text-sm text-text-secondary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-                      >
-                        {categorie.nom}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            </li>
-          )}
+      {/* Barre utilitaire : ticker + Contact (design l.34-47) */}
+      <div className="mx-auto flex h-[38px] max-w-[1220px] items-center border-b border-border px-[28px] text-[12px] tracking-[.02em] text-text-secondary">
+        {ticker && (
+          <Link
+            href={`/articles/${ticker.slug}`}
+            className={`flex max-w-[52ch] items-center gap-[8px] overflow-hidden text-text-secondary hover:text-accent-primary ${LIEN_FOCUSABLE}`}
+          >
+            <span className="inline-flex flex-shrink-0 items-center gap-[6px] text-[11px] font-bold uppercase tracking-[.12em] text-accent-primary">
+              <span aria-hidden="true" className="ticker-dot h-[7px] w-[7px] rounded-full bg-accent-primary" />
+              En continu
+            </span>
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">{ticker.titre}</span>
+          </Link>
+        )}
 
-          {zones.length > 0 && (
-            <li>
-              <details className="relative">
-                <summary className="cursor-pointer list-none text-sm text-white/80 outline-none [&::-webkit-details-marker]:hidden hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-                  Zones géographiques
-                </summary>
-                <ul className="absolute left-0 top-full z-50 mt-2 min-w-40 rounded-sm border border-border bg-bg-primary p-2 shadow-lg">
-                  {zones.map((zone) => (
-                    <li key={zone.slug}>
-                      <Link
-                        href={`/zone/${zone.slug}`}
-                        className="block rounded-sm px-3 py-2 text-sm text-text-secondary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-                      >
-                        {zone.nom}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            </li>
-          )}
+        <div className="ml-auto flex items-center gap-[18px]">
+          <LanguageToggle />
 
-          <li>
-            <Link
-              href="/a-propos"
-              className="text-sm text-white/80 outline-none transition-colors duration-fast hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              À propos
-            </Link>
-          </li>
-        </ul>
-      </nav>
+          <a
+            href={`mailto:${aProposContent.contact.email}`}
+            className={`font-medium text-text-secondary hover:text-text-secondary ${LIEN_FOCUSABLE}`}
+          >
+            Contact
+          </a>
+        </div>
+      </div>
 
-      <form
-        role="search"
-        action="/recherche"
-        method="GET"
-        className="hidden lg:flex lg:max-w-55 lg:flex-none"
-      >
-        <label htmlFor="header-search-q" className="sr-only">
-          Rechercher un article
-        </label>
-        <input
-          id="header-search-q"
-          type="search"
-          name="q"
-          placeholder="Rechercher…"
-          className="h-9 w-full rounded-full border border-border bg-bg-primary px-4 text-sm text-text-primary outline-none placeholder:text-text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+      {/* Barre principale : logo, nav plate, recherche, CTA (design l.49-66) */}
+      <div className="mx-auto flex max-w-[1220px] items-center justify-between gap-[20px] px-[28px] pb-[16px] pt-[18px]">
+        <Link
+          href="/"
+          className={`flex flex-col gap-[2px] text-left font-editorial text-[28px] font-extrabold leading-none tracking-[-.01em] text-text-primary ${LIEN_FOCUSABLE}`}
+        >
+          Corne de l&apos;Afrique
+        </Link>
+
+        <nav aria-label="Navigation principale" className="hidden min-w-0 flex-1 flex-wrap items-center justify-center gap-[14px] lg:flex">
+          <ul className="flex flex-wrap items-center justify-center gap-[14px]">
+            {categories.map((categorie) => (
+              <li key={categorie.slug} className="flex-shrink-0">
+                <Link
+                  href={`/categorie/${categorie.slug}`}
+                  className={`whitespace-nowrap text-[12px] font-medium tracking-[-.005em] text-text-secondary transition-colors duration-fast hover:text-accent-primary ${LIEN_FOCUSABLE}`}
+                >
+                  {categorie.nom}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="hidden items-center gap-[12px] lg:flex">
+          <Link
+            href="/recherche"
+            className={`flex items-center gap-[7px] rounded-full border border-border bg-bg-secondary px-[14px] py-[8px] text-[13px] text-text-secondary hover:border-accent-primary hover:text-accent-primary ${LIEN_FOCUSABLE}`}
+          >
+            <span aria-hidden="true" className="text-[15px]">
+              ⌕
+            </span>
+            <span>Rechercher</span>
+          </Link>
+          <Link
+            href="/newsletter"
+            className={`rounded-full bg-accent-primary px-[18px] py-[9px] text-[13px] font-semibold tracking-[.01em] text-white hover:bg-accent-primary-hover ${LIEN_FOCUSABLE}`}
+          >
+            S&apos;inscrire
+          </Link>
+        </div>
+
+        <MobileHeaderControls
+          categories={categories}
+          zones={zones}
+          ctaHref="/newsletter"
+          contactEmail={aProposContent.contact.email}
         />
-      </form>
+      </div>
 
-      <Link
-        href="/newsletter"
-        className="hidden rounded-sm bg-accent-warm px-5 py-2 text-sm font-medium text-white outline-none transition-colors duration-120 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary lg:inline-block"
-      >
-        S&apos;abonner
-      </Link>
+      {/* Bandeau Pays (design l.68-77) */}
+      {zones.length > 0 && (
+        <div className="hidden border-t border-border bg-[#efeadf] lg:block">
+          <div className="mx-auto flex max-w-[1220px] items-center gap-[8px] overflow-x-auto px-[28px] py-[9px]">
+            <span className="mr-[6px] flex-shrink-0 text-[11px] font-semibold uppercase tracking-[.16em] text-[#8a8377]">
+              Pays
+            </span>
+            {zones.map((zone) => (
+              <Link
+                key={zone.slug}
+                href={`/zone/${zone.slug}`}
+                className={`flex-shrink-0 rounded-full border border-border bg-bg-secondary px-[13px] py-[5px] text-[12.5px] text-text-secondary transition-colors duration-fast hover:border-accent-primary hover:text-accent-primary ${LIEN_FOCUSABLE}`}
+              >
+                {zone.nom}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
-      <MobileHeaderControls
-        categories={categories}
-        zones={zones}
-        ctaHref="/newsletter"
-        contactEmail={aProposContent.contact.email}
-      />
+      {/* Bandeau tagline (design l.78-82) */}
+      <div className="border-t border-border bg-bg-primary">
+        <div className="mx-auto flex max-w-[1220px] items-center gap-[10px] px-[28px] py-[8px] text-[11.5px] font-semibold uppercase tracking-[.14em] text-[#8a8377]">
+          <span className="text-left text-[14.5px] font-bold leading-[30.25px] text-accent-primary">
+            Le média francophone de référence sur la Corne de l&apos;Afrique
+          </span>
+        </div>
+      </div>
     </header>
   );
 }
