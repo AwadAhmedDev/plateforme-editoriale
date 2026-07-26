@@ -116,7 +116,7 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
           <button
             type="submit"
             disabled={pending}
-            className="h-11 shrink-0 rounded-sm bg-accent-warm px-5 text-sm font-medium text-white outline-none transition-colors duration-fast hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+            className="h-11 shrink-0 rounded-sm bg-accent-primary px-5 text-sm font-medium text-white outline-none transition-colors duration-fast hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
           >
             {pending ? "Inscription…" : "S'abonner"}
           </button>
@@ -161,7 +161,7 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="h-11 rounded-sm bg-accent-warm px-5 text-sm font-medium text-white outline-none transition-colors duration-fast hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+        className="h-11 rounded-sm bg-accent-primary px-5 text-sm font-medium text-white outline-none transition-colors duration-fast hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
       >
         {pending ? "Inscription…" : "S'abonner"}
       </button>
