@@ -40,6 +40,19 @@ export function ContactForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {/* Piège à robots (honeypot) : champ invisible aux visiteurs réels (hors flux visuel,
+          exclu de l'arbre d'accessibilité, jamais atteint au clavier) — un remplissage
+          automatique de formulaire le renseigne souvent. Lu par submitContactMessage,
+          jamais par la validation Zod. */}
+      <input
+        type="text"
+        name="site_web"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+      />
+
       <div>
         <label htmlFor="contact-nom" className={LABEL}>
           Nom
