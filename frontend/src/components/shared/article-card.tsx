@@ -1,52 +1,46 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// Composant partagé (Lot L1, contrat révisé §E/§E') : variante réduite
-// d'ArticleCard, consommée par la section "Contenus liés" de la page Détail
-// d'un article, et (Lot L8b) par la Homepage. Toutes les props de données
-// sont obligatoires — justifié par DR-001 (domain-model.md : un contenu
-// Archivé est exclu de toute surface de découverte, dont les contenus liés)
-// combiné à `chk_publie_champs_requis` (tout contenu Publié possède
-// obligatoirement titre, catégorie, zone, image principale, texte alternatif
-// et date de publication) et à la contrainte `onDelete: Restrict` sur les
-// clés étrangères catégorie/zone (aucune relation ne peut devenir
-// orpheline). Aucune de ces garanties ne dépend de l'algorithme de sélection
-// des contenus liés (catégorie → zone → récents), lui-même non encore
-// validé — c'est pourquoi cette nullabilité n'en dépend pas non plus.
+// Carte de listing (REPO-1→9, clôture RC-1 : alignement sur Corne de l'Afrique.dc.html
+// l.273-286, section isListing) — consommée par app/(public)/categorie/[slug]/page.tsx
+// et app/(public)/zone/[slug]/page.tsx, seuls consommateurs restants (le 3e,
+// app/(public)/articles/page.tsx, a été supprimé — redirection vers /recherche, RC-1).
+// Image 16/9, rubrique · pays, titre, extrait, "auteur · date · temps de lecture" —
+// mêmes champs que la carte de listing du design, tous déjà disponibles sur
+// ArticlePublicListItem (aucune modification de repository requise).
 //
-// `liensTaxonomieActifs` (Lot L8b, contrat validé) : les routes
-// /categorie/[slug] et /zone/[slug] n'existent pas encore publiquement — la
-// Homepage passe `false` pour afficher categorieNom/zoneNom en texte simple
-// plutôt que des liens morts. Par défaut `true` (comportement inchangé pour
-// "Contenus liés", seul consommateur avant ce lot).
-//
-// Ni variante grille/liste complète, ni `typeContenu`, ni logique
-// d'omission contextuelle : hors périmètre de cette variante réduite
-// (cf. carte P1-T1, development-tasks.md).
+// Aucune prop de désactivation des liens rubrique/pays (contrairement à une version
+// antérieure de ce composant) : ses deux consommateurs actuels sont eux-mêmes des pages
+// de rubrique/pays, où ces routes existent toujours — plus aucun appelant ne désactivait
+// ce comportement.
 export type ArticleCardProps = {
   slug: string;
   titre: string;
+  chapo: string | null;
   imagePrincipaleUrl: string;
   imageAltText: string;
   categorieNom: string;
   categorieSlug: string;
   zoneNom: string;
   zoneSlug: string;
+  auteur: string | null;
   datePublication: Date;
-  liensTaxonomieActifs?: boolean;
+  tempsLecture: string;
 };
 
 export function ArticleCard({
   slug,
   titre,
+  chapo,
   imagePrincipaleUrl,
   imageAltText,
   categorieNom,
   categorieSlug,
   zoneNom,
   zoneSlug,
+  auteur,
   datePublication,
-  liensTaxonomieActifs = true,
+  tempsLecture,
 }: ArticleCardProps) {
   const dateFormatee = datePublication.toLocaleDateString("fr-FR", {
     day: "numeric",
@@ -55,10 +49,10 @@ export function ArticleCard({
   });
 
   return (
-    <article className="rounded-sm border border-border p-3">
+    <article className="flex flex-col overflow-hidden rounded-sm border border-border bg-bg-secondary transition-shadow duration-fast hover:shadow-lg">
       <Link
         href={`/articles/${slug}`}
-        className="relative block aspect-video overflow-hidden rounded-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+        className="relative block aspect-video overflow-hidden outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
       >
         <Image
           src={imagePrincipaleUrl}
@@ -69,40 +63,39 @@ export function ArticleCard({
         />
       </Link>
 
-      <h3 className="mt-3 font-editorial text-xl">
-        <Link
-          href={`/articles/${slug}`}
-          className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-        >
-          {titre}
-        </Link>
-      </h3>
-
-      <p className="mt-2 flex flex-wrap items-center gap-1 font-meta text-[13px] text-text-secondary">
-        {liensTaxonomieActifs ? (
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <p className="flex flex-wrap items-center gap-1 text-[11px] font-semibold uppercase tracking-[.1em] text-accent-primary">
           <Link
             href={`/categorie/${categorieSlug}`}
-            className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+            className="outline-none transition-colors duration-fast hover:text-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             {categorieNom}
           </Link>
-        ) : (
-          <span>{categorieNom}</span>
-        )}
-        <span aria-hidden="true">·</span>
-        {liensTaxonomieActifs ? (
+          <span aria-hidden="true">·</span>
           <Link
             href={`/zone/${zoneSlug}`}
-            className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+            className="outline-none transition-colors duration-fast hover:text-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             {zoneNom}
           </Link>
-        ) : (
-          <span>{zoneNom}</span>
-        )}
-        <span aria-hidden="true">·</span>
-        <span>{dateFormatee}</span>
-      </p>
+        </p>
+
+        <h3 className="font-editorial text-lg font-semibold leading-tight">
+          <Link
+            href={`/articles/${slug}`}
+            className="outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+          >
+            {titre}
+          </Link>
+        </h3>
+
+        {chapo && <p className="line-clamp-2 text-sm text-text-secondary">{chapo}</p>}
+
+        <p className="mt-auto text-xs text-text-secondary">
+          {auteur && <>{auteur} · </>}
+          {dateFormatee} · {tempsLecture}
+        </p>
+      </div>
     </article>
   );
 }
