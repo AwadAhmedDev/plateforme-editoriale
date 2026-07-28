@@ -5,12 +5,14 @@ import { getCategoriePage } from "@/features/taxonomies/get-categorie-page";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
 
-// Route Catégorie (Lot L8c, contrat validé) : lecture via getCategoriePage
-// uniquement — aucun accès repository direct ici. Page 1 des articles
-// publiés de la catégorie (12 max, déjà triés par date de publication
-// décroissante) ; aucune pagination dans ce lot. title/description
-// conditionnels sur les données réelles (nom, descriptionCourte), jamais
-// de valeur inventée si absente.
+// Route Catégorie (clôture RC-1 : alignement sur le gabarit de listing du design, Corne
+// de l'Afrique.dc.html l.265-289, section isListing/listType:'cat') : lecture via
+// getCategoriePage uniquement — aucun accès repository direct ici. Page 1 des articles
+// publiés de la catégorie (24 max, déjà triés par date de publication décroissante) ;
+// aucune pagination dans ce lot. Kicker "Rubrique" repris littéralement du design
+// (constante — le design distingue `listingKicker` du nom réel de l'instance,
+// `listingTitle`). title/description conditionnels sur les données réelles (nom,
+// descriptionCourte), jamais de valeur inventée si absente.
 export async function generateMetadata({
   params,
 }: {
@@ -76,28 +78,37 @@ export default async function CategoriePage({
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionPageJsonLd) }}
         />
       )}
-      <main className="mx-auto w-full max-w-300 flex-1 px-5 py-8 lg:px-15">
-        <h1 className="font-editorial text-3xl">{categorie.nom}</h1>
+      <main className="mx-auto w-full max-w-[1220px] flex-1 px-5 py-8 lg:px-[28px]">
+        <div className="border-b-2 border-text-primary pb-4">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[.16em] text-accent-primary">Rubrique</p>
+          <h1 className="font-editorial text-4xl">{categorie.nom}</h1>
+          <p className="mt-2 text-sm text-text-secondary">
+            {categorie.count} publication{categorie.count > 1 ? "s" : ""}
+          </p>
+        </div>
 
         {categorie.articles.length > 0 ? (
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4.5">
+          <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {categorie.articles.map((article) => (
               <ArticleCard
                 key={article.slug}
                 slug={article.slug}
                 titre={article.titre}
+                chapo={article.chapo}
                 imagePrincipaleUrl={article.imagePrincipaleUrl}
                 imageAltText={article.imageAltText}
                 categorieNom={article.categorieNom}
                 categorieSlug={article.categorieSlug}
                 zoneNom={article.zoneNom}
                 zoneSlug={article.zoneSlug}
+                auteur={article.auteur}
                 datePublication={article.datePublication}
+                tempsLecture={article.tempsLecture}
               />
             ))}
           </div>
         ) : (
-          <p className="mt-6 text-text-secondary">Aucun article publié pour le moment dans cette rubrique.</p>
+          <p className="mt-7 text-text-secondary">Aucun article publié pour le moment dans cette rubrique.</p>
         )}
       </main>
     </>
