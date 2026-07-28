@@ -18,6 +18,20 @@ const nextConfig: NextConfig = {
         ]
       : [],
   },
+  // /articles (clôture RC-1) : page supprimée — aucun lien interne ne la ciblait, et sans
+  // filtre elle produisait exactement le même jeu de résultats que /recherche
+  // (ContenuEditorialRepository.search() sans critère = findManyPublished() sans filtre,
+  // même condition `statut='publie'`, même tri). Redirection permanente plutôt qu'un 404 :
+  // /articles/{slug} (détail d'un article) n'est pas concerné, seule la racine /articles l'est.
+  async redirects() {
+    return [
+      {
+        source: "/articles",
+        destination: "/recherche",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
