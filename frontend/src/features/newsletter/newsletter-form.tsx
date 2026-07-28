@@ -25,7 +25,8 @@ type NewsletterFormProps = {
 // sitewide (app/(public)/layout.tsx, avant le footer, sur toutes les pages) — mêmes
 // champs que "compact", présentation alignée sur le design (fond sombre, bouton
 // pleinement arrondi). Les trois variantes partagent même action serveur, mêmes
-// messages, même traitement "déjà inscrit".
+// messages, même traitement "déjà inscrit", et le même piège à robots (honeypot,
+// champ "site_web" invisible, lu par subscribeNewsletter).
 export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
   const [state, formAction, pending] = useActionState(subscribeNewsletter, initialState);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -56,6 +57,17 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
     return (
       <div className="min-w-0 lg:min-w-[380px]">
         <form action={formAction} className="flex gap-2.5">
+          {/* Piège à robots (honeypot) : cf. contact-form.tsx pour la justification
+              complète — invisible aux visiteurs réels, lu par subscribeNewsletter. */}
+          <input
+            type="text"
+            name="site_web"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+          />
+
           <label htmlFor="newsletter-email-banner" className="sr-only">
             Adresse e-mail
           </label>
@@ -100,6 +112,16 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
   if (variant === "compact") {
     return (
       <form action={formAction} className="flex flex-col gap-2">
+        {/* Piège à robots (honeypot) : cf. contact-form.tsx. */}
+        <input
+          type="text"
+          name="site_web"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+        />
+
         <div className="flex flex-col gap-2 sm:flex-row">
           <label htmlFor="newsletter-email-compact" className="sr-only">
             Adresse e-mail
@@ -144,6 +166,16 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
 
   return (
     <form action={formAction} className="flex max-w-sm flex-col gap-3">
+      {/* Piège à robots (honeypot) : cf. contact-form.tsx. */}
+      <input
+        type="text"
+        name="site_web"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+      />
+
       <div className="flex flex-col gap-1">
         <label htmlFor="newsletter-email" className="text-sm font-medium">
           Adresse e-mail
