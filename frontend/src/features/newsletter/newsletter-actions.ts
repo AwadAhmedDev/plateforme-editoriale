@@ -25,6 +25,14 @@ export async function subscribeNewsletter(
   _previousState: NewsletterActionState,
   formData: FormData
 ): Promise<NewsletterActionState> {
+  // Piège à robots (honeypot, cf. newsletter-form.tsx) : un visiteur réel ne peut pas
+  // renseigner ce champ. Réponse neutre identique au succès réel si rempli — même
+  // principe que CONFIRMATION_MESSAGE ci-dessous, jamais de signal de détection.
+  const piege = String(formData.get("site_web") ?? "").trim();
+  if (piege.length > 0) {
+    return { status: "success", message: CONFIRMATION_MESSAGE };
+  }
+
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const values = { email };
 
