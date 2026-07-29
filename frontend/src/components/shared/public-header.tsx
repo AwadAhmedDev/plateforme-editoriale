@@ -25,13 +25,13 @@ const LIEN_FOCUSABLE =
 // .dc.html). Bandeau Pays masqué si aucune zone n'existe (convention déjà en
 // place dans le projet : une section sans donnée ne s'affiche pas).
 //
-// Bouton "Nos articles" en tête de nav (révision d'architecture, rétablissement de
+// "Tous les articles" en tête de nav (révision d'architecture, rétablissement de
 // /articles) : seule entrée de nav sans donnée dans .dc.html — dérogation assumée à la
 // fidélité stricte du design, justifiée par sitemap.md (page "Liste des articles"
-// documentée comme vue d'ensemble indépendante de /recherche, US-002/US-004). Traitement
-// visuel volontairement différent des 6 rubriques (pilule pleine couleur + icône, au lieu
-// d'un lien texte) et placé en premier, sur demande explicite : doit être vu avant les
-// rubriques, pas confondu avec elles.
+// documentée comme vue d'ensemble indépendante de /recherche, US-002/US-004). Appartient
+// fonctionnellement à la navigation éditoriale (sur-ensemble des 6 rubriques, pas une
+// action ni un CTA) : même traitement visuel qu'elles à l'identique (`navStyle` uniforme),
+// aucune variante — seul le libellé le distingue.
 //
 // Sélecteur de langue FR/EN (design l.40-44) : omis, DIV-D3
 // (regle-fidelite-design.md §6) — hors périmètre de ce lot.
@@ -95,10 +95,9 @@ export async function PublicHeader() {
             <li className="flex-shrink-0">
               <Link
                 href="/articles"
-                className={`flex items-center gap-[6px] whitespace-nowrap rounded-full bg-accent-primary px-[14px] py-[7px] text-[12px] font-semibold tracking-[.01em] text-white transition-colors duration-fast hover:bg-accent-primary-hover ${LIEN_FOCUSABLE}`}
+                className={`whitespace-nowrap text-[12px] font-medium tracking-[-.005em] text-text-secondary transition-colors duration-fast hover:text-accent-primary ${LIEN_FOCUSABLE}`}
               >
-                <IconeArticles />
-                Nos articles
+                Tous les articles
               </Link>
             </li>
             {categories.map((categorie) => (
@@ -164,18 +163,5 @@ export async function PublicHeader() {
         </div>
       </div>
     </header>
-  );
-}
-
-// Icône du bouton "Nos articles" : trait fin monochrome (même convention que les icônes de
-// mobile-header-controls.tsx), distincte du glyphe recherche (⌕) et du futur menu burger —
-// trois lignes de longueur inégale évoquant un texte/document, pas un menu.
-function IconeArticles() {
-  return (
-    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-      <line x1="4" y1="7" x2="20" y2="7" />
-      <line x1="4" y1="12" x2="20" y2="12" />
-      <line x1="4" y1="17" x2="14" y2="17" />
-    </svg>
   );
 }
