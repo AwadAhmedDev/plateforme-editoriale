@@ -1,23 +1,28 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/shared/article-card";
+import { PaginationLinks } from "@/components/shared/pagination-links";
 import { getZonePage } from "@/features/taxonomies/get-zone-page";
+import { normaliserPageDemandee, urlAvecPage } from "@/lib/pagination";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
+
+type ZonePageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
 // Route Pays (clôture RC-1 : alignement sur le gabarit de listing du design, Corne de
 // l'Afrique.dc.html l.265-289, section isListing/listType:'country') : symétrique de
 // app/(public)/categorie/[slug]/page.tsx. Lecture via getZonePage uniquement — aucun
-// accès repository direct ici. Page 1 des articles publiés de la zone (24 max, déjà
-// triés par date de publication décroissante) ; aucune pagination dans ce lot. Kicker
-// "Pays" repris littéralement du design (constante, cf. categorie/[slug]/page.tsx).
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+// accès repository direct ici. Pagination `?page=N` (Lot 1A) : canonical auto-référent
+// par page via urlAvecPage (jamais `?page=1` explicite). Kicker "Pays" repris
+// littéralement du design (constante, cf. categorie/[slug]/page.tsx).
+export async function generateMetadata({ params, searchParams }: ZonePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const zone = await getZonePage(slug);
+  const resolvedSearchParams = await searchParams;
+  const page = normaliserPageDemandee(resolvedSearchParams.page);
+  const zone = await getZonePage(slug, page);
 
   if (!zone) {
     return {};
@@ -27,26 +32,35 @@ export async function generateMetadata({
     title: zone.nom,
     ...(zone.descriptionCourte ? { description: zone.descriptionCourte } : {}),
     alternates: {
-      canonical: `/zone/${slug}`,
+      canonical: urlAvecPage(`/zone/${slug}`, zone.page),
     },
   };
 }
 
-export default async function ZonePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ZonePage({ params, searchParams }: ZonePageProps) {
   const { slug } = await params;
-  const zone = await getZonePage(slug);
+  const resolvedSearchParams = await searchParams;
+  const pageDemandee = normaliserPageDemandee(resolvedSearchParams.page);
+
+  const zone = await getZonePage(slug, pageDemandee);
 
   if (!zone) {
     notFound();
   }
 
+  // Page bien formée (entière, >= 1) mais hors bornes : le repository l'a déjà clampée à
+  // la dernière page existante (`zone.page` != `pageDemandee`) — notFound() plutôt que
+  // d'afficher silencieusement un contenu qui ne correspond pas à l'URL demandée (Lot 1A).
+  // Distinct du notFound() ci-dessus (slug inconnu) : même mécanisme Next.js (nearest
+  // not-found.tsx), deux causes différentes.
+  if (zone.page !== pageDemandee) {
+    notFound();
+  }
+
   // JSON-LD (Lot L12, contrat validé) : CollectionPage + ItemList imbriqué
   // (mainEntity) — omis entièrement si la zone n'a aucun article publié,
-  // jamais un ItemList déclaré sans élément.
+  // jamais un ItemList déclaré sans élément. `url` reflète la page courante (Lot 1A),
+  // cohérent avec le canonical de generateMetadata.
   const siteUrl = resoudreSiteUrl();
   const absoluteUrl = (path: string) => new URL(path, siteUrl).toString();
 
@@ -56,7 +70,7 @@ export default async function ZonePage({
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: zone.nom,
-          url: absoluteUrl(`/zone/${slug}`),
+          url: absoluteUrl(urlAvecPage(`/zone/${slug}`, zone.page)),
           mainEntity: {
             "@type": "ItemList",
             itemListElement: zone.articles.map((article, index) => ({
@@ -108,6 +122,8 @@ export default async function ZonePage({
         ) : (
           <p className="mt-7 text-text-secondary">Aucun article publié pour le moment dans ce pays.</p>
         )}
+
+        <PaginationLinks basePath={`/zone/${slug}`} currentPage={zone.page} hasNextPage={zone.hasNextPage} />
       </main>
     </>
   );

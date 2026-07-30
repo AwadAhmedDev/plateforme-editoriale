@@ -23,29 +23,33 @@ export type CategoriePageData = {
   slug: string;
   descriptionCourte: string | null;
   count: number;
+  page: number;
+  hasNextPage: boolean;
   articles: CategoriePageArticle[];
 };
 
 // Lecture publique pour app/(public)/categorie/[slug]/page.tsx : CategorieRepository.findBySlug
 // puis ContenuEditorialRepository.findManyPublished({ categorieId }), tous deux existants et
-// non modifiés. Page 1 uniquement (24 articles, déjà triés datePublication desc par le
-// repository) — aucune pagination dans ce lot. Champs `chapo`/`auteur` déjà retournés par
-// la requête Prisma sous-jacente (ARTICLE_PUBLIC_LIST_INCLUDE) : simple projection
-// supplémentaire, aucune modification de repository (clôture RC-1, alignement sur la
-// carte de listing du design, Corne de l'Afrique.dc.html l.273-286). `count` = total réel
-// (pas seulement `items.length`) : correct même si le volume dépassait un jour la page 1.
-// Mémoïsée (React.cache) : generateMetadata et la page appellent toutes deux cette fonction,
-// un seul accès base de données réel par requête.
-export const getCategoriePage = cache(async (slug: string): Promise<CategoriePageData | null> => {
+// non modifiés. `page` transmis tel quel : le repository clampe déjà toute valeur hors
+// bornes à la dernière page existante et retourne la page réellement servie (Lot 1A,
+// pagination) — la page appelante compare `page` demandé à `page` retourné pour détecter
+// une page hors bornes (notFound), sans logique dupliquée ici. Champs `chapo`/`auteur`
+// déjà retournés par la requête Prisma sous-jacente (ARTICLE_PUBLIC_LIST_INCLUDE) : simple
+// projection supplémentaire, aucune modification de repository (clôture RC-1, alignement
+// sur la carte de listing du design, Corne de l'Afrique.dc.html l.273-286). `count` = total
+// réel (pas seulement `items.length`). Mémoïsée (React.cache) : generateMetadata et la
+// page appellent toutes deux cette fonction avec les mêmes arguments, un seul accès base
+// de données réel par requête.
+export const getCategoriePage = cache(async (slug: string, page: number): Promise<CategoriePageData | null> => {
   const categorie = await CategorieRepository.findBySlug(slug);
 
   if (!categorie) {
     return null;
   }
 
-  const { items, total } = await ContenuEditorialRepository.findManyPublished({
+  const { items, total, page: pageServie, hasNextPage } = await ContenuEditorialRepository.findManyPublished({
     categorieId: categorie.id,
-    page: 1,
+    page,
   });
 
   return {
@@ -53,6 +57,8 @@ export const getCategoriePage = cache(async (slug: string): Promise<CategoriePag
     slug: categorie.slug,
     descriptionCourte: categorie.descriptionCourte,
     count: total,
+    page: pageServie,
+    hasNextPage,
     articles: items.map((item) => ({
       slug: item.slug,
       titre: item.titre!,

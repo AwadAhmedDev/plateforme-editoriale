@@ -1,25 +1,30 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/shared/article-card";
+import { PaginationLinks } from "@/components/shared/pagination-links";
 import { getCategoriePage } from "@/features/taxonomies/get-categorie-page";
+import { normaliserPageDemandee, urlAvecPage } from "@/lib/pagination";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
 
+type CategoriePageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
 // Route Catégorie (clôture RC-1 : alignement sur le gabarit de listing du design, Corne
 // de l'Afrique.dc.html l.265-289, section isListing/listType:'cat') : lecture via
-// getCategoriePage uniquement — aucun accès repository direct ici. Page 1 des articles
-// publiés de la catégorie (24 max, déjà triés par date de publication décroissante) ;
-// aucune pagination dans ce lot. Kicker "Rubrique" repris littéralement du design
-// (constante — le design distingue `listingKicker` du nom réel de l'instance,
-// `listingTitle`). title/description conditionnels sur les données réelles (nom,
-// descriptionCourte), jamais de valeur inventée si absente.
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+// getCategoriePage uniquement — aucun accès repository direct ici. Pagination `?page=N`
+// (Lot 1A) : canonical auto-référent par page via urlAvecPage (jamais `?page=1`
+// explicite). Kicker "Rubrique" repris littéralement du design (constante — le design
+// distingue `listingKicker` du nom réel de l'instance, `listingTitle`). title/description
+// conditionnels sur les données réelles (nom, descriptionCourte), jamais de valeur
+// inventée si absente.
+export async function generateMetadata({ params, searchParams }: CategoriePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const categorie = await getCategoriePage(slug);
+  const resolvedSearchParams = await searchParams;
+  const page = normaliserPageDemandee(resolvedSearchParams.page);
+  const categorie = await getCategoriePage(slug, page);
 
   if (!categorie) {
     return {};
@@ -29,26 +34,35 @@ export async function generateMetadata({
     title: categorie.nom,
     ...(categorie.descriptionCourte ? { description: categorie.descriptionCourte } : {}),
     alternates: {
-      canonical: `/categorie/${slug}`,
+      canonical: urlAvecPage(`/categorie/${slug}`, categorie.page),
     },
   };
 }
 
-export default async function CategoriePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function CategoriePage({ params, searchParams }: CategoriePageProps) {
   const { slug } = await params;
-  const categorie = await getCategoriePage(slug);
+  const resolvedSearchParams = await searchParams;
+  const pageDemandee = normaliserPageDemandee(resolvedSearchParams.page);
+
+  const categorie = await getCategoriePage(slug, pageDemandee);
 
   if (!categorie) {
     notFound();
   }
 
+  // Page bien formée (entière, >= 1) mais hors bornes : le repository l'a déjà clampée à
+  // la dernière page existante (`categorie.page` != `pageDemandee`) — notFound() plutôt
+  // que d'afficher silencieusement un contenu qui ne correspond pas à l'URL demandée
+  // (Lot 1A). Distinct du notFound() ci-dessus (slug inconnu) : même mécanisme Next.js
+  // (nearest not-found.tsx), deux causes différentes.
+  if (categorie.page !== pageDemandee) {
+    notFound();
+  }
+
   // JSON-LD (Lot L12, contrat validé) : CollectionPage + ItemList imbriqué
   // (mainEntity) — omis entièrement si la catégorie n'a aucun article
-  // publié, jamais un ItemList déclaré sans élément.
+  // publié, jamais un ItemList déclaré sans élément. `url` reflète la page courante
+  // (Lot 1A), cohérent avec le canonical de generateMetadata.
   const siteUrl = resoudreSiteUrl();
   const absoluteUrl = (path: string) => new URL(path, siteUrl).toString();
 
@@ -58,7 +72,7 @@ export default async function CategoriePage({
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: categorie.nom,
-          url: absoluteUrl(`/categorie/${slug}`),
+          url: absoluteUrl(urlAvecPage(`/categorie/${slug}`, categorie.page)),
           mainEntity: {
             "@type": "ItemList",
             itemListElement: categorie.articles.map((article, index) => ({
@@ -110,6 +124,8 @@ export default async function CategoriePage({
         ) : (
           <p className="mt-7 text-text-secondary">Aucun article publié pour le moment dans cette rubrique.</p>
         )}
+
+        <PaginationLinks basePath={`/categorie/${slug}`} currentPage={categorie.page} hasNextPage={categorie.hasNextPage} />
       </main>
     </>
   );

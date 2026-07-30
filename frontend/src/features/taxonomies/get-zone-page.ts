@@ -23,28 +23,33 @@ export type ZonePageData = {
   slug: string;
   descriptionCourte: string | null;
   count: number;
+  page: number;
+  hasNextPage: boolean;
   articles: ZonePageArticle[];
 };
 
 // Lecture publique pour app/(public)/zone/[slug]/page.tsx : symétrique de
 // get-categorie-page.ts. ZoneGeographiqueRepository.findBySlug puis
 // ContenuEditorialRepository.findManyPublished({ zoneId }), tous deux existants et non
-// modifiés. Page 1 uniquement (24 articles, déjà triés datePublication desc) — aucune
-// pagination dans ce lot. Champs `chapo`/`auteur` déjà retournés par la requête Prisma
-// sous-jacente : simple projection supplémentaire (clôture RC-1,
-// alignement sur la carte de listing du design). `count` = total réel, pas
+// modifiés. `page` transmis tel quel : le repository clampe déjà toute valeur hors bornes
+// à la dernière page existante et retourne la page réellement servie (Lot 1A,
+// pagination) — la page appelante compare `page` demandé à `page` retourné pour détecter
+// une page hors bornes (notFound), sans logique dupliquée ici. Champs `chapo`/`auteur`
+// déjà retournés par la requête Prisma sous-jacente : simple projection supplémentaire
+// (clôture RC-1, alignement sur la carte de listing du design). `count` = total réel, pas
 // `items.length`. Mémoïsée (React.cache) : generateMetadata et la page appellent toutes
-// deux cette fonction, un seul accès base de données réel par requête.
-export const getZonePage = cache(async (slug: string): Promise<ZonePageData | null> => {
+// deux cette fonction avec les mêmes arguments, un seul accès base de données réel par
+// requête.
+export const getZonePage = cache(async (slug: string, page: number): Promise<ZonePageData | null> => {
   const zone = await ZoneGeographiqueRepository.findBySlug(slug);
 
   if (!zone) {
     return null;
   }
 
-  const { items, total } = await ContenuEditorialRepository.findManyPublished({
+  const { items, total, page: pageServie, hasNextPage } = await ContenuEditorialRepository.findManyPublished({
     zoneId: zone.id,
-    page: 1,
+    page,
   });
 
   return {
@@ -52,6 +57,8 @@ export const getZonePage = cache(async (slug: string): Promise<ZonePageData | nu
     slug: zone.slug,
     descriptionCourte: zone.descriptionCourte,
     count: total,
+    page: pageServie,
+    hasNextPage,
     articles: items.map((item) => ({
       slug: item.slug,
       titre: item.titre!,
