@@ -50,7 +50,7 @@ Un schéma de validation unique par formulaire/contrat (Zod, ou équivalent), pa
 | Contexte | Convention |
 |---|---|
 | Back-office (Gestion des articles, Gestion newsletter) | Pagination numérotée, taille de page fixe **20 lignes**, jamais de « Charger plus » (`ui-specification.md`) |
-| Public (Liste des articles, Résultats de recherche, Catégorie, Zone géographique) | Même paramètre de pagination (numéro de page) exposé par le contrat ; seule la présentation change selon le point de rupture (numérotée desktop, « Charger plus » mobile — `frontend-specification.md`). **Taille de page non fixée par les documents source** — cf. Point à arbitrer §7.2 |
+| Public (Liste des articles, Résultats de recherche, Catégorie, Zone géographique) | Même paramètre de pagination (`?page=N`) exposé par le contrat. Taille de page **24**, présentation **Précédent/Suivant à tous les points de rupture** — arbitrage tranché à l'implémentation, cf. §7.2 (remplace la présentation « numérotée desktop / Charger plus mobile » de `frontend-specification.md`, jamais implémentée) |
 
 Tous les contrats paginés exposent : `page` (entier, défaut 1) et retournent : les éléments de la page courante, le nombre total d'éléments, l'indication de page suivante disponible.
 
@@ -266,9 +266,11 @@ Décision métier validée à respecter explicitement :
 
 Le passage direct Brouillon → Archivé est déjà libre selon `domain-model.md`, mais l'exigence de champs (Titre, Type, Catégorie, Zone, Image + Alt) ne conditionne aujourd'hui, à la lettre, que la transition vers Publié. Une analyse antérieure a recommandé d'étendre cette exigence à Archivé (un contenu Archivé étant conceptuellement une « publication passée », cf. US-007 : « consulter les publications passées »), mais **cette extension n'a pas encore été formellement actée** dans `domain-model.md` ni répercutée dans `database-schema.md` (`chk_publie_champs_requis`). Le contrat « Changer de statut → Archiver » (§2.2) ne peut donc pas encore fixer de règle de validation définitive sur ce point.
 
-### 7.2 Taille de page pour les listes publiques
+### 7.2 Taille de page pour les listes publiques — **tranché**
 
-`ui-specification.md` fixe explicitement 20 lignes pour les tables back-office, mais aucun document ne fixe la taille de page des listes publiques (Liste des articles, Résultats de recherche, Catégorie, Zone géographique).
+`ui-specification.md` fixe explicitement 20 lignes pour les tables back-office, mais aucun document ne fixait la taille de page des listes publiques (Liste des articles, Résultats de recherche, Catégorie, Zone géographique).
+
+**Arbitrage retenu** : **24** éléments par page publique, et une présentation Précédent/Suivant identique à tous les points de rupture (le design de référence ne comporte aucune page paginée, donc aucune maquette de pagination à suivre). Une page bien formée mais hors bornes renvoie un 404 plutôt qu'un rabattement silencieux sur la dernière page ; une valeur mal formée (`?page=abc`, `?page=-3`) est ramenée à la page 1 en 200. `?page=1` n'est jamais écrit explicitement dans une URL canonique, pour qu'une seule URL canonique existe par page réelle.
 
 ### 7.3 Messages de validation par champ à la publication
 
