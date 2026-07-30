@@ -1,8 +1,7 @@
-import type { TypeContenu } from "@prisma/client";
 import { CategorieRepository } from "@/lib/db/categorie-repository";
 import { ZoneGeographiqueRepository } from "@/lib/db/zone-geographique-repository";
 import { ContenuEditorialRepository, type TriRechercheContenu } from "@/lib/db/contenu-editorial-repository";
-import { TYPE_CONTENU_LABELS } from "@/features/articles/type-contenu-labels";
+import { TYPE_CONTENU_LABELS, estTypeContenuValide } from "@/features/articles/type-contenu-labels";
 import { estimerTempsLecture } from "@/features/articles/reading-time";
 import { analyserJour } from "@/lib/filtres-publics";
 
@@ -39,10 +38,6 @@ export type SearchArticlesResult = {
   hasNextPage: boolean;
 };
 
-function estTypeContenuValide(value: string | undefined): value is TypeContenu {
-  return value !== undefined && value in TYPE_CONTENU_LABELS;
-}
-
 function estTriValide(value: string | undefined): value is TriRechercheContenu {
   return value === "recent" || value === "long";
 }
@@ -60,10 +55,13 @@ function estTriValide(value: string | undefined): value is TriRechercheContenu {
 // repository clampe déjà toute valeur hors bornes à la dernière page existante et retourne
 // la page réellement servie (Lot 1A, pagination) — la page appelante compare `page`
 // demandé à `page` retourné pour détecter une page hors bornes (notFound). Le
-// court-circuit "slug inconnu" ci-dessous retourne `page: params.page` (jamais `1` codé en
-// dur) : un filtre catégorie/zone invalide doit toujours produire un résultat vide en
-// HTTP 200, quelle que soit la page demandée — garantie préexistante à la pagination,
-// jamais un 404 sur un simple slug invalide (corrigé après revue Lot 1A).
+// court-circuit "slug inconnu" ci-dessous retourne `page: 1` : un ensemble vide n'a qu'une
+// page. La garantie « jamais de 404 sur un simple slug invalide » est préservée —
+// `?zone=inexistante` répond toujours 200 avec un résultat vide — mais
+// `?zone=inexistante&page=999` renvoie désormais 404 comme n'importe quelle autre page hors
+// bornes. Retourner la page demandée faisait passer la garde hors-bornes de l'appelant et
+// rendait un lien « Précédent » vers la page 998, elle-même vers 997 : une échelle
+// descendante infinie de réponses 200 vides, suivie par les crawlers.
 //
 // Filtre par date (Lot 2A, US-023) : `dateFrom`/`dateTo` sont transmis à
 // ContenuEditorialRepository.search, qui les supportait déjà (`ArticlesPubliesFiltre`,
@@ -84,7 +82,7 @@ export async function searchArticles(params: SearchArticlesParams): Promise<Sear
   ]);
 
   if ((params.categorieSlug && !categorie) || (params.zoneSlug && !zone)) {
-    return { items: [], page: params.page, hasNextPage: false };
+    return { items: [], page: 1, hasNextPage: false };
   }
 
   const { items, page, hasNextPage } = await ContenuEditorialRepository.search({
