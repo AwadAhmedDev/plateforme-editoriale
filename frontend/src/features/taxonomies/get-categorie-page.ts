@@ -2,6 +2,7 @@ import { cache } from "react";
 import { CategorieRepository } from "@/lib/db/categorie-repository";
 import { ContenuEditorialRepository } from "@/lib/db/contenu-editorial-repository";
 import { estimerTempsLecture } from "@/features/articles/reading-time";
+import type { BreadcrumbItem } from "@/components/shared/breadcrumb";
 
 export type CategoriePageArticle = {
   slug: string;
@@ -25,6 +26,7 @@ export type CategoriePageData = {
   count: number;
   page: number;
   hasNextPage: boolean;
+  breadcrumb: BreadcrumbItem[];
   articles: CategoriePageArticle[];
 };
 
@@ -40,6 +42,13 @@ export type CategoriePageData = {
 // réel (pas seulement `items.length`). Mémoïsée (React.cache) : generateMetadata et la
 // page appellent toutes deux cette fonction avec les mêmes arguments, un seul accès base
 // de données réel par requête.
+//
+// Fil d'Ariane (Lot 2B, sitemap.md §Navigation secondaire : « Accueil / page courante ») :
+// deux segments, le second sans `href` — Breadcrumb rend alors de lui-même un
+// `aria-current="page"` non cliquable, aucune modification de ce composant. Indépendant de
+// `?page=N` : « Accueil / Asile & protection » est identique en page 1 et en page 3, le fil
+// d'Ariane ne situe pas dans la pagination mais dans l'arborescence. Type `BreadcrumbItem`
+// réutilisé depuis le composant partagé plutôt que redéclaré localement.
 export const getCategoriePage = cache(async (slug: string, page: number): Promise<CategoriePageData | null> => {
   const categorie = await CategorieRepository.findBySlug(slug);
 
@@ -59,6 +68,7 @@ export const getCategoriePage = cache(async (slug: string, page: number): Promis
     count: total,
     page: pageServie,
     hasNextPage,
+    breadcrumb: [{ label: "Accueil", href: "/" }, { label: categorie.nom }],
     articles: items.map((item) => ({
       slug: item.slug,
       titre: item.titre!,

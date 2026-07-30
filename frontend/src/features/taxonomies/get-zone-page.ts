@@ -2,6 +2,7 @@ import { cache } from "react";
 import { ZoneGeographiqueRepository } from "@/lib/db/zone-geographique-repository";
 import { ContenuEditorialRepository } from "@/lib/db/contenu-editorial-repository";
 import { estimerTempsLecture } from "@/features/articles/reading-time";
+import type { BreadcrumbItem } from "@/components/shared/breadcrumb";
 
 export type ZonePageArticle = {
   slug: string;
@@ -25,6 +26,7 @@ export type ZonePageData = {
   count: number;
   page: number;
   hasNextPage: boolean;
+  breadcrumb: BreadcrumbItem[];
   articles: ZonePageArticle[];
 };
 
@@ -40,6 +42,9 @@ export type ZonePageData = {
 // `items.length`. Mémoïsée (React.cache) : generateMetadata et la page appellent toutes
 // deux cette fonction avec les mêmes arguments, un seul accès base de données réel par
 // requête.
+//
+// Fil d'Ariane (Lot 2B) : identique à get-categorie-page.ts sur l'axe géographique — deux
+// segments, le second sans `href`, indépendant de `?page=N`. Voir ce fichier pour le détail.
 export const getZonePage = cache(async (slug: string, page: number): Promise<ZonePageData | null> => {
   const zone = await ZoneGeographiqueRepository.findBySlug(slug);
 
@@ -59,6 +64,7 @@ export const getZonePage = cache(async (slug: string, page: number): Promise<Zon
     count: total,
     page: pageServie,
     hasNextPage,
+    breadcrumb: [{ label: "Accueil", href: "/" }, { label: zone.nom }],
     articles: items.map((item) => ({
       slug: item.slug,
       titre: item.titre!,
