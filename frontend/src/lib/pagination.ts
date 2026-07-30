@@ -17,3 +17,28 @@ export function normaliserPageDemandee(value: string | string[] | undefined): nu
 export function urlAvecPage(path: string, page: number): string {
   return page > 1 ? `${path}?page=${page}` : path;
 }
+
+// Même règle que `urlAvecPage`, étendue aux filtres à reporter (Lot Filtres) : sert à la
+// fois aux liens Précédent/Suivant et au canonical auto-référent d'une page filtrée — un
+// seul constructeur, jamais deux qui divergeraient sur le traitement de `page=1`.
+// Déplacée ici depuis pagination-links.tsx, où elle était privée, sans changement de
+// comportement : `page=1` n'est toujours jamais écrit explicitement, et les filtres
+// restent présents même en page 1 (d'où la reconstruction ci-dessous plutôt qu'une simple
+// concaténation sur `urlAvecPage`).
+export function urlAvecPageEtFiltres(
+  path: string,
+  page: number,
+  filtres?: Record<string, string>
+): string {
+  const params = new URLSearchParams(filtres);
+
+  if (params.size === 0) {
+    return urlAvecPage(path, page);
+  }
+
+  if (page > 1) {
+    params.set("page", String(page));
+  }
+
+  return `${path}?${params.toString()}`;
+}
