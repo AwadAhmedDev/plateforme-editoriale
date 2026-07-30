@@ -442,6 +442,47 @@ export const ContenuEditorialRepository = {
     });
   },
 
+  // Contenus associés à un article (Lot 2C, sitemap.md §Navigation secondaire : « liens de
+  // contenus associés sur la page Détail d'un article ») — troisième lecture publique à
+  // `limit` de ce repository, même forme que findLatestPublished et
+  // findLatestPublishedByTypes ci-dessus. Distincte de findManyPublished, qui ne sait ni
+  // exclure un identifiant ni borner à autre chose que PUBLIC_PAGE_SIZE : la réutiliser
+  // imposerait de charger 24 lignes — corps intégral compris, ARTICLE_PUBLIC_LIST_INCLUDE
+  // ne restreignant aucun champ scalaire — pour n'en afficher que 3.
+  //
+  // `statut: "publie"` non négociable et jamais paramétrable par l'appelant, comme dans
+  // construireFiltrePublie : DR-001 exclut l'Archivé des surfaces de découverte, et les
+  // contenus associés en sont une (la page d'un article Archivé peut donc afficher des
+  // associés, mais un Archivé n'y apparaît jamais).
+  //
+  // `OR` dans un unique findMany, jamais deux requêtes réunies : un article correspondant à
+  // la fois par rubrique ET par pays produit une seule ligne, la condition SQL étant
+  // `... AND (categorie_id = $1 OR zone_id = $2)` — aucune déduplication applicative
+  // nécessaire. Les axes nuls sont omis de `OR` plutôt que comparés à NULL (`categorie_id =
+  // NULL` ne rapprocherait rien et ferait passer tous les contenus sans rubrique pour des
+  // associés). Tri par date de publication décroissante seule — aucun classement de
+  // pertinence rubrique-avant-pays, qui exigerait un ORDER BY sur expression (décision
+  // produit du Lot 2C, pas un oubli).
+  findRelatedPublished(
+    params: { excludeId: string; categorieId: string | null; zoneId: string | null },
+    limit: number
+  ): Promise<ArticlePublicListItem[]> {
+    const axes: Prisma.ContenuEditorialWhereInput[] = [];
+    if (params.categorieId) axes.push({ categorieId: params.categorieId });
+    if (params.zoneId) axes.push({ zoneId: params.zoneId });
+
+    return prisma.contenuEditorial.findMany({
+      where: {
+        statut: "publie",
+        id: { not: params.excludeId },
+        OR: axes,
+      },
+      include: ARTICLE_PUBLIC_LIST_INCLUDE,
+      orderBy: { datePublication: "desc" },
+      take: limit,
+    });
+  },
+
   // Recherche publique (server-actions-specification.md §9.1) : `websearch_to_tsquery`
   // exclusivement — jamais `to_tsquery` brut (tolère nativement guillemets non fermés et
   // opérateurs `&`/`|` isolés sans jamais lever d'erreur de syntaxe côté Postgres,

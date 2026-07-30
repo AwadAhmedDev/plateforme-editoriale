@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getArticleDetail } from "@/features/articles/get-article-detail";
+import { getRelatedArticles } from "@/features/articles/get-related-articles";
+import { ArticleCard } from "@/components/shared/article-card";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { ShareBar } from "@/features/articles/share-bar";
 import { CitationBlock } from "@/features/articles/citation-block";
@@ -78,6 +80,11 @@ export default async function ArticleDetailPage({
   if (!article) {
     notFound();
   }
+
+  // Contenus associés (Lot 2C) : `relatedContext` réutilisé tel quel, sans modification de
+  // getArticleDetail. Appelé après la garde notFound() — jamais de requête pour un article
+  // qui n'a pas de page.
+  const relatedArticles = await getRelatedArticles(article.relatedContext);
 
   const dateFormatee = article.datePublicationAffichee?.toLocaleDateString("fr-FR", {
     day: "numeric",
@@ -217,6 +224,25 @@ export default async function ArticleDetailPage({
               </li>
             ))}
           </ul>
+        )}
+
+        {/* Contenus associés (Lot 2C, sitemap.md §Navigation secondaire). Section omise
+            entièrement quand la liste est vide — jamais un titre « À lire aussi » suivi de
+            rien (même principe que PaginationLinks, qui ne rend rien sur une page unique).
+            <h2> : la page n'a qu'un <h1> et le corps est rendu en texte brut, donc aucun
+            titre intermédiaire — avec le <h3> interne d'ArticleCard, la hiérarchie est
+            h1 → h2 → h3, sans saut. Grille 2 colonnes au plus : la colonne de lecture fait
+            680px, jamais les 3 colonnes des pages rubrique/pays qui disposent de 1220px.
+            ArticleCard réutilisé tel quel, aucune variante de carte créée. */}
+        {relatedArticles.length > 0 && (
+          <section className="mt-12 border-t border-border pt-8">
+            <h2 className="font-editorial text-xl font-semibold">À lire aussi</h2>
+            <div className="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2">
+              {relatedArticles.map((related) => (
+                <ArticleCard key={related.slug} {...related} />
+              ))}
+            </div>
+          </section>
         )}
       </main>
     </>
