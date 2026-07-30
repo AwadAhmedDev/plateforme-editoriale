@@ -3,11 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleSearchResultCard } from "@/components/articles/article-search-result-card";
 import { PaginationLinks } from "@/components/shared/pagination-links";
-import { searchArticles, normaliserJourRecherche } from "@/features/articles/search-articles";
+import { searchArticles } from "@/features/articles/search-articles";
 import { listCategorieMenu } from "@/features/taxonomies/list-categorie-menu";
 import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
 import { TYPE_CONTENU_LABELS } from "@/features/articles/type-contenu-labels";
 import { normaliserPageDemandee } from "@/lib/pagination";
+import { lireParam, normaliserJour } from "@/lib/filtres-publics";
 
 // Recherche publique (REPO-6, refonte layout : Corne de l'Afrique.dc.html l.292-355) :
 // une seule route, formulaire GET natif (aucun JavaScript, aucun composant client).
@@ -36,10 +37,6 @@ export const metadata: Metadata = {
   },
 };
 
-function lireParam(value: string | string[] | undefined): string {
-  return typeof value === "string" ? value.trim() : "";
-}
-
 export default async function RecherchePage({
   searchParams,
 }: {
@@ -57,8 +54,8 @@ export default async function RecherchePage({
   // par search-articles.ts, jamais revalidées localement. Une borne rejetée devient
   // `undefined` et disparaît donc du champ réaffiché comme des liens de pagination — la
   // page n'affiche jamais un filtre qui n'a pas été appliqué.
-  const du = normaliserJourRecherche(lireParam(resolvedSearchParams.du));
-  const au = normaliserJourRecherche(lireParam(resolvedSearchParams.au));
+  const du = normaliserJour(lireParam(resolvedSearchParams.du));
+  const au = normaliserJour(lireParam(resolvedSearchParams.au));
 
   // Aucun critère soumis (ni q, ni aucun filtre) : affiche tout le contenu Publié,
   // trié "Plus récent" par défaut — comportement conforme au design (Corne de
