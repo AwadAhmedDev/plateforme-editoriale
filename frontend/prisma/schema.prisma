@@ -73,6 +73,28 @@ model SessionAdministrateur {
   @@map("session_administrateur")
 }
 
+// État d'étranglement de la surface de connexion administrateur
+// (security-specification.md §10, point d'arbitrage brute force tranché).
+//
+// Délibérément SANS relation vers Administrateur : le compteur décrit la surface de
+// connexion, jamais un compte. Un identifiant inconnu n'a aucune ligne à incrémenter —
+// rattacher l'état à un compte rendrait le délai observable uniquement sur les comptes
+// existants, ce qui reconstituerait le canal d'énumération que §9 ferme (message
+// générique + comparaison bcrypt systématique). L'état est donc consulté et incrémenté
+// à l'identique, que l'identifiant soumis existe ou non.
+//
+// Clé primaire textuelle et non UUID, seul écart au reste du schéma : une valeur
+// constante (`ADMIN_LOGIN`) garantit structurellement l'unicité de la ligne, là où un
+// `gen_random_uuid()` en autoriserait plusieurs. La ligne est insérée par la migration,
+// jamais créée à la volée — un upsert en chemin de requête introduirait une course.
+model EtranglementConnexion {
+  surface           String    @id
+  echecsConsecutifs Int       @default(0) @map("echecs_consecutifs")
+  dernierEchecAt    DateTime? @map("dernier_echec_at") @db.Timestamptz
+
+  @@map("etranglement_connexion")
+}
+
 model ContenuEditorial {
   id                       String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   slug                     String                   @unique
