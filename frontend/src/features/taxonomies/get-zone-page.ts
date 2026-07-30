@@ -1,7 +1,10 @@
 import { cache } from "react";
 import { ZoneGeographiqueRepository } from "@/lib/db/zone-geographique-repository";
+import { CategorieRepository } from "@/lib/db/categorie-repository";
 import { ContenuEditorialRepository } from "@/lib/db/contenu-editorial-repository";
 import { estimerTempsLecture } from "@/features/articles/reading-time";
+import { estTypeContenuValide } from "@/features/articles/type-contenu-labels";
+import { analyserJour } from "@/lib/filtres-publics";
 import type { BreadcrumbItem } from "@/components/shared/breadcrumb";
 
 export type ZonePageArticle = {
@@ -45,15 +48,49 @@ export type ZonePageData = {
 //
 // Fil d'Ariane (Lot 2B) : identique à get-categorie-page.ts sur l'axe géographique — deux
 // segments, le second sans `href`, indépendant de `?page=N`. Voir ce fichier pour le détail.
-export const getZonePage = cache(async (slug: string, page: number): Promise<ZonePageData | null> => {
+//
+// Filtres secondaires (Lot Filtres) : rubrique, type et bornes de date — jamais `zone`,
+// déjà donnée par la route. Symétrique de get-categorie-page.ts, voir ce fichier pour le
+// détail des règles (arguments primitifs imposés par React.cache, court-circuit d'un slug
+// secondaire inconnu retournant `page: 1`).
+const lireZonePage = cache(async (
+  slug: string,
+  page: number,
+  categorieSlug: string,
+  typeContenu: string,
+  du: string,
+  au: string
+): Promise<ZonePageData | null> => {
   const zone = await ZoneGeographiqueRepository.findBySlug(slug);
 
   if (!zone) {
     return null;
   }
 
+  const categorie = categorieSlug ? await CategorieRepository.findBySlug(categorieSlug) : null;
+
+  if (categorieSlug && !categorie) {
+    return {
+      nom: zone.nom,
+      slug: zone.slug,
+      descriptionCourte: zone.descriptionCourte,
+      count: 0,
+      page: 1,
+      hasNextPage: false,
+      breadcrumb: [{ label: "Accueil", href: "/" }, { label: zone.nom }],
+      articles: [],
+    };
+  }
+
+  const borneDu = analyserJour(du);
+  const borneAu = analyserJour(au);
+
   const { items, total, page: pageServie, hasNextPage } = await ContenuEditorialRepository.findManyPublished({
     zoneId: zone.id,
+    ...(categorie ? { categorieId: categorie.id } : {}),
+    ...(estTypeContenuValide(typeContenu) ? { typeContenu } : {}),
+    ...(borneDu ? { dateFrom: borneDu.debut } : {}),
+    ...(borneAu ? { dateTo: borneAu.fin } : {}),
     page,
   });
 
@@ -81,3 +118,25 @@ export const getZonePage = cache(async (slug: string, page: number): Promise<Zon
     })),
   };
 });
+
+export type ZonePageFiltres = {
+  page: number;
+  categorieSlug?: string;
+  typeContenu?: string;
+  du?: string;
+  au?: string;
+};
+
+// Signature publique aplatissant l'objet d'options en arguments primitifs stables — cf.
+// get-categorie-page.ts : React.cache compare par identité, un littéral d'objet
+// reconstruit par generateMetadata puis par la page produirait deux accès base.
+export function getZonePage(slug: string, filtres: ZonePageFiltres): Promise<ZonePageData | null> {
+  return lireZonePage(
+    slug,
+    filtres.page,
+    filtres.categorieSlug ?? "",
+    filtres.typeContenu ?? "",
+    filtres.du ?? "",
+    filtres.au ?? ""
+  );
+}

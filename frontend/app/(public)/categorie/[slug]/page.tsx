@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/shared/article-card";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { PaginationLinks } from "@/components/shared/pagination-links";
+import { PublicFilters, lireFiltresListing, filtresAppliques } from "@/components/shared/public-filters";
 import { getCategoriePage } from "@/features/taxonomies/get-categorie-page";
-import { normaliserPageDemandee, urlAvecPage } from "@/lib/pagination";
+import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
+import { urlAvecPageEtFiltres } from "@/lib/pagination";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
 
@@ -13,29 +15,48 @@ type CategoriePageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+// `categorie` est retirée des filtres appliqués : la rubrique est donnée par la route, un
+// `?categorie=` dans l'URL ne doit jamais la contredire ni polluer canonical et pagination.
+function filtresDeLaPage(filtres: ReturnType<typeof lireFiltresListing>): Record<string, string> {
+  const { categorie: _ignore, ...params } = filtresAppliques(filtres);
+  return params;
+}
+
 // Route Catégorie (clôture RC-1 : alignement sur le gabarit de listing du design, Corne
 // de l'Afrique.dc.html l.265-289, section isListing/listType:'cat') : lecture via
 // getCategoriePage uniquement — aucun accès repository direct ici. Pagination `?page=N`
-// (Lot 1A) : canonical auto-référent par page via urlAvecPage (jamais `?page=1`
-// explicite). Kicker "Rubrique" repris littéralement du design (constante — le design
-// distingue `listingKicker` du nom réel de l'instance, `listingTitle`). title/description
+// (Lot 1A) : canonical auto-référent par page (jamais `?page=1` explicite). Kicker
+// "Rubrique" repris littéralement du design (constante — le design distingue
+// `listingKicker` du nom réel de l'instance, `listingTitle`). title/description
 // conditionnels sur les données réelles (nom, descriptionCourte), jamais de valeur
 // inventée si absente.
+//
+// SEO des URLs filtrées (Lot Filtres) : dès qu'un filtre est actif, `noindex, follow`. Une
+// vue filtrée est un résultat utilisateur, pas une page éditoriale permanente — même
+// raisonnement que le canonical fixe de /recherche, mais ici la page nue reste indexable,
+// d'où un `robots` par URL plutôt qu'un canonical figé. `follow` préserve la transmission
+// vers les articles. Le canonical reste auto-référent, filtres compris : jamais un
+// canonical déclarant qu'une vue filtrée EST la page non filtrée, ce qui serait faux —
+// deux jeux de résultats distincts.
 export async function generateMetadata({ params, searchParams }: CategoriePageProps): Promise<Metadata> {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const page = normaliserPageDemandee(resolvedSearchParams.page);
-  const categorie = await getCategoriePage(slug, page);
+  const filtres = lireFiltresListing(resolvedSearchParams);
+  const categorie = await getCategoriePage(slug, filtres);
 
   if (!categorie) {
     return {};
   }
 
+  const filtresUrl = filtresDeLaPage(filtres);
+  const estFiltree = Object.keys(filtresUrl).length > 0;
+
   return {
     title: categorie.nom,
     ...(categorie.descriptionCourte ? { description: categorie.descriptionCourte } : {}),
+    ...(estFiltree ? { robots: { index: false, follow: true } } : {}),
     alternates: {
-      canonical: urlAvecPage(`/categorie/${slug}`, categorie.page),
+      canonical: urlAvecPageEtFiltres(`/categorie/${slug}`, categorie.page, filtresUrl),
     },
   };
 }
@@ -43,9 +64,12 @@ export async function generateMetadata({ params, searchParams }: CategoriePagePr
 export default async function CategoriePage({ params, searchParams }: CategoriePageProps) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const pageDemandee = normaliserPageDemandee(resolvedSearchParams.page);
+  const filtres = lireFiltresListing(resolvedSearchParams);
+  const pageDemandee = filtres.page;
 
-  const categorie = await getCategoriePage(slug, pageDemandee);
+  // Arguments strictement identiques à ceux de generateMetadata : getCategoriePage est
+  // mémoïsée, donc un seul accès base de données pour les deux appels de ce rendu.
+  const [categorie, zones] = await Promise.all([getCategoriePage(slug, filtres), listZoneMenu()]);
 
   if (!categorie) {
     notFound();
@@ -60,20 +84,29 @@ export default async function CategoriePage({ params, searchParams }: CategorieP
     notFound();
   }
 
+  const filtresUrl = filtresDeLaPage(filtres);
+  const estFiltree = Object.keys(filtresUrl).length > 0;
+
   // JSON-LD (Lot L12, contrat validé) : CollectionPage + ItemList imbriqué
   // (mainEntity) — omis entièrement si la catégorie n'a aucun article
   // publié, jamais un ItemList déclaré sans élément. `url` reflète la page courante
   // (Lot 1A), cohérent avec le canonical de generateMetadata.
+  //
+  // Également omis dès qu'un filtre est actif (Lot Filtres) : publier une donnée
+  // structurée décrivant une collection qu'on demande simultanément de ne pas indexer
+  // (`noindex` posé par generateMetadata) serait contradictoire. Le BreadcrumbList
+  // ci-dessous reste, lui, inconditionnel — le fil d'Ariane est vrai quels que soient les
+  // filtres, comme il l'est déjà quelle que soit la page.
   const siteUrl = resoudreSiteUrl();
   const absoluteUrl = (path: string) => new URL(path, siteUrl).toString();
 
   const collectionPageJsonLd =
-    categorie.articles.length > 0
+    categorie.articles.length > 0 && !estFiltree
       ? {
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: categorie.nom,
-          url: absoluteUrl(urlAvecPage(`/categorie/${slug}`, categorie.page)),
+          url: absoluteUrl(urlAvecPageEtFiltres(`/categorie/${slug}`, categorie.page, filtresUrl)),
           mainEntity: {
             "@type": "ItemList",
             itemListElement: categorie.articles.map((article, index) => ({
@@ -124,6 +157,21 @@ export default async function CategoriePage({ params, searchParams }: CategorieP
           </p>
         </div>
 
+        {/* Filtres secondaires (ui-specification.md §Comportement des filtres,
+            api-contracts.md §3.6) : zone, type et date — jamais `categorie`, déjà donnée
+            par la route. */}
+        <PublicFilters
+          basePath={`/categorie/${slug}`}
+          axes={["zone", "type", "date"]}
+          valeurs={{
+            zone: filtres.zoneSlug,
+            type: filtres.typeContenu,
+            du: filtres.du,
+            au: filtres.au,
+          }}
+          zones={zones}
+        />
+
         {categorie.articles.length > 0 ? (
           <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {categorie.articles.map((article) => (
@@ -144,11 +192,24 @@ export default async function CategoriePage({ params, searchParams }: CategorieP
               />
             ))}
           </div>
+        ) : estFiltree ? (
+          /* Deux états vides distincts (ui-specification.md §États vides) : « aucun
+             contenu ne correspond aux filtres », qui appelle une action de reprise en
+             main, et « taxonomie sans article publié », message neutre sans ton d'excuse.
+             Le lien de réinitialisation du formulaire ci-dessus est déjà présent dès qu'un
+             filtre est actif — il tient lieu d'action de sortie, jamais une zone
+             silencieuse. */
+          <p className="mt-7 text-text-secondary">Aucun article ne correspond à ces critères.</p>
         ) : (
           <p className="mt-7 text-text-secondary">Aucun article publié pour le moment dans cette rubrique.</p>
         )}
 
-        <PaginationLinks basePath={`/categorie/${slug}`} currentPage={categorie.page} hasNextPage={categorie.hasNextPage} />
+        <PaginationLinks
+          basePath={`/categorie/${slug}`}
+          currentPage={categorie.page}
+          hasNextPage={categorie.hasNextPage}
+          preserveParams={filtresUrl}
+        />
       </main>
     </>
   );

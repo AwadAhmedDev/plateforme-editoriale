@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/shared/article-card";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { PaginationLinks } from "@/components/shared/pagination-links";
+import { PublicFilters, lireFiltresListing, filtresAppliques } from "@/components/shared/public-filters";
 import { getZonePage } from "@/features/taxonomies/get-zone-page";
-import { normaliserPageDemandee, urlAvecPage } from "@/lib/pagination";
+import { listCategorieMenu } from "@/features/taxonomies/list-categorie-menu";
+import { urlAvecPageEtFiltres } from "@/lib/pagination";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
 
@@ -12,6 +14,13 @@ type ZonePageProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
+
+// `zone` est retirée des filtres appliqués : le pays est donné par la route, un `?zone=`
+// dans l'URL ne doit jamais le contredire ni polluer canonical et pagination.
+function filtresDeLaPage(filtres: ReturnType<typeof lireFiltresListing>): Record<string, string> {
+  const { zone: _ignore, ...params } = filtresAppliques(filtres);
+  return params;
+}
 
 // Route Pays (clôture RC-1 : alignement sur le gabarit de listing du design, Corne de
 // l'Afrique.dc.html l.265-289, section isListing/listType:'country') : symétrique de
@@ -22,18 +31,22 @@ type ZonePageProps = {
 export async function generateMetadata({ params, searchParams }: ZonePageProps): Promise<Metadata> {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const page = normaliserPageDemandee(resolvedSearchParams.page);
-  const zone = await getZonePage(slug, page);
+  const filtres = lireFiltresListing(resolvedSearchParams);
+  const zone = await getZonePage(slug, filtres);
 
   if (!zone) {
     return {};
   }
 
+  const filtresUrl = filtresDeLaPage(filtres);
+  const estFiltree = Object.keys(filtresUrl).length > 0;
+
   return {
     title: zone.nom,
     ...(zone.descriptionCourte ? { description: zone.descriptionCourte } : {}),
+    ...(estFiltree ? { robots: { index: false, follow: true } } : {}),
     alternates: {
-      canonical: urlAvecPage(`/zone/${slug}`, zone.page),
+      canonical: urlAvecPageEtFiltres(`/zone/${slug}`, zone.page, filtresUrl),
     },
   };
 }
@@ -41,9 +54,12 @@ export async function generateMetadata({ params, searchParams }: ZonePageProps):
 export default async function ZonePage({ params, searchParams }: ZonePageProps) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const pageDemandee = normaliserPageDemandee(resolvedSearchParams.page);
+  const filtres = lireFiltresListing(resolvedSearchParams);
+  const pageDemandee = filtres.page;
 
-  const zone = await getZonePage(slug, pageDemandee);
+  // Arguments strictement identiques à ceux de generateMetadata : getZonePage est
+  // mémoïsée, donc un seul accès base de données pour les deux appels de ce rendu.
+  const [zone, categories] = await Promise.all([getZonePage(slug, filtres), listCategorieMenu()]);
 
   if (!zone) {
     notFound();
@@ -58,20 +74,25 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
     notFound();
   }
 
+  const filtresUrl = filtresDeLaPage(filtres);
+  const estFiltree = Object.keys(filtresUrl).length > 0;
+
   // JSON-LD (Lot L12, contrat validé) : CollectionPage + ItemList imbriqué
   // (mainEntity) — omis entièrement si la zone n'a aucun article publié,
   // jamais un ItemList déclaré sans élément. `url` reflète la page courante (Lot 1A),
-  // cohérent avec le canonical de generateMetadata.
+  // cohérent avec le canonical de generateMetadata. Également omis dès qu'un filtre est
+  // actif (Lot Filtres) : ne pas décrire une collection qu'on demande de ne pas indexer.
+  // Le BreadcrumbList reste inconditionnel.
   const siteUrl = resoudreSiteUrl();
   const absoluteUrl = (path: string) => new URL(path, siteUrl).toString();
 
   const collectionPageJsonLd =
-    zone.articles.length > 0
+    zone.articles.length > 0 && !estFiltree
       ? {
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: zone.nom,
-          url: absoluteUrl(urlAvecPage(`/zone/${slug}`, zone.page)),
+          url: absoluteUrl(urlAvecPageEtFiltres(`/zone/${slug}`, zone.page, filtresUrl)),
           mainEntity: {
             "@type": "ItemList",
             itemListElement: zone.articles.map((article, index) => ({
@@ -120,6 +141,21 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
           </p>
         </div>
 
+        {/* Filtres secondaires (ui-specification.md §Comportement des filtres,
+            api-contracts.md §3.7) : rubrique, type et date — jamais `zone`, déjà donnée
+            par la route. */}
+        <PublicFilters
+          basePath={`/zone/${slug}`}
+          axes={["categorie", "type", "date"]}
+          valeurs={{
+            categorie: filtres.categorieSlug,
+            type: filtres.typeContenu,
+            du: filtres.du,
+            au: filtres.au,
+          }}
+          categories={categories}
+        />
+
         {zone.articles.length > 0 ? (
           <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {zone.articles.map((article) => (
@@ -140,11 +176,22 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
               />
             ))}
           </div>
+        ) : estFiltree ? (
+          /* Deux états vides distincts (ui-specification.md §États vides) : « aucun
+             contenu ne correspond aux filtres », qui appelle une action de reprise en
+             main — assurée par le lien de réinitialisation du formulaire ci-dessus — et
+             « taxonomie sans article publié », message neutre sans ton d'excuse. */
+          <p className="mt-7 text-text-secondary">Aucun article ne correspond à ces critères.</p>
         ) : (
           <p className="mt-7 text-text-secondary">Aucun article publié pour le moment dans ce pays.</p>
         )}
 
-        <PaginationLinks basePath={`/zone/${slug}`} currentPage={zone.page} hasNextPage={zone.hasNextPage} />
+        <PaginationLinks
+          basePath={`/zone/${slug}`}
+          currentPage={zone.page}
+          hasNextPage={zone.hasNextPage}
+          preserveParams={filtresUrl}
+        />
       </main>
     </>
   );

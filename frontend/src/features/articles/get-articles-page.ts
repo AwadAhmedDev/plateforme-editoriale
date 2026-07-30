@@ -1,6 +1,10 @@
 import { cache } from "react";
 import { ContenuEditorialRepository } from "@/lib/db/contenu-editorial-repository";
+import { CategorieRepository } from "@/lib/db/categorie-repository";
+import { ZoneGeographiqueRepository } from "@/lib/db/zone-geographique-repository";
 import { estimerTempsLecture } from "@/features/articles/reading-time";
+import { estTypeContenuValide } from "@/features/articles/type-contenu-labels";
+import { analyserJour } from "@/lib/filtres-publics";
 
 export type ArticlesPageArticle = {
   slug: string;
@@ -35,8 +39,38 @@ export type ArticlesPageData = {
 // ici. `count` = total réel (pas `items.length`). Mémoïsée (React.cache) : generateMetadata
 // et la page appellent toutes deux cette fonction avec le même argument `page`, un seul
 // accès base de données réel par requête.
-export const getArticlesPage = cache(async (page: number): Promise<ArticlesPageData> => {
+//
+// Filtres (Lot Filtres, ui-specification.md §Comportement des filtres, api-contracts.md
+// §3.2) : rubrique, pays, type et bornes de date — les quatre axes, aucune dimension
+// n'étant donnée par la route ici, contrairement à /categorie et /zone. Symétrique de
+// get-categorie-page.ts, voir ce fichier pour le détail (arguments primitifs imposés par
+// React.cache, court-circuit d'un slug inconnu retournant `page: 1`).
+const lireArticlesPage = cache(async (
+  page: number,
+  categorieSlug: string,
+  zoneSlug: string,
+  typeContenu: string,
+  du: string,
+  au: string
+): Promise<ArticlesPageData> => {
+  const [categorie, zone] = await Promise.all([
+    categorieSlug ? CategorieRepository.findBySlug(categorieSlug) : null,
+    zoneSlug ? ZoneGeographiqueRepository.findBySlug(zoneSlug) : null,
+  ]);
+
+  if ((categorieSlug && !categorie) || (zoneSlug && !zone)) {
+    return { count: 0, page: 1, hasNextPage: false, articles: [] };
+  }
+
+  const borneDu = analyserJour(du);
+  const borneAu = analyserJour(au);
+
   const { items, total, page: pageServie, hasNextPage } = await ContenuEditorialRepository.findManyPublished({
+    ...(categorie ? { categorieId: categorie.id } : {}),
+    ...(zone ? { zoneId: zone.id } : {}),
+    ...(estTypeContenuValide(typeContenu) ? { typeContenu } : {}),
+    ...(borneDu ? { dateFrom: borneDu.debut } : {}),
+    ...(borneAu ? { dateTo: borneAu.fin } : {}),
     page,
   });
 
@@ -60,3 +94,25 @@ export const getArticlesPage = cache(async (page: number): Promise<ArticlesPageD
     })),
   };
 });
+
+export type ArticlesPageFiltres = {
+  page: number;
+  categorieSlug?: string;
+  zoneSlug?: string;
+  typeContenu?: string;
+  du?: string;
+  au?: string;
+};
+
+// Signature publique aplatissant l'objet d'options en arguments primitifs stables — cf.
+// get-categorie-page.ts : React.cache compare par identité.
+export function getArticlesPage(filtres: ArticlesPageFiltres): Promise<ArticlesPageData> {
+  return lireArticlesPage(
+    filtres.page,
+    filtres.categorieSlug ?? "",
+    filtres.zoneSlug ?? "",
+    filtres.typeContenu ?? "",
+    filtres.du ?? "",
+    filtres.au ?? ""
+  );
+}
