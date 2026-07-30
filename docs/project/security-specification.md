@@ -138,15 +138,38 @@ Le corpus métier ne traite pas explicitement la protection CSRF. Analyse d'arch
 
 **Aucun document source ne spécifie de mécanisme de limitation du nombre de tentatives** (rate limiting, verrouillage progressif, CAPTCHA, délai croissant) pour la Connexion administrateur, le formulaire Newsletter ou le formulaire Contact — absence totale, vérifiée par relecture de `ui-specification.md`, `frontend-specification.md`, `api-contracts.md` et `server-actions-specification.md`, pas seulement un paramètre non chiffré.
 
-Ceci constitue le point d'arbitrage le plus significatif de ce document, au regard de `requirements.md` §2.1 (« Les accès réservés... doivent être protégés par un mécanisme d'authentification fiable ») et des risques déjà identifiés par `discovery.md` §8 (dépendance à un administrateur unique, sensibilité géopolitique des contenus — un compte administrateur compromis équivaut à une compromission totale du site, cf. §1.3) :
+Ceci constituait le point d'arbitrage le plus significatif de ce document — tranché depuis pour la Connexion administrateur (§10.1), toujours ouvert pour les deux formulaires publics — au regard de `requirements.md` §2.1 (« Les accès réservés... doivent être protégés par un mécanisme d'authentification fiable ») et des risques déjà identifiés par `discovery.md` §8 (dépendance à un administrateur unique, sensibilité géopolitique des contenus — un compte administrateur compromis équivaut à une compromission totale du site, cf. §1.3) :
 
-| Surface | Risque en l'absence de limitation | Point d'arbitrage |
+| Surface | Risque en l'absence de limitation | État |
 |---|---|---|
-| Connexion administrateur | Attaque par force brute ou par dictionnaire sur l'unique compte existant, sans ralentissement ni blocage | Mécanisme et seuil (nombre de tentatives, fenêtre de temps, stratégie de blocage — par compte, par IP, ou combinée) non spécifiés — à trancher avant la Phase 4 (`implementation-roadmap.md`), sans qu'aucune valeur ne soit préjugée ici |
-| Formulaire Newsletter | Abus automatisé (inscription massive, épuisement de la table `inscrit_newsletter`, utilisation comme oracle d'énumération malgré la réponse neutre de §9 si la fréquence de requêtes n'est pas limitée) | Aucun mécanisme anti-abus (limitation de fréquence, honeypot, CAPTCHA) spécifié |
-| Formulaire Contact | Abus automatisé du canal de notification e-mail vers l'administrateur (spam, saturation) | Aucun mécanisme anti-abus spécifié ; risque direct sur `technical-architecture.md` §8 point 9 (service transactionnel, coût/quota par envoi) |
+| Connexion administrateur | Attaque par force brute ou par dictionnaire sur l'unique compte existant, sans ralentissement ni blocage | **Tranché et implémenté** — cf. §10.1 |
+| Formulaire Newsletter | Abus automatisé (inscription massive, épuisement de la table `inscrit_newsletter`, utilisation comme oracle d'énumération malgré la réponse neutre de §9 si la fréquence de requêtes n'est pas limitée) | **Toujours ouvert** — aucun mécanisme anti-abus (limitation de fréquence, honeypot, CAPTCHA) spécifié ni implémenté |
+| Formulaire Contact | Abus automatisé du canal de notification e-mail vers l'administrateur (spam, saturation) | **Toujours ouvert** — aucun mécanisme anti-abus spécifié ni implémenté ; risque direct sur `technical-architecture.md` §8 point 9 (service transactionnel, coût/quota par envoi) |
 
-Ce document ne tranche délibérément aucun de ces mécanismes ni leurs seuils, conformément à la consigne de signaler un point d'arbitrage plutôt que d'inventer une règle non sourcée.
+Ce document ne tranchait délibérément aucun de ces mécanismes, conformément à la consigne de signaler un point d'arbitrage plutôt que d'inventer une règle non sourcée. **La ligne « Connexion administrateur » a depuis été tranchée par décision produit** et est documentée ci-dessous ; les deux autres restent des points d'arbitrage ouverts.
+
+### 10.1 Connexion administrateur — arbitrage tranché
+
+**Mécanisme retenu : ralentissement progressif non bloquant.** Chaque échec impose une attente croissante avant que la réponse ne soit rendue ; aucun verrouillage, aucune exclusion, temporaire ou définitive. Le bon mot de passe finit toujours par ouvrir une session.
+
+Ce choix est dicté par l'administrateur unique (`ui-specification.md` §Architecture UI, point 1) : un verrouillage serait une arme retournable contre le propriétaire du site — un attaquant échouant délibérément l'enfermerait dehors, sans second compte pour l'en sortir. Le ralentissement conserve l'effet dissuasif sans jamais créer cette situation.
+
+| Paramètre | Valeur | Justification |
+|---|---|---|
+| Seuil de déclenchement | **3 échecs** | Trois essais francs couvrent la faute de frappe et le verrouillage majuscules, sans coût pour un usage normal |
+| Base | **500 ms** | Premier délai perceptible, du même ordre que le coût bcrypt déjà subi |
+| Plafond | **2 s** | bcryptjs à coût 12 consomme déjà jusqu'à ~1,5 s ; le total reste ainsi sous ~3,5 s, très en deçà de la durée maximale de fonction la plus contrainte de l'hébergeur (`deployment.md` §Hébergement) |
+| Fenêtre de décroissance | **15 min** | Un attaquant qui l'attend perd davantage que les 2 s qu'il économise |
+
+Progression : 3 échecs → 500 ms, 4 → 1 s, 5 et au-delà → 2 s. Remise à zéro à toute authentification réussie.
+
+**Portée de l'état.** Le compteur décrit **la surface de connexion, jamais un compte** : il est consulté et incrémenté à l'identique, que l'identifiant soumis existe ou non. Le rattacher à un compte rendrait le délai observable uniquement sur les comptes existants, ce qui reconstituerait le canal d'énumération que §9 ferme. Conséquence assumée : des identifiants fantaisistes peuvent imposer jusqu'à 2 s à l'administrateur légitime — préjudice borné, et jamais excluant.
+
+**Mise à jour atomique.** Décroissance, incrément et lecture s'effectuent en une seule instruction, l'intervalle étant évalué par la base. Une lecture suivie d'une écriture laisserait des tentatives concurrentes lire la même valeur et échapper entièrement au délai — une attaque parallèle aurait défait l'étranglement.
+
+**Repli en cas d'état absent : ouverture, jamais fermeture.** Si la ligne d'état manque, l'authentification se poursuit sans délai et l'anomalie est journalisée. Un échec fermé signifierait l'exclusion définitive de l'unique administrateur.
+
+**Portée réelle, sans l'enjoliver.** Le débit d'attaque passe d'environ 40-120 tentatives par minute à une quinzaine — un facteur 3 à 7. Contre un mot de passe fort, superflu ; contre un mot de passe faible, insuffisant à l'échelle de l'année. L'apport principal de la mesure est la **visibilité** : compteur persistant et journalisation des tentatives (§13.1), là où une attaque était auparavant totalement silencieuse. Un mot de passe administrateur long et unique reste la protection la plus efficace de cette surface.
 
 ---
 
@@ -216,7 +239,7 @@ Reprise et complétée de `implementation-roadmap.md` (Phase 9), avec les exigen
 - [ ] Mot de passe administrateur haché en bcrypt, jamais celui utilisé en développement s'il a été généré à des fins de test (§2, §11).
 - [ ] Durée d'inactivité avant expiration de session (DR-002) explicitement configurée, jamais laissée à une valeur par défaut non documentée (§2).
 - [ ] Attributs `Secure`/`SameSite` du cookie de session vérifiés contre la documentation Next.js 16 effectivement installée (§2, §6).
-- [ ] Décision de limitation de tentatives (brute force) sur la Connexion administrateur explicitement prise et implémentée, ou explicitement acceptée comme risque documenté (§10).
+- [x] Décision de limitation de tentatives (brute force) sur la Connexion administrateur explicitement prise et implémentée, ou explicitement acceptée comme risque documenté (§10) — **ralentissement progressif non bloquant** : aucune attente pour les 3 premiers échecs, puis 500 ms, 1 s et 2 s au plafond, décroissance après 15 min sans échec, remise à zéro à toute réussite. Aucun verrouillage, l'administrateur unique ne pouvant jamais être exclu de son propre site (§10.1). **Reste ouvert** pour les formulaires Newsletter et Contact.
 - [ ] `.env` et tout fichier de secrets exclu du contrôle de version (§11).
 - [ ] Journalisation vérifiée pour ne jamais exposer les données listées en §13.2.
 - [ ] `robots.txt` exclut `/admin` en production réelle (`frontend-specification.md` §SEO, `implementation-roadmap.md` Phase 9).
