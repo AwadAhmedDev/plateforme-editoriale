@@ -1,19 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArticleSearchResultCard } from "@/components/articles/article-search-result-card";
+import { PaginationLinks } from "@/components/shared/pagination-links";
 import { searchArticles } from "@/features/articles/search-articles";
 import { listCategorieMenu } from "@/features/taxonomies/list-categorie-menu";
 import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
 import { TYPE_CONTENU_LABELS } from "@/features/articles/type-contenu-labels";
+import { normaliserPageDemandee } from "@/lib/pagination";
 
 // Recherche publique (REPO-6, refonte layout : Corne de l'Afrique.dc.html l.292-355) :
 // une seule route, formulaire GET natif (aucun JavaScript, aucun composant client).
 // searchParams est une Request-time API : cette page est rendue dynamiquement à la
 // requête. Layout sidebar (290px) + résultats, remplace l'ancienne ligne de champs
-// pleine largeur — champs combinables librement, aucune date, aucune pagination, aucun
-// contenu premium. Canonical fixe conservé (/recherche, sans query string) : les
-// combinaisons de filtres sont des résultats utilisateur, pas des pages éditoriales
-// permanentes.
+// pleine largeur — champs combinables librement, aucune date, aucun contenu premium.
+// Pagination `?page=N` (Lot 1A) : canonical fixe INCHANGÉ (/recherche, sans query
+// string, y compris pour page > 1) — décision déjà prise avant ce lot et simplement
+// reconduite : `page` n'est qu'une dimension de plus parmi les combinaisons de filtres,
+// déjà toutes traitées comme des résultats utilisateur, jamais des pages éditoriales
+// permanentes individuellement indexables.
 //
 // Sidebar sticky en desktop (conforme au design, qui la fixe à `top:150px`) — mais
 // jamais avec cette valeur codée en dur : le header REPO-3 n'a plus de hauteur fixe
@@ -45,6 +50,7 @@ export default async function RecherchePage({
   const zoneSlug = lireParam(resolvedSearchParams.zone);
   const typeContenu = lireParam(resolvedSearchParams.type);
   const sort = lireParam(resolvedSearchParams.sort);
+  const pageDemandee = normaliserPageDemandee(resolvedSearchParams.page);
 
   // Aucun critère soumis (ni q, ni aucun filtre) : affiche tout le contenu Publié,
   // trié "Plus récent" par défaut — comportement conforme au design (Corne de
@@ -52,17 +58,35 @@ export default async function RecherchePage({
   // sur la page, filtres tous sur "Tous/Toutes"). Un filtre seul, sans q, s'applique
   // normalement (décision L11 déjà validée) ; le tri s'applique lui aussi sans qu'aucun
   // autre critère ne soit requis, cohérent avec ce même principe.
-  const [articles, categories, zones] = await Promise.all([
+  const [{ items: articles, page, hasNextPage }, categories, zones] = await Promise.all([
     searchArticles({
       q: q || undefined,
       categorieSlug: categorieSlug || undefined,
       zoneSlug: zoneSlug || undefined,
       typeContenu: typeContenu || undefined,
       sort: sort || undefined,
+      page: pageDemandee,
     }),
     listCategorieMenu(),
     listZoneMenu(),
   ]);
+
+  // Page bien formée (entière, >= 1) mais hors bornes pour cette combinaison de filtres :
+  // le repository l'a déjà clampée à la dernière page existante (`page` !=
+  // `pageDemandee`) — notFound() plutôt que d'afficher silencieusement un résultat qui ne
+  // correspond pas à l'URL demandée (Lot 1A).
+  if (page !== pageDemandee) {
+    notFound();
+  }
+
+  // Filtres actifs à reporter sur les liens Précédent/Suivant — jamais une valeur vide
+  // dans preserveParams (produirait des URLs du type "?q=&page=2").
+  const preserveParams: Record<string, string> = {};
+  if (q) preserveParams.q = q;
+  if (categorieSlug) preserveParams.categorie = categorieSlug;
+  if (zoneSlug) preserveParams.zone = zoneSlug;
+  if (typeContenu) preserveParams.type = typeContenu;
+  if (sort) preserveParams.sort = sort;
 
   return (
     <main className="mx-auto w-full max-w-[1220px] flex-1 px-5 py-8 lg:px-[28px]">
@@ -192,6 +216,8 @@ export default async function RecherchePage({
               <p className="mt-2 text-sm">Essayez d&apos;élargir votre recherche.</p>
             </div>
           )}
+
+          <PaginationLinks basePath="/recherche" currentPage={page} hasNextPage={hasNextPage} preserveParams={preserveParams} />
         </div>
       </div>
     </main>
