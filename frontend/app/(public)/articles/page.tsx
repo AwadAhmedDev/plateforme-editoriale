@@ -1,30 +1,54 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/shared/article-card";
+import { PaginationLinks } from "@/components/shared/pagination-links";
 import { getArticlesPage } from "@/features/articles/get-articles-page";
+import { normaliserPageDemandee, urlAvecPage } from "@/lib/pagination";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import { serializeJsonLd } from "@/lib/json-ld";
+
+type ArticlesPageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
 // Route Articles (rétablissement post-RC-1, révision d'architecture : sitemap.md
 // documente cette page comme une vue exhaustive et navigable de l'ensemble des contenus
 // publiés, indépendamment d'une recherche ciblée — US-002, US-004) : symétrique de
 // app/(public)/categorie/[slug]/page.tsx et app/(public)/zone/[slug]/page.tsx. Lecture via
-// getArticlesPage uniquement — aucun accès repository direct ici. Page 1 des articles
-// publiés (24 max, déjà triés par date de publication décroissante) ; aucune pagination
-// dans ce lot, cohérent avec /recherche et /categorie|/zone. Eyebrow "Articles" et H1
-// "Tous les articles" : constantes (pas de nom d'instance à projeter, contrairement au
-// kicker "Rubrique"/"Pays" des pages Catégorie/Pays).
-export const metadata: Metadata = {
-  title: "Tous les articles",
-  alternates: {
-    canonical: "/articles",
-  },
-};
+// getArticlesPage uniquement — aucun accès repository direct ici. Pagination `?page=N`
+// (Lot 1A) : `generateMetadata` lit désormais `searchParams` (cette route devient
+// dynamique — searchParams est une Request-time API, comme /recherche), canonical
+// auto-référent par page via urlAvecPage (jamais `?page=1` explicite). Eyebrow "Articles"
+// et H1 "Tous les articles" : constantes (pas de nom d'instance à projeter, contrairement
+// au kicker "Rubrique"/"Pays" des pages Catégorie/Pays).
+export async function generateMetadata({ searchParams }: ArticlesPageProps): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const page = normaliserPageDemandee(resolvedSearchParams.page);
 
-export default async function ArticlesPage() {
-  const { count, articles } = await getArticlesPage();
+  return {
+    title: "Tous les articles",
+    alternates: {
+      canonical: urlAvecPage("/articles", page),
+    },
+  };
+}
+
+export default async function ArticlesPage({ searchParams }: ArticlesPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const pageDemandee = normaliserPageDemandee(resolvedSearchParams.page);
+
+  const { count, page, hasNextPage, articles } = await getArticlesPage(pageDemandee);
+
+  // Page bien formée (entière, >= 1) mais hors bornes : le repository l'a déjà clampée à
+  // la dernière page existante (`page` != `pageDemandee`) — notFound() plutôt que
+  // d'afficher silencieusement un contenu qui ne correspond pas à l'URL demandée (Lot 1A).
+  if (page !== pageDemandee) {
+    notFound();
+  }
 
   // JSON-LD (Lot L12, contrat validé) : CollectionPage + ItemList imbriqué (mainEntity) —
-  // omis entièrement si la liste est vide, jamais un ItemList déclaré sans élément.
+  // omis entièrement si la liste est vide, jamais un ItemList déclaré sans élément. `url`
+  // reflète la page courante (Lot 1A), cohérent avec le canonical de generateMetadata.
   const siteUrl = resoudreSiteUrl();
   const absoluteUrl = (path: string) => new URL(path, siteUrl).toString();
 
@@ -34,7 +58,7 @@ export default async function ArticlesPage() {
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: "Tous les articles",
-          url: absoluteUrl("/articles"),
+          url: absoluteUrl(urlAvecPage("/articles", page)),
           mainEntity: {
             "@type": "ItemList",
             itemListElement: articles.map((article, index) => ({
@@ -86,6 +110,8 @@ export default async function ArticlesPage() {
         ) : (
           <p className="mt-7 text-text-secondary">Aucun article publié pour le moment.</p>
         )}
+
+        <PaginationLinks basePath="/articles" currentPage={page} hasNextPage={hasNextPage} />
       </main>
     </>
   );
