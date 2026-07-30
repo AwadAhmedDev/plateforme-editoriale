@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleSearchResultCard } from "@/components/articles/article-search-result-card";
 import { PaginationLinks } from "@/components/shared/pagination-links";
-import { searchArticles } from "@/features/articles/search-articles";
+import { searchArticles, normaliserJourRecherche } from "@/features/articles/search-articles";
 import { listCategorieMenu } from "@/features/taxonomies/list-categorie-menu";
 import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
 import { TYPE_CONTENU_LABELS } from "@/features/articles/type-contenu-labels";
@@ -13,7 +13,8 @@ import { normaliserPageDemandee } from "@/lib/pagination";
 // une seule route, formulaire GET natif (aucun JavaScript, aucun composant client).
 // searchParams est une Request-time API : cette page est rendue dynamiquement à la
 // requête. Layout sidebar (290px) + résultats, remplace l'ancienne ligne de champs
-// pleine largeur — champs combinables librement, aucune date, aucun contenu premium.
+// pleine largeur — champs combinables librement, aucun contenu premium. Bornes de date
+// `du`/`au` ajoutées au Lot 2A (US-023) : le filtrage par date est désormais complet.
 // Pagination `?page=N` (Lot 1A) : canonical fixe INCHANGÉ (/recherche, sans query
 // string, y compris pour page > 1) — décision déjà prise avant ce lot et simplement
 // reconduite : `page` n'est qu'une dimension de plus parmi les combinaisons de filtres,
@@ -52,6 +53,13 @@ export default async function RecherchePage({
   const sort = lireParam(resolvedSearchParams.sort);
   const pageDemandee = normaliserPageDemandee(resolvedSearchParams.page);
 
+  // Bornes de date (Lot 2A, US-023) : normalisées ici via la règle de validation exportée
+  // par search-articles.ts, jamais revalidées localement. Une borne rejetée devient
+  // `undefined` et disparaît donc du champ réaffiché comme des liens de pagination — la
+  // page n'affiche jamais un filtre qui n'a pas été appliqué.
+  const du = normaliserJourRecherche(lireParam(resolvedSearchParams.du));
+  const au = normaliserJourRecherche(lireParam(resolvedSearchParams.au));
+
   // Aucun critère soumis (ni q, ni aucun filtre) : affiche tout le contenu Publié,
   // trié "Plus récent" par défaut — comportement conforme au design (Corne de
   // l'Afrique.dc.html : "Recherche documentaire" affiche déjà 14 résultats à l'arrivée
@@ -65,6 +73,8 @@ export default async function RecherchePage({
       zoneSlug: zoneSlug || undefined,
       typeContenu: typeContenu || undefined,
       sort: sort || undefined,
+      dateFrom: du,
+      dateTo: au,
       page: pageDemandee,
     }),
     listCategorieMenu(),
@@ -87,6 +97,8 @@ export default async function RecherchePage({
   if (zoneSlug) preserveParams.zone = zoneSlug;
   if (typeContenu) preserveParams.type = typeContenu;
   if (sort) preserveParams.sort = sort;
+  if (du) preserveParams.du = du;
+  if (au) preserveParams.au = au;
 
   return (
     <main className="mx-auto w-full max-w-[1220px] flex-1 px-5 py-8 lg:px-[28px]">
@@ -168,6 +180,45 @@ export default async function RecherchePage({
               ))}
             </select>
           </div>
+
+          {/* Bornes de date (Lot 2A, US-023) — dernier critère d'acceptation manquant de
+              US-023, et dernier axe de filtrage listé par sitemap.md §Recherche. Regroupées
+              dans un <fieldset> avec <legend> : les deux champs forment une seule plage, pas
+              deux filtres indépendants, et c'est le seul patron qui l'annonce à un lecteur
+              d'écran (chaque champ garde par ailleurs son propre <label>). `<input
+              type="date">` plutôt qu'un composant de calendrier : le formulaire reste un GET
+              natif sans JavaScript, comme le reste de cette page (REPO-6). */}
+          <fieldset>
+            <legend className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
+              Date de publication
+            </legend>
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label htmlFor="du" className="mb-1 block text-[12px] text-text-secondary">
+                  Du
+                </label>
+                <input
+                  type="date"
+                  id="du"
+                  name="du"
+                  defaultValue={du}
+                  className="w-full rounded-md border border-border bg-bg-primary px-2.5 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+                />
+              </div>
+              <div>
+                <label htmlFor="au" className="mb-1 block text-[12px] text-text-secondary">
+                  Au
+                </label>
+                <input
+                  type="date"
+                  id="au"
+                  name="au"
+                  defaultValue={au}
+                  className="w-full rounded-md border border-border bg-bg-primary px-2.5 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+                />
+              </div>
+            </div>
+          </fieldset>
 
           <div>
             <label htmlFor="sort" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">

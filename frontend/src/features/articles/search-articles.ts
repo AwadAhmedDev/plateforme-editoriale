@@ -25,6 +25,10 @@ export type SearchArticlesParams = {
   zoneSlug?: string;
   typeContenu?: string;
   sort?: string;
+  // Bornes de date de publication, incluses toutes les deux (Lot 2A) — chaînes brutes
+  // d'URL au format `YYYY-MM-DD`, validées ici et non par l'appelant.
+  dateFrom?: string;
+  dateTo?: string;
   page: number;
 };
 
@@ -40,6 +44,47 @@ function estTypeContenuValide(value: string | undefined): value is TypeContenu {
 
 function estTriValide(value: string | undefined): value is TriRechercheContenu {
   return value === "recent" || value === "long";
+}
+
+// Bornes de date de /recherche (Lot 2A) : `YYYY-MM-DD` est le seul format que produise
+// `<input type="date">`, donc le seul accepté. Toute autre valeur est ignorée
+// silencieusement (traitée comme absente), exactement comme typeContenu/sort ci-dessus —
+// un paramètre d'URL invalide n'est jamais une erreur ni un 404.
+//
+// Bornes calculées en UTC, jamais dans le fuseau du serveur : une même URL doit produire
+// le même résultat quelle que soit la machine qui rend la page.
+//
+// `fin` est portée à 23:59:59.999 alors que `debut` reste à minuit : le repository applique
+// `date_publication <= dateTo` sur un timestamp, donc un `au=2026-01-15` laissé à minuit
+// exclurait tous les contenus publiés *le* 15 janvier. C'est le seul piège de ce filtre.
+function analyserJour(value: string | undefined): { debut: Date; fin: Date } | undefined {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return undefined;
+  }
+
+  const [annee, mois, jour] = value.split("-").map(Number);
+  const debut = new Date(Date.UTC(annee, mois - 1, jour));
+
+  // Rejette une date bien formée mais inexistante (2026-02-30, 2026-13-01), que Date.UTC
+  // reporterait silencieusement sur le mois suivant au lieu de la refuser.
+  if (
+    debut.getUTCFullYear() !== annee ||
+    debut.getUTCMonth() !== mois - 1 ||
+    debut.getUTCDate() !== jour
+  ) {
+    return undefined;
+  }
+
+  return { debut, fin: new Date(Date.UTC(annee, mois - 1, jour, 23, 59, 59, 999)) };
+}
+
+// Exposée pour app/(public)/recherche/page.tsx : la page doit savoir si une borne est
+// valide sans dupliquer la règle de validation — pour ne réafficher dans le champ, et ne
+// reporter sur les liens de pagination, qu'une valeur réellement prise en compte. Retourne
+// la chaîne inchangée (jamais une date reformatée) : c'est la valeur qui doit repartir
+// telle quelle dans l'URL et dans `<input type="date">`.
+export function normaliserJourRecherche(value: string | undefined): string | undefined {
+  return analyserJour(value) ? value : undefined;
 }
 
 // Lecture publique pour app/(public)/recherche/page.tsx : étend searchArticles avec les
@@ -59,10 +104,19 @@ function estTriValide(value: string | undefined): value is TriRechercheContenu {
 // dur) : un filtre catégorie/zone invalide doit toujours produire un résultat vide en
 // HTTP 200, quelle que soit la page demandée — garantie préexistante à la pagination,
 // jamais un 404 sur un simple slug invalide (corrigé après revue Lot 1A).
+//
+// Filtre par date (Lot 2A, US-023) : `dateFrom`/`dateTo` sont transmis à
+// ContenuEditorialRepository.search, qui les supportait déjà (`ArticlesPubliesFiltre`,
+// appliqué aussi bien côté Prisma que dans les conditions SQL de recherche plein-texte) —
+// aucune modification de repository dans ce lot. Une plage inversée (`du` > `au`) est
+// transmise telle quelle et produit un résultat vide : c'est la réponse honnête à ce qui a
+// été demandé, jamais une réécriture silencieuse des bornes saisies.
 export async function searchArticles(params: SearchArticlesParams): Promise<SearchArticlesResult> {
   const q = params.q?.trim() || undefined;
   const typeContenu = estTypeContenuValide(params.typeContenu) ? params.typeContenu : undefined;
   const sort = estTriValide(params.sort) ? params.sort : undefined;
+  const du = analyserJour(params.dateFrom);
+  const au = analyserJour(params.dateTo);
 
   const [categorie, zone] = await Promise.all([
     params.categorieSlug ? CategorieRepository.findBySlug(params.categorieSlug) : null,
@@ -79,6 +133,8 @@ export async function searchArticles(params: SearchArticlesParams): Promise<Sear
     ...(zone ? { zoneId: zone.id } : {}),
     ...(typeContenu ? { typeContenu } : {}),
     ...(sort ? { sort } : {}),
+    ...(du ? { dateFrom: du.debut } : {}),
+    ...(au ? { dateTo: au.fin } : {}),
     page: params.page,
   });
 
