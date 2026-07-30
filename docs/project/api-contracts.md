@@ -69,6 +69,23 @@ Paramètres combinables, portés par l'URL (`searchParams`), jamais par un state
 | Plage inversée (`du` > `au`) | Transmise telle quelle, résultat vide ; jamais une réécriture silencieuse des bornes saisies |
 | Bornes seules | `du` et `au` sont indépendamment optionnels — une borne unique est un filtre valide (« depuis le », « jusqu'au ») |
 
+### 1.8 Contenus associés (page Détail d'un contenu)
+
+`sitemap.md` §Navigation secondaire prévoit des « liens de contenus associés » sur la page Détail d'un contenu. Contrat de lecture :
+
+| Règle | Convention |
+|---|---|
+| Entrée | L'article courant : son identifiant, sa rubrique et son pays. Aucun paramètre d'URL — la section ne dépend jamais de `searchParams` |
+| Rapprochement | Même rubrique **OU** même pays. Un contenu correspondant aux deux axes n'apparaît **qu'une seule fois** (condition `OR` d'une requête unique, jamais deux jeux de résultats réunis) |
+| Exclusion | L'article courant est toujours exclu de ses propres associés |
+| Statut | `publie` seul, non paramétrable. La page d'un contenu Archivé affiche des associés, mais un Archivé n'y figure jamais — les contenus associés sont une surface de découverte (DR-001) |
+| Volume et tri | 3 au maximum, par date de publication décroissante. **Aucun classement de pertinence** : une correspondance de rubrique ne prime pas sur une correspondance de pays |
+| Article sans rubrique ni pays | Aucun axe de rapprochement : liste vide, sans accès base de données |
+| Liste vide | Section entièrement omise — jamais un titre suivi d'aucun contenu |
+| Métadonnées et pagination | Aucun impact : la section n'entre ni dans les métadonnées SEO, ni dans le JSON-LD, ni dans aucune pagination |
+
+**Péremption assumée** (décision Lot 2C) : `revalidateArticleSurfaces` invalide la page de détail du contenu muté et les surfaces de découverte, mais **pas les pages de détail de ses frères de rubrique/pays**, dont la section « À lire aussi » change lorsqu'un frère est publié ou dépublié. Écart accepté et non corrigé : l'énumération des slugs frères à chaque mutation coûterait plus que le bénéfice pour un média à administrateur unique.
+
 ---
 
 ## 2. Contrats Administration
