@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/shared/article-card";
+import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { PaginationLinks } from "@/components/shared/pagination-links";
 import { getCategoriePage } from "@/features/taxonomies/get-categorie-page";
 import { normaliserPageDemandee, urlAvecPage } from "@/lib/pagination";
@@ -84,6 +85,22 @@ export default async function CategoriePage({ params, searchParams }: CategorieP
         }
       : null;
 
+  // BreadcrumbList (Lot 2B) : émis inconditionnellement, contrairement au CollectionPage
+  // ci-dessus qui reste omis sur une rubrique sans article publié (décision L12) — un fil
+  // d'Ariane reste valide sur une rubrique vide. Deux balises <script> distinctes, l'une
+  // conditionnelle et l'autre non, comme sur articles/[slug]/page.tsx. `item` omis pour le
+  // segment courant (sans `href`) : jamais une URL de page paginée déclarée ici.
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: categorie.breadcrumb.map((segment, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: segment.label,
+      ...(segment.href ? { item: absoluteUrl(segment.href) } : {}),
+    })),
+  };
+
   return (
     <>
       {collectionPageJsonLd && (
@@ -92,8 +109,14 @@ export default async function CategoriePage({ params, searchParams }: CategorieP
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionPageJsonLd) }}
         />
       )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
       <main className="mx-auto w-full max-w-[1220px] flex-1 px-5 py-8 lg:px-[28px]">
-        <div className="border-b-2 border-text-primary pb-4">
+        <Breadcrumb items={categorie.breadcrumb} />
+
+        <div className="mt-4 border-b-2 border-text-primary pb-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[.16em] text-accent-primary">Rubrique</p>
           <h1 className="font-editorial text-4xl">{categorie.nom}</h1>
           <p className="mt-2 text-sm text-text-secondary">

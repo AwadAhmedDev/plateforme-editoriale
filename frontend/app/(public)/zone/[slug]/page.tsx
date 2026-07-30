@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/shared/article-card";
+import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { PaginationLinks } from "@/components/shared/pagination-links";
 import { getZonePage } from "@/features/taxonomies/get-zone-page";
 import { normaliserPageDemandee, urlAvecPage } from "@/lib/pagination";
@@ -82,6 +83,20 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
         }
       : null;
 
+  // BreadcrumbList (Lot 2B) : émis inconditionnellement, contrairement au CollectionPage
+  // ci-dessus qui reste omis sur un pays sans article publié (décision L12) — un fil
+  // d'Ariane reste valide sur un pays vide. Symétrique de categorie/[slug]/page.tsx.
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: zone.breadcrumb.map((segment, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: segment.label,
+      ...(segment.href ? { item: absoluteUrl(segment.href) } : {}),
+    })),
+  };
+
   return (
     <>
       {collectionPageJsonLd && (
@@ -90,8 +105,14 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionPageJsonLd) }}
         />
       )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
       <main className="mx-auto w-full max-w-[1220px] flex-1 px-5 py-8 lg:px-[28px]">
-        <div className="border-b-2 border-text-primary pb-4">
+        <Breadcrumb items={zone.breadcrumb} />
+
+        <div className="mt-4 border-b-2 border-text-primary pb-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[.16em] text-accent-primary">Pays</p>
           <h1 className="font-editorial text-4xl">{zone.nom}</h1>
           <p className="mt-2 text-sm text-text-secondary">
