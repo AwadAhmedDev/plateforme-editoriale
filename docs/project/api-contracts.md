@@ -58,6 +58,17 @@ Tous les contrats paginés exposent : `page` (entier, défaut 1) et retournent :
 
 Paramètres combinables, portés par l'URL (`searchParams`), jamais par un state client isolé (`frontend-specification.md`) : `q` (texte libre), `categorie`, `zone`, `type`, `date`. Le texte libre (`q`) interroge le vecteur de recherche couvrant titre, chapô, corps et mots-clés (`database-schema.md` §4.5/§6 — corrige la couverture de US-022 sur les mots-clés). Les autres paramètres filtrent par égalité stricte sur les colonnes correspondantes. Tous les paramètres sont combinables entre eux (US-023).
 
+**Filtrage par date** — le paramètre `date` est exposé sous forme de deux bornes de plage, `du` et `au`, **toutes deux incluses**, portant sur la date de publication :
+
+| Règle | Convention |
+|---|---|
+| Format accepté | `YYYY-MM-DD` uniquement — le seul que produise un champ de date natif |
+| Valeur invalide (format erroné, ou date inexistante type `2026-02-30`) | Ignorée silencieusement, traitée comme absente ; jamais une erreur, jamais un 404. Elle n'est ni réaffichée dans le champ, ni reportée sur les liens de pagination |
+| Fuseau | Bornes calculées en UTC, jamais dans le fuseau du serveur : une même URL rend le même résultat sur toute machine |
+| Borne haute | Portée à la fin de journée (`23:59:59.999`), la comparaison portant sur un timestamp — sans cela, `au=2026-01-15` exclurait les contenus publiés *le* 15 |
+| Plage inversée (`du` > `au`) | Transmise telle quelle, résultat vide ; jamais une réécriture silencieuse des bornes saisies |
+| Bornes seules | `du` et `au` sont indépendamment optionnels — une borne unique est un filtre valide (« depuis le », « jusqu'au ») |
+
 ---
 
 ## 2. Contrats Administration
