@@ -13,7 +13,14 @@ import { ArticleTable } from "@/features/articles/article-table";
 export default async function AdminArticlesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; statut?: string; categorieId?: string; zoneId?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    statut?: string;
+    categorieId?: string;
+    zoneId?: string;
+    tri?: string;
+    sens?: string;
+  }>;
 }) {
   const params = await searchParams;
 
@@ -38,6 +45,8 @@ export default async function AdminArticlesPage({
         statutFilter={params.statut ?? ""}
         categorieIdFilter={params.categorieId ?? ""}
         zoneIdFilter={params.zoneId ?? ""}
+        tri={params.tri ?? ""}
+        sens={params.sens ?? ""}
         categories={categories}
         zones={zones}
       />
