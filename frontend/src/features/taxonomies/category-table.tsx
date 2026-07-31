@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useId, useRef, useState } from "react";
 import { updateCategory, deleteCategory, type CategoryActionState } from "@/features/taxonomies/categorie-actions";
 import type { CategoryListItem } from "@/features/taxonomies/list-categories";
 
@@ -178,9 +178,38 @@ function DeleteCategoryDialog({ categorie, onClose }: { categorie: CategoryListI
   const boundDeleteCategory = deleteCategory.bind(null, categorie.id);
   const [state, formAction, pending] = useActionState(boundDeleteCategory, initialState);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const declencheurRef = useRef<HTMLElement | null>(null);
+  // Identifiant du titre (Lot B4) : `useId()` garantit un identifiant unique par instance,
+  // stable d'un rendu à l'autre, sans le dériver de l'entité affichée ni risquer de collision
+  // avec les identifiants déjà posés ailleurs dans la page (`nom-${categorie.id}`, etc.).
+  const titreId = useId();
 
+  // Restitution du focus (Lot B3) : `showModal()` mémorise bien l'élément précédemment
+  // focalisé, mais le navigateur ne le refocalise qu'au `close()` — or cette Modal n'est
+  // jamais fermée par `close()`. Tous ses chemins de sortie (Annuler, ✕, Échap, clic sur
+  // l'arrière-plan, succès de la suppression) passent par `onClose()`, qui démonte le
+  // <dialog> : le focus retombe alors sur <body> et l'utilisateur au clavier repart du
+  // début du document. Le déclencheur est donc mémorisé juste avant l'ouverture et
+  // refocalisé au démontage, ce qui couvre uniformément les cinq chemins.
+  //
+  // Garde `!dialog.open` : en mode strict (développement), React rejoue cet effet sans
+  // démonter le <dialog>. Sans elle, le second passage mémoriserait un bouton interne à la
+  // Modal comme « déclencheur », et rappellerait `showModal()` sur une Modal déjà ouverte
+  // (`InvalidStateError`) — défaut latent du code d'origine, neutralisé au passage.
   useEffect(() => {
-    dialogRef.current?.showModal();
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) {
+      const actif = document.activeElement;
+      declencheurRef.current = actif instanceof HTMLElement && actif !== document.body ? actif : null;
+      dialog.showModal();
+    }
+
+    return () => {
+      // `isConnected` : après une suppression réussie, la ligne (donc le bouton) peut avoir
+      // déjà disparu de la table revalidée — refocaliser un nœud détaché serait sans effet.
+      const declencheur = declencheurRef.current;
+      if (declencheur?.isConnected) declencheur.focus();
+    };
   }, []);
 
   useEffect(() => {
@@ -192,6 +221,7 @@ function DeleteCategoryDialog({ categorie, onClose }: { categorie: CategoryListI
   return (
     <dialog
       ref={dialogRef}
+      aria-labelledby={titreId}
       onCancel={onClose}
       onClick={(event) => {
         if (event.target === dialogRef.current) {
@@ -201,7 +231,9 @@ function DeleteCategoryDialog({ categorie, onClose }: { categorie: CategoryListI
       className="w-full max-w-[440px] rounded-md border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
     >
       <div className="mb-2 flex items-start justify-between">
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Supprimer la catégorie</h2>
+        <h2 id={titreId} className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          Supprimer la catégorie
+        </h2>
         <button
           type="button"
           onClick={onClose}
