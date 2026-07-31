@@ -252,10 +252,17 @@ export const ContenuEditorialRepository = {
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     const page = Math.min(Math.max(1, params.page), totalPages);
 
-    const orderBy: Prisma.ContenuEditorialOrderByWithRelationInput =
+    // Tri secondaire stable (Lot B2) : `statut` ne prend que 3 valeurs et
+    // `dateDerniereModification` peut être partagée (import/seed en lot), donc les ex æquo sont
+    // la règle et non l'exception. Sans départage total, PostgreSQL ne garantit aucun ordre
+    // entre deux lignes égales d'un OFFSET à l'autre : une même ligne pourrait apparaître sur
+    // deux pages consécutives pendant qu'une autre n'apparaîtrait sur aucune. `id` (clé
+    // primaire, donc unique) rend l'ordre total et la pagination déterministe ; il n'est jamais
+    // un critère de tri exposé à l'utilisateur.
+    const orderBy: Prisma.ContenuEditorialOrderByWithRelationInput[] =
       params.sort?.champ === "statut"
-        ? { statut: params.sort.sens }
-        : { dateDerniereModification: params.sort?.sens ?? "desc" };
+        ? [{ statut: params.sort.sens }, { dateDerniereModification: "desc" }, { id: "asc" }]
+        : [{ dateDerniereModification: params.sort?.sens ?? "desc" }, { id: "asc" }];
 
     const items = await prisma.contenuEditorial.findMany({
       where,
@@ -314,8 +321,28 @@ export const ContenuEditorialRepository = {
       return prisma.contenuEditorial.update({ where: { id }, data });
     }
 
+    // Fenêtre d'une milliseconde plutôt qu'une égalité stricte (correctif A-01) :
+    // `date_derniere_modification` est un TIMESTAMPTZ, donc stocké en MICROsecondes par
+    // Postgres, alors qu'un `Date` JavaScript ne porte que des MILLIsecondes. La valeur
+    // relue par Prisma est donc systématiquement TRONQUÉE (vérifié sur la pile réelle :
+    // 23:04:38.852887 en base → 23:04:38.852 côté client), et l'égalité stricte utilisée
+    // jusqu'ici ne pouvait plus jamais être satisfaite — toute sauvegarde depuis l'Éditeur
+    // échouait en ConcurrentModificationError, y compris sans aucune écriture concurrente.
+    //
+    // Aucun assouplissement du verrou : la troncature étant exacte (jamais un arrondi),
+    // { t : trunc_ms(t) = d } est très précisément { t : d ≤ t < d+1 ms }. Ce prédicat
+    // accepte donc exactement les lignes que Prisma désignerait comme identiques à la
+    // version chargée par l'Éditeur, ni plus ni moins. Une écriture concurrente, séparée
+    // d'au moins un aller-retour réseau, porte un `now()` postérieur de plusieurs
+    // millisecondes : elle sort de la fenêtre et déclenche le conflit comme prévu au Lot 16A.
     const resultat = await prisma.contenuEditorial.updateMany({
-      where: { id, dateDerniereModification: dateDerniereModificationAttendue },
+      where: {
+        id,
+        dateDerniereModification: {
+          gte: dateDerniereModificationAttendue,
+          lt: new Date(dateDerniereModificationAttendue.getTime() + 1),
+        },
+      },
       data,
     });
 
