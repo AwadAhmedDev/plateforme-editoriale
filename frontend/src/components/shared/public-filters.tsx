@@ -77,8 +77,19 @@ export function filtresAppliques(filtres: FiltresListing): Record<string, string
 }
 
 const LABEL = "mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary";
+
+// `min-w-0` est structurel, pas décoratif : sans lui, un `<input type="date">` refuse de
+// descendre sous sa largeur intrinsèque native (~120-140px selon le navigateur) et fait
+// déborder horizontalement sa grille sur mobile. `h-11` aligne tous les champs sur la même
+// hauteur — un `<select>` et un `<input type="date">` ne se calent pas spontanément à
+// l'identique — et atteint la cible tactile de 44px.
 const CHAMP =
-  "w-full rounded-md border border-border bg-bg-primary px-3 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary";
+  "h-11 w-full min-w-0 rounded-md border border-border bg-bg-primary px-3 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary";
+
+// Chaque axe occupe toute la largeur sous `sm`, puis partage la ligne au-delà. `min-w-0`
+// autorise la contraction ; `min-w-[170px]` n'est réintroduit qu'à partir de `sm`, là où
+// l'espace le permet — appliqué dès le mobile, il forçait le débordement.
+const AXE = "min-w-0 sm:min-w-[170px] sm:flex-1";
 
 // Filtres secondaires des pages de listing publiques (/articles, /categorie/[slug],
 // /zone/[slug]) — exigés par ui-specification.md §Comportement des filtres, sitemap.md
@@ -110,10 +121,10 @@ export function PublicFilters({ basePath, axes, valeurs, categories, zones }: Pu
     <form
       action={basePath}
       method="GET"
-      className="mt-6 flex flex-wrap items-end gap-4 rounded-[8px] border border-border bg-bg-secondary p-4"
+      className="mt-6 flex flex-col gap-5 rounded-[8px] border border-border bg-bg-secondary p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-4 sm:gap-y-5 sm:p-5"
     >
       {axes.includes("categorie") && (
-        <div className="min-w-[170px] flex-1">
+        <div className={AXE}>
           <label htmlFor="categorie" className={LABEL}>
             Rubrique
           </label>
@@ -129,7 +140,7 @@ export function PublicFilters({ basePath, axes, valeurs, categories, zones }: Pu
       )}
 
       {axes.includes("zone") && (
-        <div className="min-w-[170px] flex-1">
+        <div className={AXE}>
           <label htmlFor="zone" className={LABEL}>
             Pays
           </label>
@@ -145,7 +156,7 @@ export function PublicFilters({ basePath, axes, valeurs, categories, zones }: Pu
       )}
 
       {axes.includes("type") && (
-        <div className="min-w-[170px] flex-1">
+        <div className={AXE}>
           <label htmlFor="type" className={LABEL}>
             Type de contenu
           </label>
@@ -165,16 +176,20 @@ export function PublicFilters({ basePath, axes, valeurs, categories, zones }: Pu
           d'écran (chaque champ gardant par ailleurs son propre <label>). Repris tel quel du
           Lot 2A sur /recherche. */}
       {axes.includes("date") && (
-        <fieldset className="min-w-[240px] flex-1">
+        <fieldset className="min-w-0 sm:min-w-[280px] sm:flex-1">
           <legend className={LABEL}>Date de publication</legend>
-          <div className="grid grid-cols-2 gap-2.5">
-            <div>
+          {/* Empilées sous `sm`, côte à côte au-delà : à 375px, deux `<input type="date">`
+              natifs partagent ~130px chacun, se retrouvent collés et débordent de la carte.
+              `min-w-0` sur chaque cellule complète celui du champ — sans lui, la grille
+              conserve la largeur intrinsèque de ses colonnes et déborde malgré tout. */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="min-w-0">
               <label htmlFor="du" className="mb-1 block text-[12px] text-text-secondary">
                 Du
               </label>
               <input type="date" id="du" name="du" defaultValue={valeurs.du ?? ""} className={CHAMP} />
             </div>
-            <div>
+            <div className="min-w-0">
               <label htmlFor="au" className="mb-1 block text-[12px] text-text-secondary">
                 Au
               </label>
@@ -184,10 +199,12 @@ export function PublicFilters({ basePath, axes, valeurs, categories, zones }: Pu
         </fieldset>
       )}
 
-      <div className="flex items-center gap-3">
+      {/* Les deux actions partagent la largeur sous `sm` plutôt que de se tasser à gauche,
+          et retrouvent leur largeur intrinsèque au-delà. */}
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="submit"
-          className="rounded-md bg-accent-primary px-4 py-2.5 text-sm font-semibold text-white outline-none transition-colors duration-fast hover:bg-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+          className="h-11 flex-1 rounded-md bg-accent-primary px-4 text-sm font-semibold text-white outline-none transition-colors duration-fast hover:bg-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary sm:flex-none"
         >
           Filtrer
         </button>
@@ -195,7 +212,7 @@ export function PublicFilters({ basePath, axes, valeurs, categories, zones }: Pu
         {auMoinsUnFiltreActif && (
           <Link
             href={basePath}
-            className="rounded-md border border-border px-4 py-2.5 text-[13px] text-text-secondary outline-none transition-colors duration-fast hover:border-accent-primary hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+            className="inline-flex h-11 flex-1 items-center justify-center rounded-md border border-border px-4 text-[13px] text-text-secondary outline-none transition-colors duration-fast hover:border-accent-primary hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary sm:flex-none"
           >
             Réinitialiser les filtres
           </Link>

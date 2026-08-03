@@ -37,6 +37,21 @@ export const metadata: Metadata = {
   },
 };
 
+// Mêmes constantes, mêmes valeurs et même rôle que dans public-filters.tsx : les deux
+// surfaces de filtrage partagent une seule direction visuelle. Elles restent dupliquées
+// plutôt que remontées dans un module commun — la sidebar et la ligne horizontale sont
+// volontairement non partagées (cf. commentaire de PublicFilters) et n'ont pas vocation à
+// être couplées par un import.
+//
+// `h-11` : hauteur unique pour `<input>`, `<select>` et `<input type="date">`, qui ne se
+// calent pas spontanément à l'identique — et cible tactile de 44px.
+// `min-w-0` : sans lui, un `<input type="date">` refuse de descendre sous sa largeur
+// intrinsèque native et fait déborder sa grille.
+const LABEL = "mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary";
+const SOUS_LABEL = "mb-1 block text-[12px] text-text-secondary";
+const CHAMP =
+  "h-11 w-full min-w-0 rounded-md border border-border bg-bg-primary px-3 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary";
+
 export default async function RecherchePage({
   searchParams,
 }: {
@@ -99,16 +114,19 @@ export default async function RecherchePage({
 
   return (
     <main className="mx-auto w-full max-w-[1220px] flex-1 px-5 py-8 lg:px-[28px]">
-      <h1 className="mb-5 font-editorial text-[34px] font-bold">Recherche documentaire</h1>
+      <h1 className="mb-5 font-editorial text-[28px] font-bold sm:text-[34px]">Recherche documentaire</h1>
 
       <div className="grid gap-8 lg:grid-cols-[290px_1fr] lg:items-start lg:gap-9">
+        {/* Le formulaire n'est une sidebar de 290px qu'à partir de `lg` : en deçà il occupe
+            toute la largeur. Sa largeur utile n'est donc PAS monotone avec celle du
+            viewport, ce qui gouverne la grille des dates plus bas. */}
         <form
           action="/recherche"
           method="GET"
-          className="flex flex-col gap-5 rounded-[8px] border border-border bg-bg-secondary p-[22px] lg:sticky lg:top-[var(--header-height,10.5rem)] lg:max-h-[calc(100vh_-_var(--header-height,10.5rem)_-_1.5rem)] lg:overflow-y-auto"
+          className="flex flex-col gap-5 rounded-[8px] border border-border bg-bg-secondary p-4 sm:p-[22px] lg:sticky lg:top-[var(--header-height,10.5rem)] lg:max-h-[calc(100vh_-_var(--header-height,10.5rem)_-_1.5rem)] lg:overflow-y-auto"
         >
           <div>
-            <label htmlFor="q" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
+            <label htmlFor="q" className={LABEL}>
               Mot-clé
             </label>
             <input
@@ -117,19 +135,19 @@ export default async function RecherchePage({
               name="q"
               defaultValue={q}
               placeholder="Rechercher un sujet…"
-              className="w-full rounded-md border border-border bg-bg-primary px-3 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+              className={CHAMP}
             />
           </div>
 
           <div>
-            <label htmlFor="zone" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
+            <label htmlFor="zone" className={LABEL}>
               Pays
             </label>
             <select
               id="zone"
               name="zone"
               defaultValue={zoneSlug}
-              className="w-full rounded-md border border-border bg-bg-primary px-3 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+              className={CHAMP}
             >
               <option value="">Tous les pays</option>
               {zones.map((zone) => (
@@ -141,14 +159,14 @@ export default async function RecherchePage({
           </div>
 
           <div>
-            <label htmlFor="categorie" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
+            <label htmlFor="categorie" className={LABEL}>
               Rubrique
             </label>
             <select
               id="categorie"
               name="categorie"
               defaultValue={categorieSlug}
-              className="w-full rounded-md border border-border bg-bg-primary px-3 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+              className={CHAMP}
             >
               <option value="">Toutes les rubriques</option>
               {categories.map((categorie) => (
@@ -160,14 +178,14 @@ export default async function RecherchePage({
           </div>
 
           <div>
-            <label htmlFor="type" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
+            <label htmlFor="type" className={LABEL}>
               Type de contenu
             </label>
             <select
               id="type"
               name="type"
               defaultValue={typeContenu}
-              className="w-full rounded-md border border-border bg-bg-primary px-3 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+              className={CHAMP}
             >
               <option value="">Tous les types</option>
               {Object.entries(TYPE_CONTENU_LABELS).map(([value, label]) => (
@@ -186,65 +204,61 @@ export default async function RecherchePage({
               type="date">` plutôt qu'un composant de calendrier : le formulaire reste un GET
               natif sans JavaScript, comme le reste de cette page (REPO-6). */}
           <fieldset>
-            <legend className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
-              Date de publication
-            </legend>
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label htmlFor="du" className="mb-1 block text-[12px] text-text-secondary">
+            <legend className={LABEL}>Date de publication</legend>
+            {/* Grille non monotone, à l'image du conteneur (cf. commentaire du <form>) :
+                empilée sous `sm` (deux champs date natifs collés et débordants à 375px),
+                côte à côte de `sm` à `lg` où le formulaire occupe toute la largeur, puis
+                de nouveau empilée à partir de `lg` — la sidebar n'y fait plus que 290px,
+                soit ~117px par colonne, sous la largeur intrinsèque d'un champ date. */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="min-w-0">
+                <label htmlFor="du" className={SOUS_LABEL}>
                   Du
                 </label>
-                <input
-                  type="date"
-                  id="du"
-                  name="du"
-                  defaultValue={du}
-                  className="w-full rounded-md border border-border bg-bg-primary px-2.5 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-                />
+                <input type="date" id="du" name="du" defaultValue={du} className={CHAMP} />
               </div>
-              <div>
-                <label htmlFor="au" className="mb-1 block text-[12px] text-text-secondary">
+              <div className="min-w-0">
+                <label htmlFor="au" className={SOUS_LABEL}>
                   Au
                 </label>
-                <input
-                  type="date"
-                  id="au"
-                  name="au"
-                  defaultValue={au}
-                  className="w-full rounded-md border border-border bg-bg-primary px-2.5 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-                />
+                <input type="date" id="au" name="au" defaultValue={au} className={CHAMP} />
               </div>
             </div>
           </fieldset>
 
           <div>
-            <label htmlFor="sort" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
+            <label htmlFor="sort" className={LABEL}>
               Trier par
             </label>
             <select
               id="sort"
               name="sort"
               defaultValue={sort || "recent"}
-              className="w-full rounded-md border border-border bg-bg-primary px-3 py-2.5 text-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+              className={CHAMP}
             >
               <option value="recent">Plus récent</option>
               <option value="long">Lecture la plus longue</option>
             </select>
           </div>
 
-          <button
-            type="submit"
-            className="rounded-md bg-accent-primary px-4 py-2.5 text-sm font-semibold text-white outline-none transition-colors duration-fast hover:bg-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-          >
-            Rechercher
-          </button>
+          {/* Les deux actions partagent une ligne dès `sm` (le formulaire y est encore
+              pleine largeur, les empiler y gaspillerait deux hauteurs de bouton), et
+              repassent l'une sous l'autre en sidebar `lg`, où la largeur ne suffit plus. */}
+          <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+            <button
+              type="submit"
+              className="h-11 rounded-md bg-accent-primary px-4 text-sm font-semibold text-white outline-none transition-colors duration-fast hover:bg-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary sm:flex-1 lg:flex-none"
+            >
+              Rechercher
+            </button>
 
-          <Link
-            href="/recherche"
-            className="rounded-md border border-border py-2.5 text-center text-[13px] text-text-secondary outline-none transition-colors duration-fast hover:border-accent-primary hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-          >
-            Réinitialiser les filtres
-          </Link>
+            <Link
+              href="/recherche"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-border px-4 text-center text-[13px] text-text-secondary outline-none transition-colors duration-fast hover:border-accent-primary hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary sm:flex-1 lg:flex-none"
+            >
+              Réinitialiser les filtres
+            </Link>
+          </div>
         </form>
 
         <div>
