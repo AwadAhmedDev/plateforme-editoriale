@@ -78,9 +78,14 @@ export async function PublicHeader() {
         <div className="ml-auto flex flex-shrink-0 items-center gap-[18px]">
           <LanguageToggle />
 
+          {/* Masqué sous `lg` : le menu burger (MobileHeaderControls) porte déjà une
+              entrée Contact, ce lien y est donc redondant — et il amputait le ticker.
+              Mesuré à 360px : le titre de l'article en continu ne disposait plus que de
+              144px, soit une quinzaine de caractères, illisibles. Aucun contenu n'est
+              perdu, seul le doublon disparaît là où l'espace manque. */}
           <Link
             href="/contact"
-            className={`font-medium text-text-secondary hover:text-text-secondary ${LIEN_FOCUSABLE}`}
+            className={`hidden font-medium text-text-secondary hover:text-text-secondary lg:inline ${LIEN_FOCUSABLE}`}
           >
             Contact
           </Link>
