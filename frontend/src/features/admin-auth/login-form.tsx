@@ -41,6 +41,17 @@ export function AdminLoginForm() {
           name="identifiant"
           type="text"
           autoComplete="username"
+          // Claviers logiciels mobiles : sur un `type="text"` sans ces attributs, iOS Safari
+          // et Chrome Android appliquent par défaut la capitalisation de début de phrase et
+          // la correction automatique. L'identifiant part alors transformé (première lettre
+          // en capitale, voire espace ajouté par la barre de suggestions) ; la recherche en
+          // base est une égalité exacte, donc ne trouve rien, et la connexion échoue avec le
+          // message générique — sur mobile uniquement, à identifiants pourtant corrects.
+          // Le champ mot de passe n'en a pas besoin : les navigateurs désactivent déjà ces
+          // transformations sur `type="password"`.
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           required
           className="h-11 rounded-md border border-zinc-300 px-3.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-zinc-100"
         />
