@@ -1,12 +1,19 @@
 name: CI
 
+# Verification statique uniquement. Le build de production n'est plus rejoue ici :
+# l'integration Git native de Vercel construit chaque pull request (preview) et
+# chaque push sur master (production) avec les variables reelles de chaque
+# environnement. Le dupliquer ici imposerait de repliquer SITE_URL, DATABASE_URL
+# et R2_PUBLIC_URL en secrets GitHub sans rien verifier de plus.
+#
+# Les migrations ne sont jamais appliquees depuis GitHub Actions : elles sont
+# jouees par le `buildCommand` de frontend/vercel.json, et uniquement quand
+# VERCEL_ENV vaut "production".
+
 on:
   pull_request:
   push:
     branches: [master]
-  # Rend ce workflow appelable par deploy.yml (jobs.<id>.uses) : la verification
-  # est ecrite une seule fois et rejouee a l'identique avant chaque deploiement.
-  workflow_call:
 
 jobs:
   verifier:
@@ -29,13 +36,15 @@ jobs:
       - name: Installer les dependances
         run: npm ci
 
-      # package.json n'a aucun script postinstall : sur une installation propre,
-      # le client Prisma n'existe pas et `next build` echoue. L'etape est donc
-      # explicite. prisma.config.ts lit DIRECT_URL via env(), qui leve si absente.
+      # Indispensable AVANT `tsc` : 14 fichiers de src/ importent @prisma/client,
+      # dont les types n'existent pas tant que le client n'est pas genere.
+      # `generate` ne se connecte jamais a la base ; prisma.config.ts exige
+      # seulement que DIRECT_URL soit definie (env() leve si absente), d'ou cette
+      # valeur factice — aucun secret GitHub n'est necessaire.
       - name: Generer le client Prisma
         run: npx prisma generate
         env:
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
 
       - name: Verification des types
         run: npx tsc --noEmit
@@ -45,15 +54,3 @@ jobs:
       - name: Lint
         run: npm run lint
         continue-on-error: true
-
-      # DATABASE_URL est requise au BUILD et pas seulement au runtime : "/" et
-      # "/sitemap.xml" sont prerendues statiquement et interrogent la base.
-      # R2_PUBLIC_URL est lue par next.config.ts pour images.remotePatterns ;
-      # sans elle le build reussit mais next/image refuse les images R2.
-      # SITE_URL est obligatoire hors developpement (src/lib/site-url.ts leve).
-      - name: Build de production
-        run: npm run build
-        env:
-          SITE_URL: ${{ secrets.SITE_URL }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
