@@ -6,6 +6,18 @@ type Langue = "FR" | "EN";
 
 const LANGUES: readonly Langue[] = ["FR", "EN"];
 
+// Drapeau de disponibilité de l'internationalisation. La plateforme n'existe
+// qu'en français : tant qu'il vaut `false`, le sélecteur n'est pas rendu du
+// tout — ni visuellement, ni dans l'arbre d'accessibilité, ni dans le DOM.
+//
+// Seule l'INTERFACE est masquée : le composant, son état et son balisage
+// restent intacts ci-dessous. Réactiver les langues = passer ce drapeau à
+// `true`, sans rien réécrire.
+//
+// Typé `boolean` explicitement, et non laissé inférer le littéral `false` :
+// sinon TypeScript marque tout le corps suivant comme code inatteignable.
+const LANGUES_DISPONIBLES: boolean = false;
+
 // Bascule FR/EN du header, purement visuelle pour l'instant : l'anglais
 // n'est pas encore développé, aucun contenu ni route ne change au clic.
 // État local au composant, jamais persisté ni propagé ailleurs — à
@@ -13,6 +25,10 @@ const LANGUES: readonly Langue[] = ["FR", "EN"];
 // disponible (cf. décision produit prise avec l'utilisateur).
 export function LanguageToggle() {
   const [langue, setLangue] = useState<Langue>("FR");
+
+  // Après le hook, jamais avant : un retour anticipé placé au-dessus de
+  // `useState` violerait les règles des Hooks.
+  if (!LANGUES_DISPONIBLES) return null;
 
   return (
     <div className="flex items-center gap-[2px]">
