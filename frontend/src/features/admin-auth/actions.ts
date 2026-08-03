@@ -69,7 +69,15 @@ export async function adminLogin(identifiant: string, motDePasse: string): Promi
     return { success: false, error: GENERIC_LOGIN_ERROR };
   }
 
-  const administrateur = await AdminRepository.findByIdentifiant(identifiant);
+  // Identifiant recherché sous la même forme que celle déjà validée juste au-dessus :
+  // la validation portait sur `identifiant.trim()` mais la recherche utilisait la valeur
+  // brute, si bien qu'un espace ajouté par un clavier logiciel (barre de suggestions
+  // mobile) suffisait à ne rien trouver en base. Le mot de passe, lui, n'est jamais
+  // normalisé : un espace y est un caractère significatif.
+  //
+  // Normalisation appliquée avant la recherche, donc identiquement que l'identifiant
+  // existe ou non : la séquence commune aux deux branches d'échec (§9) reste intacte.
+  const administrateur = await AdminRepository.findByIdentifiant(identifiant.trim());
   const passwordHashToCompare = administrateur?.motDePasseHash ?? DUMMY_PASSWORD_HASH;
   const passwordValid = await verifyPassword(motDePasse, passwordHashToCompare);
 
