@@ -33,8 +33,14 @@ const LIEN_FOCUSABLE =
 // action ni un CTA) : même traitement visuel qu'elles à l'identique (`navStyle` uniforme),
 // aucune variante — seul le libellé le distingue.
 //
-// Sélecteur de langue FR/EN (design l.40-44) : omis, DIV-D3
-// (regle-fidelite-design.md §6) — hors périmètre de ce lot.
+// Sélecteur de langue FR/EN (design l.40-44) : le composant est monté mais ne
+// rend rien tant que LANGUES_DISPONIBLES vaut `false` dans language-toggle.tsx
+// — la plateforme n'existe qu'en français. Seule l'interface est masquée, la
+// logique reste en place et réactivable par ce seul drapeau.
+//
+// Gouttières : `px-5 lg:px-[28px]`, identiques à celles de toutes les pages
+// publiques et du footer. Un `px-[28px]` fixe désalignerait le contenu du
+// header de 8px par rapport au corps de page sur mobile.
 //
 // CTA "S'inscrire" : DIV-D7 (regle-fidelite-design.md §6), le design
 // distingue "S'abonner" (abonnement payant, hors MVP) de "S'inscrire"
@@ -55,7 +61,7 @@ export async function PublicHeader() {
       <HeaderHeightSync />
 
       {/* Barre utilitaire : ticker + Contact (design l.34-47) */}
-      <div className="mx-auto flex h-[38px] max-w-[1220px] items-center border-b border-border px-[28px] text-[12px] tracking-[.02em] text-text-secondary">
+      <div className="mx-auto flex h-[38px] max-w-[1220px] items-center gap-3 border-b border-border px-5 text-[12px] tracking-[.02em] text-text-secondary lg:px-[28px]">
         {ticker && (
           <Link
             href={`/articles/${ticker.slug}`}
@@ -69,7 +75,7 @@ export async function PublicHeader() {
           </Link>
         )}
 
-        <div className="ml-auto flex items-center gap-[18px]">
+        <div className="ml-auto flex flex-shrink-0 items-center gap-[18px]">
           <LanguageToggle />
 
           <Link
@@ -82,7 +88,7 @@ export async function PublicHeader() {
       </div>
 
       {/* Barre principale : logo, nav plate, recherche, CTA (design l.49-66) */}
-      <div className="mx-auto flex max-w-[1220px] items-center justify-between gap-[20px] px-[28px] pb-[16px] pt-[18px]">
+      <div className="mx-auto flex max-w-[1220px] items-center justify-between gap-[20px] px-5 pb-[16px] pt-[18px] lg:px-[28px]">
         <Link
           href="/"
           className={`flex flex-col gap-[2px] text-left font-editorial text-[28px] font-extrabold leading-none tracking-[-.01em] text-text-primary ${LIEN_FOCUSABLE}`}
@@ -137,7 +143,7 @@ export async function PublicHeader() {
       {/* Bandeau Pays (design l.68-77) */}
       {zones.length > 0 && (
         <div className="hidden border-t border-border bg-[#efeadf] lg:block">
-          <div className="mx-auto flex max-w-[1220px] items-center gap-[8px] overflow-x-auto px-[28px] py-[9px]">
+          <div className="mx-auto flex max-w-[1220px] items-center gap-[8px] overflow-x-auto px-5 py-[9px] lg:px-[28px]">
             <span className="mr-[6px] flex-shrink-0 text-[11px] font-semibold uppercase tracking-[.16em] text-[#8a8377]">
               Pays
             </span>
@@ -156,8 +162,13 @@ export async function PublicHeader() {
 
       {/* Bandeau tagline (design l.78-82) */}
       <div className="border-t border-border bg-bg-primary">
-        <div className="mx-auto flex max-w-[1220px] items-center gap-[10px] px-[28px] py-[8px] text-[11.5px] font-semibold uppercase tracking-[.14em] text-[#8a8377]">
-          <span className="text-left text-[14.5px] font-bold leading-[30.25px] text-accent-primary">
+        {/* Tagline : en majuscules avec `tracking-[.14em]`, elle occupe ~580px de largeur
+            de texte. Sous `sm` elle passe donc sur deux lignes, où `leading-[30.25px]`
+            (issu du design desktop) créait un interligne de 30px pour du texte de 14.5px —
+            visuellement disloqué. Taille et interligne sont réduits sous `sm`, la valeur
+            du design étant rétablie telle quelle au-delà. */}
+        <div className="mx-auto flex max-w-[1220px] items-center gap-[10px] px-5 py-[8px] text-[11.5px] font-semibold uppercase tracking-[.14em] text-[#8a8377] lg:px-[28px]">
+          <span className="text-left text-[12px] font-bold leading-[1.6] text-accent-primary sm:text-[14.5px] sm:leading-[30.25px]">
             Le média francophone de référence sur la Corne de l&apos;Afrique
           </span>
         </div>
