@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { submitContactMessage, type ContactActionState } from "@/features/contact/contact-actions";
 import { OBJETS_CONTACT } from "@/features/contact/contact-schema";
+import { TurnstileWidget } from "@/components/shared/turnstile-widget";
 
 const initialState: ContactActionState = { status: "idle", message: null };
 
@@ -100,6 +101,8 @@ export function ContactForm() {
           className={`${CHAMP} resize-y`}
         />
       </div>
+
+      <TurnstileWidget resetSignal={state} />
 
       {state.status === "error" && (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">

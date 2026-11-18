@@ -2,6 +2,10 @@
 
 import { MessageContactRepository } from "@/lib/db/message-contact-repository";
 import { contactMessageSchema } from "@/features/contact/contact-schema";
+import { sendEmail } from "@/lib/email/send-email";
+import { verifyTurnstile } from "@/lib/turnstile";
+
+const MESSAGE_ROBOT = "La vérification anti-robot a échoué. Merci de réessayer.";
 
 export type ContactActionState = {
   status: "idle" | "success" | "error";
@@ -36,6 +40,10 @@ export async function submitContactMessage(
     message: String(formData.get("message") ?? "").trim(),
   };
 
+  if (!(await verifyTurnstile(formData))) {
+    return { status: "error", message: MESSAGE_ROBOT, values };
+  }
+
   const parsed = contactMessageSchema.safeParse(values);
   if (!parsed.success) {
     return {
@@ -46,6 +54,25 @@ export async function submitContactMessage(
   }
 
   await MessageContactRepository.create(parsed.data);
+
+  // Alerte à la rédaction (Resend) ; « Répondre » écrit directement à l'expéditeur.
+  const destinataire = process.env.CONTACT_NOTIFICATION_EMAIL;
+  if (destinataire) {
+    await sendEmail({
+      to: destinataire,
+      replyTo: parsed.data.email,
+      subject: `[Contact] ${parsed.data.objet} — ${parsed.data.nom}`,
+      text: `Nouveau message reçu via le formulaire de contact.
+
+Nom : ${parsed.data.nom}
+Courriel : ${parsed.data.email}
+Objet : ${parsed.data.objet}
+
+${parsed.data.message}
+
+— Tous les messages : /admin/contact`,
+    });
+  }
 
   return { status: "success", message: MESSAGE_SUCCES };
 }

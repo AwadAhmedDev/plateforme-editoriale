@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Spectral, Archivo } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -61,8 +61,14 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
-        {/* Mesure d'audience sans cookie : aucun bandeau de consentement requis (CNIL). */}
-        <Analytics />
+        {/* Cloudflare Web Analytics : sans cookie, aucun bandeau de consentement requis (CNIL). */}
+        {process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN && (
+          <Script
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            strategy="afterInteractive"
+            data-cf-beacon={JSON.stringify({ token: process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN })}
+          />
+        )}
       </body>
     </html>
   );

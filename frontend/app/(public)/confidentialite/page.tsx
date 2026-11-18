@@ -58,11 +58,20 @@ export default function ConfidentialitePage() {
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold">Cookies et mesure d&apos;audience</h2>
         <p className="text-sm text-text-secondary">
-          Le site ne dépose aucun cookie publicitaire ni de traçage. La mesure d&apos;audience (Vercel Web
+          Le site ne dépose aucun cookie publicitaire ni de traçage. La mesure d&apos;audience (Cloudflare Web
           Analytics) fonctionne sans cookie et sans identifiant persistant : les visites sont comptées de manière
           agrégée et anonyme, sans suivi d&apos;un site à l&apos;autre. Le seul cookie utilisé est un cookie de
           session strictement nécessaire, réservé à l&apos;espace d&apos;administration. Aucun consentement
           n&apos;est donc requis.
+        </p>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-semibold">Prestataires</h2>
+        <p className="text-sm text-text-secondary">
+          Les formulaires sont protégés contre les robots par Cloudflare Turnstile, qui analyse des signaux
+          techniques du navigateur sans cookie publicitaire. Les e-mails (confirmation d&apos;inscription,
+          transmission des messages de contact à la rédaction) sont envoyés via Resend.
         </p>
       </section>
     </main>

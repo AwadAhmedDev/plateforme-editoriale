@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { TurnstileWidget } from "@/components/shared/turnstile-widget";
 import { subscribeNewsletter, type NewsletterActionState } from "@/features/newsletter/newsletter-actions";
 
 const initialState: NewsletterActionState = { status: "idle", message: null };
@@ -56,7 +57,7 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
   if (variant === "banner") {
     return (
       <div className="min-w-0 lg:min-w-[380px]">
-        <form action={formAction} className="flex gap-2.5">
+        <form action={formAction} className="flex flex-wrap gap-2.5">
           {/* Piège à robots (honeypot) : cf. contact-form.tsx pour la justification
               complète — invisible aux visiteurs réels, lu par subscribeNewsletter. */}
           <input
@@ -87,6 +88,7 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
           >
             {pending ? "Inscription…" : "S'inscrire"}
           </button>
+          <TurnstileWidget resetSignal={state} className="basis-full empty:hidden" />
         </form>
 
         {state.status === "error" && (
@@ -144,6 +146,8 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
           </button>
         </div>
 
+        <TurnstileWidget resetSignal={state} />
+
         {state.status === "error" && (
           <p role="alert" className="text-sm text-red-600 dark:text-red-400">
             {state.message}
@@ -197,6 +201,8 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
       >
         {pending ? "Inscription…" : "S'abonner"}
       </button>
+
+      <TurnstileWidget resetSignal={state} />
 
       {state.status === "error" && (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">

@@ -5,6 +5,24 @@ import { Prisma } from "@prisma/client";
 import { InscritNewsletterRepository } from "@/lib/db/inscrit-newsletter-repository";
 import { generateNewsletterToken } from "@/lib/newsletter/token";
 import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
+import { sendEmail } from "@/lib/email/send-email";
+import { verifyTurnstile } from "@/lib/turnstile";
+import { resoudreSiteUrl } from "@/lib/site-url";
+
+// E-mail de bienvenue, envoyé uniquement à une adresse nouvellement (ré)inscrite : jamais
+// à une adresse déjà inscrite, pour ne pas faire du formulaire un outil de spam.
+async function envoyerConfirmation(email: string, jeton: string) {
+  const lien = new URL(`/newsletter/desinscription?token=${encodeURIComponent(jeton)}`, resoudreSiteUrl()).toString();
+  await sendEmail({
+    to: email,
+    subject: "Bienvenue — newsletter Corne de l'Afrique",
+    text: `Merci pour votre inscription à la newsletter Corne de l'Afrique.
+
+Vous recevrez une édition par semaine : analyses, enquêtes et actualités sur la Corne de l'Afrique.
+
+Pour vous désinscrire à tout moment : ${lien}`,
+  });
+}
 
 // Server Actions Newsletter (server-actions-specification.md §6, §8.2).
 export type NewsletterActionState = {
@@ -40,11 +58,17 @@ export async function subscribeNewsletter(
     return { status: "error", message: "Adresse e-mail invalide.", values };
   }
 
+  if (!(await verifyTurnstile(formData))) {
+    return { status: "error", message: "La vérification anti-robot a échoué. Merci de réessayer.", values };
+  }
+
   const existante = await InscritNewsletterRepository.findByEmail(email);
 
   if (!existante) {
     try {
-      await InscritNewsletterRepository.create({ email, jetonDesinscription: generateNewsletterToken() });
+      const jeton = generateNewsletterToken();
+      await InscritNewsletterRepository.create({ email, jetonDesinscription: jeton });
+      await envoyerConfirmation(email, jeton);
     } catch (error) {
       // Concurrence sur UNIQUE(email) : une autre requête a inscrit cette adresse entre la
       // lecture et l'écriture. Traité comme une confirmation neutre standard, jamais une erreur.
@@ -53,7 +77,9 @@ export async function subscribeNewsletter(
       }
     }
   } else if (existante.statut === "desinscrit") {
-    await InscritNewsletterRepository.reactivate(existante.id, generateNewsletterToken());
+    const jeton = generateNewsletterToken();
+    const { count } = await InscritNewsletterRepository.reactivate(existante.id, jeton);
+    if (count > 0) await envoyerConfirmation(email, jeton);
   }
   // existante.statut === "inscrit" : aucune écriture, confirmation neutre identique.
 
