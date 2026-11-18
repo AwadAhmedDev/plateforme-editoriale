@@ -5,7 +5,7 @@ import { listZoneMenu } from "@/features/taxonomies/list-zone-menu";
 const LIEN_COLONNE =
   "block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
 
-const TITRE_COLONNE = "mb-3.5 text-[11px] font-semibold uppercase tracking-[.14em] text-[#6f6a5f]";
+const TITRE_COLONNE = "mb-3.5 text-[11px] font-semibold uppercase tracking-[.14em] text-[#8c8678]";
 
 // Colonnes "Rubriques" et "Pays" du footer (REPO-8, Corne de l'Afrique.dc.html
 // l.464-475) : deux enfants directs du <> rendus comme grid items du footer

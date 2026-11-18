@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Spectral, Archivo } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { resoudreSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -35,6 +36,17 @@ export const metadata: Metadata = {
   },
   description:
     "Média francophone consacré à l'actualité, l'analyse et la documentation sur la Corne de l'Afrique.",
+  // Aperçu réseaux sociaux par défaut (app/og-image/route.tsx) ; les articles le remplacent.
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "Corne de l'Afrique",
+    images: [{ url: "/og-image", width: 1200, height: 630, alt: "Corne de l'Afrique" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-image"],
+  },
 };
 
 export default function RootLayout({
@@ -47,7 +59,11 @@ export default function RootLayout({
       lang="fr"
       className={`${spectral.variable} ${archivo.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {/* Mesure d'audience sans cookie : aucun bandeau de consentement requis (CNIL). */}
+        <Analytics />
+      </body>
     </html>
   );
 }

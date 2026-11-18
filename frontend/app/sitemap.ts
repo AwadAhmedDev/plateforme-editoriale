@@ -32,6 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/contact") },
     { url: absoluteUrl("/mentions-legales") },
     { url: absoluteUrl("/confidentialite") },
+    { url: absoluteUrl("/conditions-generales") },
     { url: absoluteUrl("/newsletter") },
     ...articles.map((article) => ({
       url: absoluteUrl(`/articles/${article.slug}`),

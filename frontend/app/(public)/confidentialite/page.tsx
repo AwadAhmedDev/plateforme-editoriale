@@ -54,6 +54,17 @@ export default function ConfidentialitePage() {
           chaque communication envoyée.
         </p>
       </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-semibold">Cookies et mesure d&apos;audience</h2>
+        <p className="text-sm text-text-secondary">
+          Le site ne dépose aucun cookie publicitaire ni de traçage. La mesure d&apos;audience (Vercel Web
+          Analytics) fonctionne sans cookie et sans identifiant persistant : les visites sont comptées de manière
+          agrégée et anonyme, sans suivi d&apos;un site à l&apos;autre. Le seul cookie utilisé est un cookie de
+          session strictement nécessaire, réservé à l&apos;espace d&apos;administration. Aucun consentement
+          n&apos;est donc requis.
+        </p>
+      </section>
     </main>
   );
 }

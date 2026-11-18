@@ -76,7 +76,7 @@ export default function PublicLayout({
           <FooterTaxonomies />
 
           <nav aria-label="Le média">
-            <p className="mb-3.5 text-[11px] font-semibold uppercase tracking-[.14em] text-[#6f6a5f]">Le média</p>
+            <p className="mb-3.5 text-[11px] font-semibold uppercase tracking-[.14em] text-[#8c8678]">Le média</p>
             <ul className="flex flex-col gap-2.5">
               <li>
                 <Link href="/recherche" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
@@ -104,6 +104,16 @@ export default function PublicLayout({
                 </Link>
               </li>
               <li>
+                <Link href="/conditions-generales" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  Conditions générales
+                </Link>
+              </li>
+              <li>
+                <Link href="/confidentialite" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  Confidentialité
+                </Link>
+              </li>
+              <li>
                 <Link href="/a-propos" className="block text-left text-[#c8c2b6] outline-none transition-colors duration-fast hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                   À propos
                 </Link>
@@ -113,7 +123,7 @@ export default function PublicLayout({
         </div>
 
         <div className="border-t border-[#2a2622]">
-          <div className="mx-auto flex max-w-[1220px] flex-wrap justify-between gap-2 px-5 py-4.5 text-[12px] text-[#6f6a5f] lg:px-[28px]">
+          <div className="mx-auto flex max-w-[1220px] flex-wrap justify-between gap-2 px-5 py-4.5 text-[12px] text-[#8c8678] lg:px-[28px]">
             <span>© 2026 Corne de l&apos;Afrique — Tous droits réservés</span>
             <span>Information indépendante · francophone · documentée</span>
           </div>

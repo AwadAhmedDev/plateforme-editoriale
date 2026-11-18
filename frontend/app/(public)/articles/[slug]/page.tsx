@@ -58,13 +58,13 @@ export async function generateMetadata({
               },
             ],
           }
-        : {}),
+        : { images: ["/og-image"] }),
     },
     twitter: {
-      card: article.image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       ...(article.titre ? { title: article.titre } : {}),
       ...(article.chapo ? { description: article.chapo } : {}),
-      ...(article.image ? { images: [article.image.url] } : {}),
+      images: [article.image ? article.image.url : "/og-image"],
     },
   };
 }

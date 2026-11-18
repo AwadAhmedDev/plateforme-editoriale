@@ -47,6 +47,22 @@ const nextConfig: NextConfig = {
   // sont publiques et non authentifiées. Accepté au vu du contexte (administrateur unique,
   // validation Zod en tête de chaque action) ; à réexaminer si une surface publique
   // acceptant des fichiers apparaissait.
+  // HSTS : Vercel redirige déjà HTTP → HTTPS ; cet en-tête interdit au navigateur de
+  // retenter en HTTP pendant 2 ans (protection contre le downgrade SSL-strip).
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "DENY" },
+        ],
+      },
+    ];
+  },
+
   experimental: {
     serverActions: {
       bodySizeLimit: "6mb",

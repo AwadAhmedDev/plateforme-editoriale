@@ -149,7 +149,7 @@ export async function PublicHeader() {
       {zones.length > 0 && (
         <div className="hidden border-t border-border bg-[#efeadf] lg:block">
           <div className="mx-auto flex max-w-[1220px] items-center gap-[8px] overflow-x-auto px-5 py-[9px] lg:px-[28px]">
-            <span className="mr-[6px] flex-shrink-0 text-[11px] font-semibold uppercase tracking-[.16em] text-[#8a8377]">
+            <span className="mr-[6px] flex-shrink-0 text-[11px] font-semibold uppercase tracking-[.16em] text-text-secondary">
               Pays
             </span>
             {zones.map((zone) => (
