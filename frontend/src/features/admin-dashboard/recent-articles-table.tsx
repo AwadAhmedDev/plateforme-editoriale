@@ -1,33 +1,17 @@
 import Link from "next/link";
 import type { ArticleRecentlyModified } from "@/lib/db/contenu-editorial-repository";
-
-// Mêmes libellés que STATUTS dans features/articles/status-pills.tsx (Lot 9, non modifié,
-// non exporté) — reproduits ici en texte simple plutôt que réimportés : cette table reste
-// un Server Component pur (aucun état, aucun événement propre), alors que StatusPills est
-// un Client Component dont l'`onChange` requis ne peut pas traverser la frontière
-// Server → Client avec une fonction locale. Pas de pastille colorée ici : la colonne
-// « Statut » d'ui-specification.md §Dashboard Administrateur ne prescrit, contrairement à
-// la table Gestion des articles (§Tables Administrateur), aucun rendu en pastille.
-const STATUT_LABELS: Record<string, string> = {
-  brouillon: "Brouillon",
-  publie: "Publié",
-  archive: "Archivé",
-};
+import { StatusBadge } from "@/components/admin/status-badge";
 
 function formatDate(date: Date): string {
-  return new Date(date).toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
+  return new Date(date).toLocaleDateString("fr-FR", { year: "numeric", month: "short", day: "numeric" });
 }
 
-// Table « Derniers articles modifiés » (ui-specification.md §Dashboard Administrateur :
-// Titre, Catégorie, Statut, Dernière modification — 5 lignes maximum). La limite est déjà
-// appliquée par ContenuEditorialRepository.findRecentlyModified (RECENT_ARTICLES_LIMIT,
-// get-dashboard-data.ts), jamais recoupée ici. Le titre est un lien direct vers l'Éditeur,
-// sur le même motif que « Modifier » dans ArticleTable (features/articles/article-table.tsx)
-// — pas de ligne cliquable dans son ensemble, motif absent du reste du projet.
+// Table « Derniers articles modifiés » (ui-specification.md §Dashboard : Titre, Catégorie,
+// Statut, Dernière modification). La limite est appliquée par le Repository.
 export function RecentArticlesTable({ articles }: { articles: ArticleRecentlyModified[] }) {
   if (articles.length === 0) {
     return (
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="px-5 py-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
         Aucun article pour le moment. Créez votre premier article pour commencer.
       </p>
     );
@@ -36,27 +20,31 @@ export function RecentArticlesTable({ articles }: { articles: ArticleRecentlyMod
   return (
     <table className="w-full border-collapse text-sm">
       <thead>
-        <tr className="border-b border-zinc-200 text-left text-[12px] font-mono uppercase text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-          <th className="py-2">Titre</th>
-          <th className="py-2">Catégorie</th>
-          <th className="py-2">Statut</th>
-          <th className="py-2">Dernière modification</th>
+        <tr className="text-left">
+          <th>Titre</th>
+          <th>Catégorie</th>
+          <th>Statut</th>
+          <th>Dernière modification</th>
         </tr>
       </thead>
       <tbody>
         {articles.map((article) => (
-          <tr key={article.id} className="border-b border-zinc-100 dark:border-zinc-800">
-            <td className="py-3">
+          <tr key={article.id}>
+            <td className="max-w-[420px]">
               <Link
                 href={`/admin/articles/${article.id}`}
-                className="text-zinc-900 underline-offset-2 hover:underline dark:text-zinc-100"
+                className="line-clamp-1 font-medium text-zinc-900 hover:text-accent-primary dark:text-zinc-100"
               >
                 {article.titre ?? "Article sans titre"}
               </Link>
             </td>
-            <td className="py-3">{article.categorie?.nom ?? "—"}</td>
-            <td className="py-3">{STATUT_LABELS[article.statut] ?? article.statut}</td>
-            <td className="py-3">{formatDate(article.dateDerniereModification)}</td>
+            <td className="text-zinc-600 dark:text-zinc-400">{article.categorie?.nom ?? "—"}</td>
+            <td>
+              <StatusBadge statut={article.statut} />
+            </td>
+            <td className="whitespace-nowrap text-zinc-600 dark:text-zinc-400">
+              {formatDate(article.dateDerniereModification)}
+            </td>
           </tr>
         ))}
       </tbody>

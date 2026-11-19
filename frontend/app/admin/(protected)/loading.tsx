@@ -17,7 +17,7 @@ import { SkeletonBlock, SkeletonAnnonce } from "@/components/admin/skeleton-bloc
 // libellé en `text-[11px]` avec `mt-1`.
 function CarteCompteur() {
   return (
-    <div className="rounded-md border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+    <div className="admin-card p-5">
       <SkeletonBlock className="h-8 w-16" />
       <SkeletonBlock className="mt-1 h-3 w-28" />
     </div>
@@ -26,7 +26,7 @@ function CarteCompteur() {
 
 export default function DashboardLoading() {
   return (
-    <main className="p-7">
+    <main className="p-4 sm:p-6 lg:p-8">
       <SkeletonAnnonce />
 
       <div className="mb-6 flex items-center justify-between">
@@ -34,15 +34,15 @@ export default function DashboardLoading() {
         <SkeletonBlock className="h-10 w-40" />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (
           <CarteCompteur key={index} />
         ))}
       </div>
 
-      <div className="mt-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+      <div className="mt-4">
         <SkeletonBlock className="mb-3 h-3 w-36" />
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <CarteCompteur key={index} />
           ))}
