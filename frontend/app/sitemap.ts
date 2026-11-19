@@ -8,7 +8,7 @@ import { listZoneSlugs } from "@/features/taxonomies/list-zone-slugs";
 // d'architecture rétablissant `/articles`) : routes publiques réellement existantes à ce
 // jour. `/articles` y figure de nouveau (sitemap.md documente cette page comme une vue
 // exhaustive de l'ensemble des contenus publiés, indépendante de /recherche — US-002,
-// US-004) ; la redirection permanente vers /recherche a été retirée de next.config.ts.
+// US-004) ; la redirection permanente vers /recherche a été retirée de next.config.mjs.
 // Aucun accès repository direct ici, uniquement des features publiques de lecture
 // (list-published-article-slugs.ts, list-categorie-slugs.ts, list-zone-slugs.ts).
 // Revalidation à la demande déjà câblée via revalidatePath("/sitemap.xml") dans

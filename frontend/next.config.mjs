@@ -1,4 +1,5 @@
-import type { NextConfig } from "next";
+// JS et non TS : sur Hostinger (glibc < 2.29) Next 16.4 retombe sur SWC WASM et ne sait plus
+// charger un next.config.ts — un .mjs est importé tel quel, sans transpilation.
 
 // `images.remotePatterns` pour le domaine public Cloudflare R2 (module Média, Lot 6) —
 // dérivé de R2_PUBLIC_URL, jamais codé en dur. Absence tolérée : si la variable n'est pas
@@ -6,7 +7,8 @@ import type { NextConfig } from "next";
 // `remotePatterns` reste vide plutôt que de faire échouer le build.
 const r2PublicUrl = process.env.R2_PUBLIC_URL;
 
-const nextConfig: NextConfig = {
+/** @type {import("next").NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: r2PublicUrl
       ? [
