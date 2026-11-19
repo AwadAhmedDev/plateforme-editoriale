@@ -12,7 +12,8 @@ import {
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { deleteArticle, type ArticleActionState } from "@/features/articles/article-actions";
-import { StatusPills, type StatutArticle } from "@/features/articles/status-pills";
+import type { StatutArticle } from "@/features/articles/status-pills";
+import { StatusBadge } from "@/components/admin/status-badge";
 import type { ArticleAdminListItem } from "@/lib/db/contenu-editorial-repository";
 import type { CategoryListItem } from "@/features/taxonomies/list-categories";
 import type { ZoneListItem } from "@/features/taxonomies/list-zones";
@@ -54,9 +55,8 @@ const CHAMP_PAR_DEFAUT: ChampTri = "date";
 // (Modal de confirmation native <dialog> pour Supprimer). « Modifier » navigue vers
 // l'Éditeur (/admin/articles/{id}) — contrairement à CategoryTable/ZoneTable, il n'existe
 // pas d'édition inline pour un article (l'Éditeur, Lot 10, reste le seul écran de
-// modification). StatusPills (Lot 9, non modifié) est réutilisé tel quel pour l'affichage
-// du statut par ligne ; comme il exige un `onChange`, celui-ci est un no-op et le composant
-// est rendu `inert` pour ne jamais se comporter comme un sélecteur silencieusement inactif.
+// modification). Le statut par ligne est une StatusBadge en lecture seule
+// (StatusPills reste le sélecteur de l'Éditeur).
 export function ArticleTable({
   articles,
   total,
@@ -280,9 +280,7 @@ export function ArticleTable({
               >
                 <td className="py-3">{article.titre ?? "Article sans titre"}</td>
                 <td className="py-3">
-                  <span className="inline-block" inert>
-                    <StatusPills value={article.statut} onChange={() => {}} />
-                  </span>
+                  <StatusBadge statut={article.statut} />
                 </td>
                 <td className="py-3">{article.categorie?.nom ?? "—"}</td>
                 <td className="py-3">{article.zone?.nom ?? "—"}</td>
