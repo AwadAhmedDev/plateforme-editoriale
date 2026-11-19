@@ -5,7 +5,7 @@ import { SkeletonBlock, SkeletonAnnonce } from "@/components/admin/skeleton-bloc
 // 3 colonnes (E-mail, Date d'inscription, Action).
 export default function NewsletterLoading() {
   return (
-    <main className="p-7">
+    <main className="p-4 sm:p-6 lg:p-8">
       <SkeletonAnnonce />
 
       <SkeletonBlock className="mb-6 h-7 w-56" />

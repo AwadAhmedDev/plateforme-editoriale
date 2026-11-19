@@ -25,7 +25,7 @@ export default async function ArticleEditPage({ params }: { params: Promise<{ id
   }
 
   return (
-    <main className="p-7">
+    <main className="p-4 sm:p-6 lg:p-8">
       <Link
         href="/admin/articles"
         className="mb-4 inline-block text-sm text-zinc-600 underline-offset-2 hover:text-zinc-900 hover:underline dark:text-zinc-400 dark:hover:text-zinc-100"

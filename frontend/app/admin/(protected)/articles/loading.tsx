@@ -9,7 +9,7 @@ import { SkeletonBlock, SkeletonAnnonce } from "@/components/admin/skeleton-bloc
 // un décalage horizontal à l'arrivée du contenu.
 export default function ArticlesLoading() {
   return (
-    <main className="p-7">
+    <main className="p-4 sm:p-6 lg:p-8">
       <SkeletonAnnonce />
 
       <div className="mb-6 flex items-center justify-between">

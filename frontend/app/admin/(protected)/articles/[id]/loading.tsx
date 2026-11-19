@@ -8,7 +8,7 @@ import { SkeletonBlock, SkeletonAnnonce } from "@/components/admin/skeleton-bloc
 // ArticleImageForm, empilés avec `gap-8`.
 export default function EditeurArticleLoading() {
   return (
-    <main className="p-7">
+    <main className="p-4 sm:p-6 lg:p-8">
       <SkeletonAnnonce />
 
       <SkeletonBlock className="mb-4 h-5 w-40" />

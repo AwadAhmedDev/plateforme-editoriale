@@ -27,12 +27,12 @@ export default async function AdminArticlesPage({
   const [result, categories, zones] = await Promise.all([listArticles(params), listCategories(), listZones()]);
 
   return (
-    <main className="p-7">
-      <div className="mb-6 flex items-center justify-between">
+    <main className="p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Gestion des articles</h1>
         <Link
           href="/admin/articles/nouveau"
-          className="h-10 rounded-md bg-zinc-900 px-4 text-sm font-medium leading-10 text-white dark:bg-zinc-100 dark:text-zinc-900"
+          className="admin-btn-primary"
         >
           + Nouvel article
         </Link>

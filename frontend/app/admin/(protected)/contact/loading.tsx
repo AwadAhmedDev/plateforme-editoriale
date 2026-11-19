@@ -9,7 +9,7 @@ import { SkeletonBlock, SkeletonAnnonce } from "@/components/admin/skeleton-bloc
 // §États chargement).
 export default function ContactLoading() {
   return (
-    <main className="p-7">
+    <main className="p-4 sm:p-6 lg:p-8">
       <SkeletonAnnonce />
 
       <SkeletonBlock className="mb-6 h-7 w-64" />
