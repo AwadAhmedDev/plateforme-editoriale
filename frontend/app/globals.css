@@ -286,3 +286,116 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/*
+ * Espace d'administration — styles partagés. Règles de tables/champs hors @layer à dessein : ils priment sur les
+ * utilitaires Tailwind déjà posés dans chaque table/formulaire admin, ce qui harmonise
+ * tous les écrans en un seul endroit sans réécrire chaque composant.
+ */
+@layer components {
+  .admin-card {
+    @apply rounded-xl border border-zinc-200 bg-white shadow-sm transition dark:border-zinc-800 dark:bg-zinc-950;
+  }
+  .admin-btn-primary {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white;
+  }
+}
+
+.admin-content main > h1,
+.admin-content main > div:first-child h1 {
+  font-size: 1.5rem;
+  letter-spacing: -0.015em;
+}
+
+.admin-content table {
+  background: var(--color-white);
+  border-radius: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.admin-content :not(.admin-card) > table {
+  box-shadow: 0 0 0 1px var(--color-zinc-200), 0 1px 2px rgb(0 0 0 / 0.04);
+  overflow: hidden;
+}
+.admin-content thead tr {
+  background: var(--color-zinc-50);
+  border-bottom: 1px solid var(--color-zinc-200);
+}
+.admin-content th {
+  padding: 0.75rem 1.25rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-zinc-500);
+  text-align: left;
+  white-space: nowrap;
+}
+.admin-content td {
+  padding: 0.875rem 1.25rem;
+  vertical-align: middle;
+}
+.admin-content tbody tr {
+  border-bottom: 1px solid var(--color-zinc-100);
+  transition: background-color 120ms;
+}
+.admin-content tbody tr:last-child {
+  border-bottom: 0;
+}
+.admin-content tbody tr:hover {
+  background: var(--color-zinc-50);
+}
+.admin-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+  border-radius: 0.5rem;
+  background-color: var(--color-white);
+  transition: border-color 120ms, box-shadow 120ms;
+}
+.admin-content :is(input, select, textarea):focus {
+  border-color: var(--color-zinc-400);
+  box-shadow: 0 0 0 3px rgb(24 24 27 / 0.08);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.admin-content :is(a, button) {
+  transition: color 120ms, background-color 120ms, border-color 120ms, box-shadow 120ms, opacity 120ms;
+}
+.admin-content button.rounded-md,
+.admin-content a.rounded-md {
+  border-radius: 0.5rem;
+}
+.admin-content dialog {
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 50px -12px rgb(0 0 0 / 0.25);
+}
+.admin-content dialog::backdrop {
+  background: rgb(9 9 11 / 0.45);
+  backdrop-filter: blur(2px);
+}
+
+/* Écrans étroits : les tables défilent horizontalement plutôt que d'écraser leurs colonnes. */
+@media (max-width: 1023px) {
+  .admin-content table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .admin-content table,
+  .admin-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+    background-color: var(--color-zinc-950);
+  }
+  .admin-content :not(.admin-card) > table {
+    box-shadow: 0 0 0 1px var(--color-zinc-800);
+  }
+  .admin-content thead tr {
+    background: var(--color-zinc-900);
+    border-color: var(--color-zinc-800);
+  }
+  .admin-content tbody tr {
+    border-color: var(--color-zinc-800);
+  }
+  .admin-content tbody tr:hover {
+    background: var(--color-zinc-900);
+  }
+}
