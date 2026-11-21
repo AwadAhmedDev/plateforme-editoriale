@@ -1,4 +1,0 @@
-{
-  "framework": "nextjs",
-  "buildCommand": "if [ \"$VERCEL_ENV\" = \"production\" ]; then npx prisma migrate deploy; fi && npm run build"
-}

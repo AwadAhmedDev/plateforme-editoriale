@@ -21,7 +21,7 @@ export const mentionsLegalesContent = {
   },
   hebergement: {
     titre: "Hébergement",
-    paragraphes: ["Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis (vercel.com)."],
+    paragraphes: ["Hostinger International Ltd., 61 Lordou Vironos Street, 6023 Larnaca, Chypre (hostinger.fr)."],
   },
   proprieteIntellectuelle: {
     titre: "Propriété intellectuelle",

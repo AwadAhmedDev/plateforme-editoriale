@@ -2,7 +2,7 @@
 
 Application Next.js monolithique pour la gestion et la publication de contenus éditoriaux : un média en ligne consacré à la Corne de l'Afrique (articles, rubriques, pays, recherche, newsletter, contact) et son back-office de rédaction.
 
-**Démo en ligne** : https://plateforme-editoriale.vercel.app
+**Démo en ligne** : https://snowy-floralwhite-giraffe-20.hostingersite.com (hébergée sur Hostinger, déployée à chaque push sur `master`). Les migrations de base ne sont pas lancées au déploiement : après en avoir ajouté une, exécuter `npx prisma migrate deploy` depuis `frontend/`.
 
 > Site de démonstration réalisé pour un portfolio : les articles sont des contenus fictifs rédigés pour illustrer la plateforme, signalés comme tels par un bandeau sur chaque page (`DEMO_MODE`, actif par défaut en production ; `DEMO_MODE=false` pour un média réellement exploité).
 
