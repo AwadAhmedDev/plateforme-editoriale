@@ -32,15 +32,22 @@ export function ArticleImageForm({
   // composant : sans cet effet, le useState initial ci-dessus ne serait plus jamais
   // réévalué, et `altText` pourrait rester figé sur une saisie locale même une fois la
   // nouvelle valeur confirmée par le serveur redescendue en prop.
-  useEffect(() => {
+  // Réalignements pendant le rendu (patron React « ajuster un état quand une prop change »),
+  // plutôt qu'un setState dans un effet qui provoquerait un rendu intermédiaire périmé.
+  const [altTextRecu, setAltTextRecu] = useState(imageAltText);
+  if (imageAltText !== altTextRecu) {
+    setAltTextRecu(imageAltText);
     setAltText(imageAltText ?? "");
-  }, [imageAltText]);
+  }
+  const [etatTraite, setEtatTraite] = useState(state);
+  if (state !== etatTraite) {
+    setEtatTraite(state);
+    if (state.status === "success") setFile(null);
+  }
 
+  // Seul l'effet de bord (relecture serveur) reste dans un effet.
   useEffect(() => {
-    if (state.status === "success") {
-      setFile(null);
-      router.refresh();
-    }
+    if (state.status === "success") router.refresh();
   }, [state, router]);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {

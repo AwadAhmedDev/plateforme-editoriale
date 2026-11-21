@@ -1,14 +1,11 @@
 name: CI
 
-# Verification statique uniquement. Le build de production n'est plus rejoue ici :
-# l'integration Git native de Vercel construit chaque pull request (preview) et
-# chaque push sur master (production) avec les variables reelles de chaque
-# environnement. Le dupliquer ici imposerait de repliquer SITE_URL, DATABASE_URL
-# et R2_PUBLIC_URL en secrets GitHub sans rien verifier de plus.
+# Types, lint et tests unitaires, sans base ni secret. Le build de production n'est pas
+# rejoue ici : il prerend des pages (plan du site) qui lisent la base, et Hostinger le
+# construit a chaque push sur master avec les variables reelles.
 #
-# Les migrations ne sont jamais appliquees depuis GitHub Actions : elles sont
-# jouees par le `buildCommand` de frontend/vercel.json, et uniquement quand
-# VERCEL_ENV vaut "production".
+# Les migrations ne sont jamais appliquees depuis GitHub Actions : apres en avoir ajoute
+# une, la lancer a la main (`npx prisma migrate deploy`, voir README).
 
 on:
   pull_request:
@@ -49,8 +46,9 @@ jobs:
       - name: Verification des types
         run: npx tsc --noEmit
 
-      # Non bloquant tant que les erreurs preexistantes ne sont pas traitees.
-      # Passer a `continue-on-error: false` des qu'elles le sont.
+      # Bloquant : le code est sans erreur ni avertissement de lint.
       - name: Lint
-        run: npm run lint
-        continue-on-error: true
+        run: npm run lint -- --max-warnings=0
+
+      - name: Tests
+        run: npm test

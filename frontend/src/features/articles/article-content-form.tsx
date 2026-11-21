@@ -57,6 +57,27 @@ export function ArticleContentForm({
   // ArticleImageForm ou ArticleStatusPanel (aucun des deux ne touche jamais les mots-clés).
   const motsClesKey = article?.motsCles.map((m) => m.motCle).join("") ?? "";
 
+  // Mots-clés (état React, non un champ DOM) : réalignés pendant le rendu, sur exactement
+  // les mêmes déclencheurs que l'effet ci-dessous (patron React « ajuster un état quand
+  // une prop change »), plutôt que par un setState dans l'effet.
+  const cleSynchro = JSON.stringify([
+    article?.slug,
+    article?.titre,
+    article?.chapo,
+    article?.corps,
+    article?.typeContenu,
+    article?.categorieId,
+    article?.zoneId,
+    article?.auteur,
+    article?.sources,
+    motsClesKey,
+  ]);
+  const [cleRecue, setCleRecue] = useState(cleSynchro);
+  if (cleSynchro !== cleRecue) {
+    setCleRecue(cleSynchro);
+    setMotsCles(article?.motsCles.map((m) => m.motCle) ?? []);
+  }
+
   // Resynchronisation (audit Lot 15, correctif Lot 15A) : contrairement à
   // ArticleStatusPanel/ArticleImageForm — dont la prop resynchronisée (`statut`,
   // `imageAltText`) ne peut changer que via leur propre action — cet effet dépend
@@ -81,8 +102,6 @@ export function ArticleContentForm({
     if (zoneIdRef.current) zoneIdRef.current.value = article?.zoneId ?? "";
     if (auteurRef.current) auteurRef.current.value = article?.auteur ?? "";
     if (sourcesRef.current) sourcesRef.current.value = article?.sources ?? "";
-    setMotsCles(article?.motsCles.map((m) => m.motCle) ?? []);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     article?.slug,
     article?.titre,

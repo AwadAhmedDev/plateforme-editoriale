@@ -1,6 +1,6 @@
 import { getCurrentSession } from "@/features/admin-auth/session";
 import { DEMO_ADMIN, DEMO_REFUS } from "@/lib/demo";
-import { prisma } from "@/lib/prisma";
+import { AdminRepository } from "@/lib/db/admin-repository";
 
 // Garde de session administrateur partagée (security-specification.md §3 : défense en
 // profondeur — chaque Server Action/fonction de lecture réservée à l'administrateur doit
@@ -19,10 +19,7 @@ export async function ensureAdministrateurAuthentifie(): Promise<void> {
 export async function estCompteDemo(): Promise<boolean> {
   const session = await getCurrentSession();
   if (!session.authenticated) return false;
-  const admin = await prisma.administrateur.findUnique({
-    where: { id: session.administrateurId },
-    select: { identifiant: true },
-  });
+  const admin = await AdminRepository.findById(session.administrateurId);
   return admin?.identifiant === DEMO_ADMIN.identifiant;
 }
 

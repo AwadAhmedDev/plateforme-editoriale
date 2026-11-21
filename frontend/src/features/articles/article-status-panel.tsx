@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   publishArticle,
@@ -35,9 +35,13 @@ export function ArticleStatusPanel({ id, statut }: { id: string; statut: StatutA
   // rester figé sur la dernière valeur locale même si le serveur revient avec autre chose
   // (ex. écriture concurrente dans un autre onglet). Reste conforme à la stratégie pessimiste :
   // cet effet ne fait que réaligner l'affichage sur le serveur, jamais l'inverse.
-  useEffect(() => {
+  // Réalignement pendant le rendu (et non dans un effet) : patron recommandé par React
+  // pour « ajuster un état quand une prop change », sans rendu intermédiaire périmé.
+  const [statutRecu, setStatutRecu] = useState(statut);
+  if (statut !== statutRecu) {
+    setStatutRecu(statut);
     setStatutConfirme(statut);
-  }, [statut]);
+  }
 
   function onChange(nouveauStatut: StatutArticle) {
     if (nouveauStatut === statutConfirme || isPending) return;

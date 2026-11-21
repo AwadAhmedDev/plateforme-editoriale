@@ -70,7 +70,7 @@ export function ShareBar({ titre }: { titre: string }) {
       </button>
 
       <button type="button" onClick={partagerSurX} aria-label="Partager sur X" className={BOUTON_ICONE}>
-        𝕏
+        <span aria-hidden="true">𝕏</span>
       </button>
       <button
         type="button"
@@ -78,7 +78,7 @@ export function ShareBar({ titre }: { titre: string }) {
         aria-label="Partager sur LinkedIn"
         className={`${BOUTON_ICONE} text-xs tracking-[.02em]`}
       >
-        in
+        <span aria-hidden="true">in</span>
       </button>
       <button type="button" onClick={partagerParEmail} aria-label="Partager par e-mail" className={BOUTON_ICONE}>
         <span aria-hidden="true">✉</span>

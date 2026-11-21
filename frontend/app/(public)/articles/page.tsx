@@ -129,6 +129,7 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
 
         {articles.length > 0 ? (
           <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <h2 className="sr-only">Liste des articles</h2>
             {articles.map((article) => (
               <ArticleCard
                 key={article.slug}

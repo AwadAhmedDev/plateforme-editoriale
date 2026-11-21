@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import type { CategorieMenuItem } from "@/features/taxonomies/list-categorie-menu";
 import type { ZoneMenuItem } from "@/features/taxonomies/list-zone-menu";
 
 type Panneau = "aucun" | "recherche" | "menu";
+
+// Aucune source externe à écouter : seul compte le fait d'être côté client.
+const abonnementVide = () => () => {};
 
 // Seul Client Component du header (Lot 6.2, contrat technique) : îlot isolé
 // recevant en props des données déjà chargées côté serveur par
@@ -27,16 +30,17 @@ export function MobileHeaderControls({
   // rendre le portail dès le premier rendu client (avant que React n'ait confirmé
   // l'hydratation) provoquerait un mismatch. Aucun impact perçu : les panneaux sont de
   // toute façon fermés (`panneau === "aucun"`) tant que l'utilisateur n'a rien cliqué.
-  const [monte, setMonte] = useState(false);
+  // useSyncExternalStore : false au rendu serveur et à l'hydratation, true ensuite.
+  const monte = useSyncExternalStore(
+    abonnementVide,
+    () => true,
+    () => false
+  );
   const declencheurRechercheRef = useRef<HTMLButtonElement>(null);
   const declencheurMenuRef = useRef<HTMLButtonElement>(null);
   const champRechercheRef = useRef<HTMLInputElement>(null);
   const fermetureMenuRef = useRef<HTMLButtonElement>(null);
   const panneauRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMonte(true);
-  }, []);
 
   const fermer = useCallback(() => {
     const declencheur =

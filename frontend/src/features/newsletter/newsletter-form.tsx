@@ -101,7 +101,7 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
           En vous inscrivant, vous acceptez notre{" "}
           <Link
             href="/confidentialite"
-            className="text-[#c8c2b6] underline-offset-2 outline-none transition-colors duration-fast hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="text-[#c8c2b6] underline underline-offset-2 outline-none transition-colors duration-fast hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             politique de confidentialité
           </Link>
@@ -158,7 +158,7 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
           Consultez notre{" "}
           <Link
             href="/confidentialite"
-            className="text-accent-primary underline-offset-2 outline-none transition-colors duration-fast hover:text-accent-primary-hover hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+            className="text-accent-primary underline underline-offset-2 outline-none transition-colors duration-fast hover:text-accent-primary-hover hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             Politique de confidentialité
           </Link>
@@ -214,7 +214,7 @@ export function NewsletterForm({ variant = "full" }: NewsletterFormProps) {
         Votre adresse e-mail est utilisée exclusivement pour l&apos;envoi de la newsletter. Consultez notre{" "}
         <Link
           href="/confidentialite"
-          className="text-accent-primary underline-offset-2 outline-none transition-colors duration-fast hover:text-accent-primary-hover hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+          className="text-accent-primary underline underline-offset-2 outline-none transition-colors duration-fast hover:text-accent-primary-hover hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
         >
           Politique de confidentialité
         </Link>

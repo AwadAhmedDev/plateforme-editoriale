@@ -91,7 +91,8 @@ export default async function Home() {
 
           {secondary.length > 0 && (
             <div className="flex flex-col gap-5 lg:border-l lg:border-border lg:pl-9">
-              <p className="text-xs font-semibold uppercase tracking-[.16em] text-text-secondary">À la une</p>
+              {/* <h2> (même apparence) : les titres <h3> ci-dessous suivent ainsi l'ordre h1 → h2 → h3 */}
+              <h2 className="text-xs font-semibold uppercase tracking-[.16em] text-text-secondary">À la une</h2>
               {secondary.map((item) => {
                 const dateFormatee = item.datePublication.toLocaleDateString("fr-FR", {
                   day: "numeric",

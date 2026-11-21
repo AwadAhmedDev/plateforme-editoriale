@@ -158,6 +158,7 @@ export default async function ZonePage({ params, searchParams }: ZonePageProps) 
 
         {zone.articles.length > 0 ? (
           <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <h2 className="sr-only">Liste des articles</h2>
             {zone.articles.map((article) => (
               <ArticleCard
                 key={article.slug}

@@ -39,7 +39,7 @@ export function FeaturedArticle({ article }: { article: FeaturedHomeArticle }) {
         <p className="mb-2.5 flex flex-wrap items-center gap-2.5 text-xs font-semibold uppercase tracking-[.14em] text-accent-primary">
           <Link
             href={`/categorie/${article.categorieSlug}`}
-            className="outline-none transition-colors duration-fast hover:text-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+            className="inline-flex min-h-6 items-center outline-none transition-colors duration-fast hover:text-accent-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             {article.categorieNom}
           </Link>
@@ -48,7 +48,7 @@ export function FeaturedArticle({ article }: { article: FeaturedHomeArticle }) {
           </span>
           <Link
             href={`/zone/${article.zoneSlug}`}
-            className="text-text-secondary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+            className="inline-flex min-h-6 items-center text-text-secondary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
           >
             {article.zoneNom}
           </Link>
