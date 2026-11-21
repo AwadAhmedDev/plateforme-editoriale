@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { ContenuEditorialRepository } from "@/lib/db/contenu-editorial-repository";
-import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
+import { ensureAdministrateurAuthentifie, refusSiCompteDemo } from "@/lib/auth/require-admin-session";
 import { uploadImage, ImageValidationError } from "@/lib/media/upload-image";
 import { revalidateArticleSurfaces, toArticleSurfaceState } from "@/features/articles/revalidate-article-surfaces";
 
@@ -39,6 +39,8 @@ export async function uploadMainImage(
   formData: FormData
 ): Promise<ArticleMediaActionState> {
   await ensureAdministrateurAuthentifie();
+  const refusDemo = await refusSiCompteDemo();
+  if (refusDemo) return refusDemo;
 
   const existante = await ContenuEditorialRepository.findById(id);
   if (!existante) {

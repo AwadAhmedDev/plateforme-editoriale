@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { contactContent } from "./content";
-import { aProposContent } from "../a-propos/content";
 import { ContactForm } from "@/features/contact/contact-form";
 
 // Page Contact (REPO-7, Corne de l'Afrique.dc.html l.401-430) : colonne coordonnées +
@@ -24,12 +23,6 @@ export default function ContactPage() {
         <p className="mt-4 max-w-[44ch] text-base leading-relaxed text-text-secondary">{contactContent.intro}</p>
 
         <div className="mt-7 flex flex-col gap-4">
-          <div className="flex items-baseline gap-3">
-            <span className="w-[90px] shrink-0 text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">
-              Courriel
-            </span>
-            <span className="text-[15px]">{aProposContent.contact.email}</span>
-          </div>
           {contactContent.coordonnees.map((ligne) => (
             <div key={ligne.label} className="flex items-baseline gap-3">
               <span className="w-[90px] shrink-0 text-[11px] font-semibold uppercase tracking-[.12em] text-text-secondary">

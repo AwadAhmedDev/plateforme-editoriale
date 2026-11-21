@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { InscritNewsletterRepository } from "@/lib/db/inscrit-newsletter-repository";
 import { generateNewsletterToken } from "@/lib/newsletter/token";
-import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
+import { ensureAdministrateurAuthentifie, refusSiCompteDemo } from "@/lib/auth/require-admin-session";
 import { sendEmail } from "@/lib/email/send-email";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { resoudreSiteUrl } from "@/lib/site-url";
@@ -92,6 +92,8 @@ export async function removeSubscriber(
   _formData: FormData
 ): Promise<NewsletterActionState> {
   await ensureAdministrateurAuthentifie();
+  const refusDemo = await refusSiCompteDemo();
+  if (refusDemo) return refusDemo;
 
   const existante = await InscritNewsletterRepository.findById(id);
   if (!existante) {

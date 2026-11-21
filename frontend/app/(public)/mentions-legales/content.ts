@@ -1,31 +1,27 @@
 import { aProposContent } from "../a-propos/content";
 
 // Contenu éditorial des Mentions légales — même convention que a-propos/content.ts :
-// séparé de page.tsx, réutilise le placeholder de contact déjà établi
-// (aProposContent.contact.email) plutôt qu'une seconde adresse inventée. Identité de
-// l'éditeur, adresse et hébergeur restent des placeholders explicites entre crochets :
-// aucune identité, adresse ou numéro d'immatriculation inventé et présenté comme réel —
-// à remplacer par les données réelles de l'exploitant du site avant mise en production
-// (obligation légale LCEN, non une simple préférence éditoriale).
+// séparé de page.tsx. Site de démonstration non commercial (portfolio) : l'éditeur est
+// une personne physique sans activité commerciale, d'où l'absence de SIRET ; l'adresse
+// postale n'est pas publiée, le contact passe par le formulaire du site (LCEN art. 6 III-2
+// pour les éditeurs non professionnels). À remplacer par l'identité de l'exploitant réel
+// avant toute exploitation comme média.
 export const mentionsLegalesContent = {
   editeur: {
     titre: "Éditeur du site",
     paragraphes: [
-      "[Nom et prénom, ou raison sociale de l'éditeur]",
-      "[Adresse postale complète]",
-      "[Numéro SIRET, le cas échéant]",
-      `Contact : ${aProposContent.contact.email}`,
+      "Awad Ahmed, développeur web, particulier sans activité commerciale.",
+      "Ce site est une démonstration réalisée pour un portfolio : les articles sont des contenus de démonstration et ne constituent pas une source d'information.",
+      `Contact : ${aProposContent.contact.libelle} (page Contact).`,
     ],
   },
   directeurPublication: {
     titre: "Directeur de la publication",
-    paragraphes: [
-      "[Nom de l'éditeur], responsable éditorial unique de la publication (voir la page À propos).",
-    ],
+    paragraphes: ["Awad Ahmed."],
   },
   hebergement: {
     titre: "Hébergement",
-    paragraphes: ["[Nom de l'hébergeur]", "[Adresse de l'hébergeur]"],
+    paragraphes: ["Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis (vercel.com)."],
   },
   proprieteIntellectuelle: {
     titre: "Propriété intellectuelle",

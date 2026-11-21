@@ -1,5 +1,6 @@
 import { MessageContactRepository } from "@/lib/db/message-contact-repository";
-import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
+import { ensureAdministrateurAuthentifie, estCompteDemo } from "@/lib/auth/require-admin-session";
+import { DEMO_MASQUE } from "@/lib/demo";
 
 export type ContactMessageListItem = {
   id: string;
@@ -23,16 +24,18 @@ export type ContactMessageListResult = {
 // appliquée en amont (proxy.ts + layout.tsx).
 export async function listContactMessages(params: { page: number }): Promise<ContactMessageListResult> {
   await ensureAdministrateurAuthentifie();
+  // compte de démonstration public : aucune donnée des visiteurs affichée
+  const demo = await estCompteDemo();
 
   const { items, total, hasNextPage, page } = await MessageContactRepository.findAllPagines(params);
 
   return {
     items: items.map((item) => ({
       id: item.id,
-      nom: item.nom,
-      email: item.email,
-      objet: item.objet,
-      message: item.message,
+      nom: demo ? DEMO_MASQUE : item.nom,
+      email: demo ? DEMO_MASQUE : item.email,
+      objet: demo ? DEMO_MASQUE : item.objet,
+      message: demo ? "Contenu masqué pour le compte de démonstration." : item.message,
       createdAt: item.createdAt,
     })),
     total,

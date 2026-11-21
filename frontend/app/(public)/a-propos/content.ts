@@ -1,9 +1,9 @@
 // Contenu éditorial de la page À propos (Lot 6.1, contrat consolidé §3/§4) :
 // séparé de page.tsx pour rester facilement remplaçable sans toucher à la
 // structure. Mission reprise telle quelle du positionnement déjà rédigé et
-// validé par design-brief.md — pas une invention. Éditeur et contact restent
-// des placeholders explicites entre crochets : aucune identité ni adresse
-// fonctionnelle inventée et présentée comme réelle.
+// validé par design-brief.md — pas une invention. Site de démonstration
+// (portfolio) : l'éditeur est le développeur, le contact passe par le
+// formulaire du site (aucune adresse e-mail publiée).
 export const aProposContent = {
   mission: {
     titre: "Notre mission",
@@ -22,9 +22,10 @@ export const aProposContent = {
   editeur: {
     titre: "L'éditeur",
     texte:
-      "Ce média est édité et administré par [Nom de l'éditeur], responsable éditorial unique de la publication.",
+      "Ce site est une démonstration conçue, développée et administrée par Awad Ahmed, développeur web, pour son portfolio. Les articles publiés sont des contenus de démonstration rédigés pour illustrer la plateforme : ils ne constituent pas une source d'information.",
   },
   contact: {
-    email: "redaction@[votre-domaine].com",
+    libelle: "le formulaire de contact du site",
+    href: "/contact",
   },
 } as const;

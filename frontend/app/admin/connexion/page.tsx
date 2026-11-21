@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/features/admin-auth/session";
 import { AdminLoginForm } from "@/features/admin-auth/login-form";
+import { DEMO_ADMIN, DEMO_MODE } from "@/lib/demo";
 
 // Route publique (technical-architecture.md §2.2 : « Aucune [protection] — redirige
 // si déjà connecté »), explicitement exclue de la garde de session (proxy.ts). Seule
@@ -18,6 +19,14 @@ export default async function AdminConnexionPage() {
         <h1 className="mb-6 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
           Connexion administrateur
         </h1>
+        {DEMO_MODE && (
+          <div className="mb-6 rounded-md border border-dashed border-amber-500 bg-amber-50 p-3 text-sm text-amber-900">
+            <p className="font-semibold">Compte de démonstration (consultation seule)</p>
+            <p className="mt-1">
+              Identifiant : <code>{DEMO_ADMIN.identifiant}</code> · Mot de passe : <code>{DEMO_ADMIN.motDePasse}</code>
+            </p>
+          </div>
+        )}
         <AdminLoginForm />
       </div>
     </main>

@@ -1,5 +1,6 @@
 import { InscritNewsletterRepository } from "@/lib/db/inscrit-newsletter-repository";
-import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
+import { ensureAdministrateurAuthentifie, estCompteDemo } from "@/lib/auth/require-admin-session";
+import { DEMO_MASQUE } from "@/lib/demo";
 
 export type SubscriberListItem = {
   id: string;
@@ -21,13 +22,16 @@ export type SubscriberListResult = {
 // ui-specification.md §Tables Administrateur).
 export async function listSubscribers(params: { page: number; email?: string }): Promise<SubscriberListResult> {
   await ensureAdministrateurAuthentifie();
+  // compte de démonstration public : ni adresse affichée, ni recherche par adresse
+  const demo = await estCompteDemo();
+  if (demo) params = { page: params.page };
 
   const { items, total, hasNextPage, page } = await InscritNewsletterRepository.findAllInscritsPagines(params);
 
   return {
     items: items.map((inscrit) => ({
       id: inscrit.id,
-      email: inscrit.email,
+      email: demo ? DEMO_MASQUE : inscrit.email,
       dateInscription: inscrit.dateInscription,
     })),
     total,

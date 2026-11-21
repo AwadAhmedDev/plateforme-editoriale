@@ -48,7 +48,7 @@ export default function AProposPage() {
       </section>
 
       <a
-        href={`mailto:${contact.email}`}
+        href={contact.href}
         className="mt-8 inline-block rounded-sm border border-border px-5 py-2 text-sm font-medium text-text-primary outline-none transition-colors duration-fast hover:text-accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
       >
         Nous contacter →
