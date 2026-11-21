@@ -1,23 +1,21 @@
 import { aProposContent } from "../a-propos/content";
 
 // Contenu éditorial des Mentions légales — même convention que a-propos/content.ts :
-// séparé de page.tsx. Site de démonstration non commercial (portfolio) : l'éditeur est
-// une personne physique sans activité commerciale, d'où l'absence de SIRET ; l'adresse
-// postale n'est pas publiée, le contact passe par le formulaire du site (LCEN art. 6 III-2
-// pour les éditeurs non professionnels). À remplacer par l'identité de l'exploitant réel
-// avant toute exploitation comme média.
+// séparé de page.tsx. Site de démonstration non commercial, réalisé par Awad Ahmed pour
+// l'éditeur Harbi Egueh Aouled : l'adresse postale n'est pas publiée, le contact passe par
+// le formulaire du site. À compléter (adresse, statut) avant toute exploitation comme média.
 export const mentionsLegalesContent = {
   editeur: {
     titre: "Éditeur du site",
     paragraphes: [
-      "Awad Ahmed, développeur web, particulier sans activité commerciale.",
-      "Ce site est une démonstration réalisée pour un portfolio : les articles sont des contenus de démonstration et ne constituent pas une source d'information.",
+      "Harbi Egueh Aouled.",
+      "Ce site est une démonstration non commerciale, conçue et développée par Awad Ahmed, développeur web : les articles sont des contenus de démonstration et ne constituent pas une source d'information.",
       `Contact : ${aProposContent.contact.libelle} (page Contact).`,
     ],
   },
   directeurPublication: {
     titre: "Directeur de la publication",
-    paragraphes: ["Awad Ahmed."],
+    paragraphes: ["Harbi Egueh Aouled."],
   },
   hebergement: {
     titre: "Hébergement",

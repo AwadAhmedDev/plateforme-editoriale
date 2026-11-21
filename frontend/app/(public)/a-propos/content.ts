@@ -22,7 +22,7 @@ export const aProposContent = {
   editeur: {
     titre: "L'éditeur",
     texte:
-      "Ce site est une démonstration conçue, développée et administrée par Awad Ahmed, développeur web, pour son portfolio. Les articles publiés sont des contenus de démonstration rédigés pour illustrer la plateforme : ils ne constituent pas une source d'information.",
+      "Ce média est édité par Harbi Egueh Aouled, directeur de la publication. Le site est une démonstration conçue et développée par Awad Ahmed, développeur web. Les articles publiés sont des contenus de démonstration rédigés pour illustrer la plateforme : ils ne constituent pas une source d'information.",
   },
   contact: {
     libelle: "le formulaire de contact du site",
