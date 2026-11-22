@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { ZoneGeographiqueRepository } from "@/lib/db/zone-geographique-repository";
 import { ContenuEditorialRepository } from "@/lib/db/contenu-editorial-repository";
-import { ensureAdministrateurAuthentifie, refusSiCompteDemo } from "@/lib/auth/require-admin-session";
+import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
 import { slugify } from "@/lib/slug";
 
 // Server Actions de Gestion des zones géographiques (server-actions-specification.md §5,
@@ -35,8 +35,6 @@ export async function createZone(
   formData: FormData
 ): Promise<ZoneActionState> {
   await ensureAdministrateurAuthentifie();
-  const refusDemo = await refusSiCompteDemo();
-  if (refusDemo) return refusDemo;
 
   const values = lireChampsFormulaire(formData);
   const descriptionCourte = values.descriptionCourte.length > 0 ? values.descriptionCourte : null;
@@ -74,8 +72,6 @@ export async function updateZone(
   formData: FormData
 ): Promise<ZoneActionState> {
   await ensureAdministrateurAuthentifie();
-  const refusDemo = await refusSiCompteDemo();
-  if (refusDemo) return refusDemo;
 
   const existante = await ZoneGeographiqueRepository.findById(id);
   if (!existante) {
@@ -120,8 +116,6 @@ export async function deleteZone(
   _formData: FormData
 ): Promise<ZoneActionState> {
   await ensureAdministrateurAuthentifie();
-  const refusDemo = await refusSiCompteDemo();
-  if (refusDemo) return refusDemo;
 
   const existante = await ZoneGeographiqueRepository.findById(id);
   if (!existante) {

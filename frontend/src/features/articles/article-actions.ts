@@ -6,7 +6,7 @@ import {
   ConcurrentModificationError,
   type ArticleForEdit,
 } from "@/lib/db/contenu-editorial-repository";
-import { ensureAdministrateurAuthentifie, refusSiCompteDemo } from "@/lib/auth/require-admin-session";
+import { ensureAdministrateurAuthentifie } from "@/lib/auth/require-admin-session";
 import { articleFieldsSchema, type ArticleFieldsInput } from "@/features/articles/article-schema";
 import { generateDraftSlug, isDraftSlug, slugify } from "@/lib/slug";
 import { revalidateArticleSurfaces, toArticleSurfaceState } from "@/features/articles/revalidate-article-surfaces";
@@ -100,8 +100,6 @@ export async function createArticle(
   formData: FormData
 ): Promise<ArticleActionState> {
   await ensureAdministrateurAuthentifie();
-  const refusDemo = await refusSiCompteDemo();
-  if (refusDemo) return refusDemo;
 
   const brut = extraireChampsFormulaire(formData);
   const analyse = articleFieldsSchema.safeParse(brut);
@@ -160,8 +158,6 @@ export async function updateArticle(
   formData: FormData
 ): Promise<ArticleActionState> {
   await ensureAdministrateurAuthentifie();
-  const refusDemo = await refusSiCompteDemo();
-  if (refusDemo) return refusDemo;
 
   const existante = await ContenuEditorialRepository.findById(id);
   if (!existante) {
@@ -268,8 +264,6 @@ export async function publishArticle(
   _formData: FormData
 ): Promise<ArticleActionState> {
   await ensureAdministrateurAuthentifie();
-  const refusDemo = await refusSiCompteDemo();
-  if (refusDemo) return refusDemo;
 
   const article = await ContenuEditorialRepository.findById(id);
   if (!article) {
@@ -305,8 +299,6 @@ export async function unpublishArticle(
   _formData: FormData
 ): Promise<ArticleActionState> {
   await ensureAdministrateurAuthentifie();
-  const refusDemo = await refusSiCompteDemo();
-  if (refusDemo) return refusDemo;
 
   const existante = await ContenuEditorialRepository.findById(id);
   if (!existante) {
@@ -331,8 +323,6 @@ export async function archiveArticle(
   _formData: FormData
 ): Promise<ArticleActionState> {
   await ensureAdministrateurAuthentifie();
-  const refusDemo = await refusSiCompteDemo();
-  if (refusDemo) return refusDemo;
 
   const existante = await ContenuEditorialRepository.findById(id);
   if (!existante) {
@@ -359,8 +349,6 @@ export async function deleteArticle(
   _formData: FormData
 ): Promise<ArticleActionState> {
   await ensureAdministrateurAuthentifie();
-  const refusDemo = await refusSiCompteDemo();
-  if (refusDemo) return refusDemo;
 
   const existante = await ContenuEditorialRepository.findById(id);
   if (!existante) {

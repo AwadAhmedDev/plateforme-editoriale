@@ -6,7 +6,6 @@ import { getArticleDetail } from "@/features/articles/get-article-detail";
 import { getRelatedArticles } from "@/features/articles/get-related-articles";
 import { ArticleCard } from "@/components/shared/article-card";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
-import { DemoArticleNotice } from "@/components/shared/demo-banner";
 import { ShareBar } from "@/features/articles/share-bar";
 import { CitationBlock } from "@/features/articles/citation-block";
 import { construireCitation } from "@/features/articles/build-citation";
@@ -182,8 +181,6 @@ export default async function ArticleDetailPage({
         <Breadcrumb items={article.breadcrumb} />
 
         <h1 className="mt-4 font-editorial text-4xl">{article.titre}</h1>
-
-        <DemoArticleNotice />
 
         {article.chapo && <p className="mt-3 font-ui text-lg text-text-secondary">{article.chapo}</p>}
 

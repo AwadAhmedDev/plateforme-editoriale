@@ -46,7 +46,7 @@ Business-domain fields/functions in French (`statut`, `motsCles`, `categorieId`)
 
 ## Tests
 
-Vitest (`npm test`, files in `tests/*.test.ts`, config `vitest.config.mts`): unit tests of the security rules (image signature/SVG/size checks, signed session cookie, JSON-LD escaping, slugs) and of the demo-account guard wired into real Server Actions. No database or network: Prisma repositories, session, R2 and `next/cache` are mocked per test. CI (`.github/workflows/ci.yml`) runs types, lint (`--max-warnings=0`) and tests on every push.
+Vitest (`npm test`, files in `tests/*.test.ts`, config `vitest.config.mts`): unit tests of the security rules (image signature/SVG/size checks, signed session cookie, JSON-LD escaping, slugs). No database or network: R2 is mocked where needed. CI (`.github/workflows/ci.yml`) runs types, lint (`--max-warnings=0`) and tests on every push.
 
 ## Documentation priority
 

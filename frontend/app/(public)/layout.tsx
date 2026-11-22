@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { PublicHeader } from "@/components/shared/public-header";
-import { DemoBanner } from "@/components/shared/demo-banner";
 import { FooterTaxonomies } from "@/components/shared/footer-taxonomies";
 import { NewsletterForm } from "@/features/newsletter/newsletter-form";
 
@@ -29,8 +28,6 @@ export default function PublicLayout({
       >
         Aller au contenu principal
       </a>
-
-      <DemoBanner />
 
       <PublicHeader />
 
